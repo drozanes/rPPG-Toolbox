@@ -19,3 +19,7 @@ neural_methods/trainer/PhysnetTrainer_backup.py
 debug_utils_physnet.py
 test.yaml
 *.out
+test_data/
+test_data_cached/
+test_data_cached_neural/
+*.avi

@@ -1,5 +1,8 @@
 """Unsupervised learning methods including POS, GREEN, CHROME, ICA, LGI and PBV."""
 import numpy as np
+import os
+import pickle
+import torch
 from evaluation.post_process import *
 from unsupervised_methods.methods.CHROME_DEHAAN import *
 from unsupervised_methods.methods.GREEN import *
@@ -27,6 +30,8 @@ def unsupervised_predict(config, data_loader, method_name):
         batch_size = test_batch[0].shape[0]
         for idx in range(batch_size):
             data_input, labels_input = test_batch[0][idx].cpu().numpy(), test_batch[1][idx].cpu().numpy()
+            print(f"DEBUG: data_input shape: {data_input.shape}")
+            print(f"DEBUG: labels_input shape: {labels_input.shape}")
             data_input = data_input[..., :3]
             if method_name == "POS":
                 BVP = POS_WANG(data_input, config.UNSUPERVISED.DATA.FS)
@@ -44,6 +49,23 @@ def unsupervised_predict(config, data_loader, method_name):
                 BVP = OMIT(data_input)
             else:
                 raise ValueError("unsupervised method name wrong!")
+            
+            # Save unsupervised outputs to pickle
+            output_dir = os.path.join(config.LOG.PATH, config.UNSUPERVISED.DATA.EXP_DATA_NAME, 'saved_test_outputs')
+            os.makedirs(output_dir, exist_ok=True)
+            filename_id = method_name + "_" + config.UNSUPERVISED.DATA.DATASET
+            output_path = os.path.join(output_dir, filename_id + '_outputs.pickle')
+            
+            save_data = {
+                'predictions': { 'subject1': { 0: torch.from_numpy(BVP.copy()) } },
+                'labels': { 'subject1': { 0: torch.from_numpy(labels_input.copy()) } },
+                'fs': config.UNSUPERVISED.DATA.FS
+            }
+            with open(output_path, 'wb') as f:
+                pickle.dump(save_data, f)
+            print(f"Saved unsupervised outputs to {output_path}")
+
+            print(f"DEBUG: BVP length: {len(BVP)}")
 
             video_frame_size = test_batch[0].shape[1]
             if config.INFERENCE.EVALUATION_WINDOW.USE_SMALLER_WINDOW:

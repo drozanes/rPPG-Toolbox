@@ -6,6 +6,9 @@ import neural_methods.trainer.DeepPhysTrainer
 import neural_methods.trainer.EfficientPhysTrainer
 import neural_methods.trainer.BigSmallTrainer
 import neural_methods.trainer.PhysFormerTrainer
-import neural_methods.trainer.PhysMambaTrainer
+try:
+    import neural_methods.trainer.PhysMambaTrainer
+except ImportError:
+    print("PhysMambaTrainer not imported due to missing dependencies.")
 import neural_methods.trainer.RhythmFormerTrainer
 import neural_methods.trainer.FactorizePhysTrainer

@@ -23,7 +23,7 @@ def ICA_POH(frames, FS):
     for c in range(3):
         BGRDetrend = utils.detrend(RGB[:, c], Lambda)
         BGRNorm[:, c] = (BGRDetrend - np.mean(BGRDetrend)) / np.std(BGRDetrend)
-    _, S = ica(np.mat(BGRNorm).H, 3)
+    _, S = ica(np.asmatrix(BGRNorm).H, 3)
 
     # select BVP Source
     MaxPx = np.zeros((1, 3))
@@ -81,7 +81,7 @@ def jade(X, m, Wprev):
     nem = m
     seuil = 1 / math.sqrt(T) / 100
     if m < n:
-        D, U = np.linalg.eig(np.matmul(X, np.mat(X).H) / T)
+        D, U = np.linalg.eig(np.matmul(X, np.asmatrix(X).H) / T)
         Diag = D
         k = np.argsort(Diag)
         pu = Diag[k]
@@ -93,7 +93,7 @@ def jade(X, m, Wprev):
         IW = linalg.sqrtm(np.matmul(X, X.H) / T)
         W = np.linalg.inv(IW)
 
-    Y = np.mat(np.matmul(W, X))
+    Y = np.asmatrix(np.matmul(W, X))
     R = np.matmul(Y, Y.H) / T
     C = np.matmul(Y, Y.T) / T
     Q = np.zeros((m * m * m * m, 1))
@@ -123,7 +123,7 @@ def jade(X, m, Wprev):
         h = h - 1
     # Approximate the Diagonalization of the Eigen Matrices:
     B = np.array([[1, 0, 0], [0, 1, 1], [0, 0 - 1j, 0 + 1j]])
-    Bt = np.mat(B).H
+    Bt = np.asmatrix(B).H
 
     encore = 1
     if Wprev == 0:
@@ -137,7 +137,7 @@ def jade(X, m, Wprev):
             for q in range(p + 1, m):
                 Ip = np.arange(p, nem * m, m)
                 Iq = np.arange(q, nem * m, m)
-                g = np.mat([M[p, Ip] - M[q, Iq], M[p, Iq], M[q, Ip]])
+                g = np.asmatrix([M[p, Ip] - M[q, Iq], M[p, Iq], M[q, Ip]])
                 temp1 = np.matmul(g, g.H)
                 temp2 = np.matmul(B, temp1)
                 temp = np.matmul(temp2, Bt)
@@ -153,7 +153,7 @@ def jade(X, m, Wprev):
                 if abs(s) > seuil:
                     encore = 1
                     pair = [p, q]
-                    G = np.mat([[c, -np.conj(s)], [s, c]])  # Givens Rotation
+                    G = np.asmatrix([[c, -np.conj(s)], [s, c]])  # Givens Rotation
                     V[:, pair] = np.matmul(V[:, pair], G)
                     M[pair, :] = np.matmul(G.H, M[pair, :])
                     temp1 = c * M[:, Ip] + s * M[:, Iq]
@@ -165,5 +165,5 @@ def jade(X, m, Wprev):
     # Whiten the Matrix
     # Estimation of the Mixing Matrix and Signal Separation
     A = np.matmul(IW, V)
-    S = np.matmul(np.mat(V).H, Y)
+    S = np.matmul(np.asmatrix(V).H, Y)
     return A, S
