@@ -12,3 +12,7 @@ except ImportError:
     print("PhysMambaTrainer not imported due to missing dependencies.")
 import neural_methods.trainer.RhythmFormerTrainer
 import neural_methods.trainer.FactorizePhysTrainer
+try:
+    import neural_methods.trainer.SpikingPhysFormerTrainer
+except ImportError:
+    print("SpikingPhysFormerTrainer not imported due to missing dependencies.")

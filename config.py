@@ -348,6 +348,18 @@ _C.MODEL.PHYSFORMER.NUM_LAYERS = 12
 _C.MODEL.PHYSFORMER.THETA = 0.7
 
 # -----------------------------------------------------------------------------
+# Model Settings for SpikingPhysFormer
+# -----------------------------------------------------------------------------
+_C.MODEL.SPIKINGPHYSFORMER = CN()
+_C.MODEL.SPIKINGPHYSFORMER.PATCH_SIZE = 4
+_C.MODEL.SPIKINGPHYSFORMER.DIM = 96
+_C.MODEL.SPIKINGPHYSFORMER.FF_DIM = 144
+_C.MODEL.SPIKINGPHYSFORMER.NUM_HEADS = 4
+_C.MODEL.SPIKINGPHYSFORMER.NUM_LAYERS = 4
+_C.MODEL.SPIKINGPHYSFORMER.THETA = 0.7
+_C.MODEL.SPIKINGPHYSFORMER.T_S = 4
+
+# -----------------------------------------------------------------------------
 # Inference settings
 # -----------------------------------------------------------------------------
 _C.INFERENCE = CN()
