@@ -40,10 +40,49 @@ def visualize_results(video_path, pickle_path, xmp_path, output_path, method_nam
     label_signal = np.concatenate(all_labels).flatten()
     
     # 2. Load the original XMP for Sensor HR
-    df_xmp = pd.read_csv(xmp_path, header=None)
-    sensor_hr_raw = df_xmp.iloc[:, 1].values
-    ts_xmp = df_xmp.iloc[:, 0].values
-    ts_xmp = ts_xmp - ts_xmp[0]
+    # UBFC ground_truth.txt is often space-separated, single line or multiple lines.
+    try:
+        df_xmp = pd.read_csv(xmp_path, header=None, sep='\s+')
+    except:
+        df_xmp = pd.read_csv(xmp_path, header=None)
+        
+    # Check if xmp_path is BVP signal or already HR
+    if df_xmp.shape[0] == 1:
+        # Single row, multiple columns (BVP signal)
+        xmp_data = df_xmp.iloc[0, :].values
+    else:
+        # Multiple rows, take the last column (likely HR)
+        xmp_data = df_xmp.iloc[:, -1].values
+        
+    if len(xmp_data) > 1000:
+        print("Detected BVP signal in XMP path. Calculating Sensor HR from BVP...")
+        sensor_bvp = xmp_data
+        sensor_hr_raw = []
+        window_size = 10 * fs
+        for i in range(len(sensor_bvp)):
+            if i >= window_size:
+                win = sensor_bvp[i-window_size:i]
+                def calc_hr_internal(sig):
+                    sig = scipy.signal.detrend(sig)
+                    b, a = scipy.signal.butter(1, [0.75 / fs * 2, 2.5 / fs * 2], btype='bandpass')
+                    sig = scipy.signal.filtfilt(b, a, sig)
+                    sig = np.expand_dims(sig, 0)
+                    f, pxx = scipy.signal.periodogram(sig, fs=fs, nfft=2048, detrend=False)
+                    mask = (f >= 0.75) & (f <= 2.5)
+                    hr = f[mask][np.argmax(pxx[0][mask])] * 60
+                    return hr
+                try:
+                    sensor_hr_raw.append(calc_hr_internal(win))
+                except:
+                    sensor_hr_raw.append(sensor_hr_raw[-1] if len(sensor_hr_raw) > 0 else 0)
+            else:
+                sensor_hr_raw.append(0)
+        sensor_hr_raw = np.array(sensor_hr_raw)
+        ts_xmp = np.arange(len(sensor_hr_raw)) / fs
+    else:
+        sensor_hr_raw = xmp_data
+        ts_xmp = df_xmp.iloc[:, 0].values
+        ts_xmp = ts_xmp - ts_xmp[0]
     
     # Video handling
     cap = cv2.VideoCapture(video_path)
@@ -54,7 +93,7 @@ def visualize_results(video_path, pickle_path, xmp_path, output_path, method_nam
     
     # Resample Sensor HR to video frames
     f_interp = interp1d(ts_xmp, sensor_hr_raw, kind='linear', fill_value='extrapolate')
-    target_ts = np.linspace(0, ts_xmp[-1], total_frames)
+    target_ts = np.linspace(0, ts_xmp[-1] if len(ts_xmp) > 1 else total_frames/video_fps, total_frames)
     sensor_hr_resampled = f_interp(target_ts)
     
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
