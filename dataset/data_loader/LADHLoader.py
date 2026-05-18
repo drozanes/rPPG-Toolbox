@@ -167,7 +167,7 @@ class LADHLoader(BaseLoader):
         file_list_path = self.file_list_path   # Get file list path
         # print(file_list_path)
         file_list_df = pd.read_csv(file_list_path)  # Read file list
-        inputs_temp = file_list_df['input_files'].tolist()  # Get input file list
+        inputs_temp = [i.replace('\\', '/') for i in file_list_df['input_files'].tolist()]  # Get input file list
         inputs_face = [] 
         # v01 v02 v03 v04 v05 face configuration information
         for each_input in inputs_temp:

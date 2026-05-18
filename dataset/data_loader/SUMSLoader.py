@@ -151,10 +151,11 @@ class SUMSLoader(BaseLoader):
 
     def load_preprocessed_data(self):
         """Load preprocessed data listed in the file list."""
-
-        file_list_path = self.file_list_path   # Get file list path
+        file_list_path = self.file_list_path  # Get file list path
         file_list_df = pd.read_csv(file_list_path)  # Read file list
-        inputs_temp = file_list_df['input_files'].tolist()  # Get input file list
+        inputs_temp = [i.replace('\\', '/') for i in file_list_df['input_files'].tolist()]  # Get input file list
+        if not inputs_temp:
+            raise ValueError(self.dataset_name + ' dataset loading data error!')
         inputs_face = [] 
         
         # v01 v02 v03 v04 face configuration information

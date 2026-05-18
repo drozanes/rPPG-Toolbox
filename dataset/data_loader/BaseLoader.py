@@ -587,7 +587,7 @@ class BaseLoader(Dataset):
         """
         file_list_path = self.file_list_path  # get list of files in
         file_list_df = pd.read_csv(file_list_path)
-        inputs = file_list_df['input_files'].tolist()
+        inputs = [i.replace('\\', '/') for i in file_list_df['input_files'].tolist()]
         if not inputs:
             raise ValueError(self.dataset_name + ' dataset loading data error!')
         inputs = sorted(inputs)  # sort input file name list

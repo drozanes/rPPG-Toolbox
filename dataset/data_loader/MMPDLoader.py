@@ -158,7 +158,7 @@ class MMPDLoader(BaseLoader):
         """
         file_list_path = self.file_list_path  # get list of files in
         file_list_df = pd.read_csv(file_list_path)
-        inputs_temp = file_list_df['input_files'].tolist()
+        inputs_temp = [i.replace('\\', '/') for i in file_list_df['input_files'].tolist()]
         inputs = []
         for each_input in inputs_temp:
             info = each_input.split(os.sep)[-1].split('_')

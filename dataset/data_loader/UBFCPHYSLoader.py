@@ -115,7 +115,7 @@ class UBFCPHYSLoader(BaseLoader):
         """
         file_list_path = self.file_list_path  # get list of files in
         file_list_df = pd.read_csv(file_list_path)
-        base_inputs = file_list_df['input_files'].tolist()
+        base_inputs = [i.replace('\\', '/') for i in file_list_df['input_files'].tolist()]
         filtered_inputs = []
 
         for input in base_inputs:
