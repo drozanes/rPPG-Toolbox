@@ -39,6 +39,8 @@ def add_args(parser):
     """Adds arguments for parser."""
     parser.add_argument('--config_file', required=False,
                         default="configs/train_configs/PURE_PURE_UBFC-rPPG_TSCAN_BASIC.yaml", type=str, help="The name of the model.")
+    parser.add_argument('--toolbox_mode', required=False, default=None, type=str, help="The mode of the toolbox.")
+    parser.add_argument('--num_workers', required=False, default=16, type=int, help="The number of workers for the data loader.")
     '''Neural Method Sample YAML LIST:
       SCAMPS_SCAMPS_UBFC-rPPG_TSCAN_BASIC.yaml
       SCAMPS_SCAMPS_UBFC-rPPG_DEEPPHYS_BASIC.yaml
@@ -148,15 +150,21 @@ if __name__ == "__main__":
     parser = add_args(parser)
     parser = trainer.BaseTrainer.BaseTrainer.add_trainer_args(parser)
     parser = data_loader.BaseLoader.BaseLoader.add_data_loader_args(parser)
-    args = parser.parse_args()
+    args, unknown = parser.parse_known_args()
 
     # configurations.
     config = get_config(args)
+    config.defrost()
+    config.merge_from_list(unknown)
+    if args.toolbox_mode:
+        config.TOOLBOX_MODE = args.toolbox_mode
+    config.freeze()
+    
     print('Configuration:')
     print(config, end='\n\n')
 
     data_loader_dict = dict() # dictionary of data loaders 
-    if config.TOOLBOX_MODE == "train_and_test":
+    if config.TOOLBOX_MODE == "train_and_test" or config.TOOLBOX_MODE == "only_preprocess":
         # train_loader
         if config.TRAIN.DATA.DATASET == "UBFC-rPPG":
             train_loader = data_loader.UBFCrPPGLoader.UBFCrPPGLoader
@@ -180,6 +188,8 @@ if __name__ == "__main__":
             train_loader = data_loader.LADHLoader.LADHLoader
         elif config.TRAIN.DATA.DATASET == "SUMS":
             train_loader = data_loader.SUMSLoader.SUMSLoader
+        elif config.TOOLBOX_MODE == "only_preprocess" and not config.TRAIN.DATA.DATASET:
+            pass
         else:
             raise ValueError("Unsupported dataset! Currently supporting UBFC-rPPG, PURE, MMPD, \
                              SCAMPS, BP4D+ (Normal and BigSmall preprocessing), UBFC-PHYS and iBVP.")
@@ -195,7 +205,7 @@ if __name__ == "__main__":
                 device=config.DEVICE)
             data_loader_dict['train'] = DataLoader(
                 dataset=train_data_loader,
-                num_workers=16,
+                num_workers=args.num_workers,
                 batch_size=config.TRAIN.BATCH_SIZE,
                 shuffle=True,
                 worker_init_fn=seed_worker,
@@ -229,6 +239,8 @@ if __name__ == "__main__":
             valid_loader = data_loader.SUMSLoader.SUMSLoader
         elif config.VALID.DATA.DATASET is None and not config.TEST.USE_LAST_EPOCH:
             raise ValueError("Validation dataset not specified despite USE_LAST_EPOCH set to False!")
+        elif config.TOOLBOX_MODE == "only_preprocess" and not config.VALID.DATA.DATASET:
+            pass
         else:
             raise ValueError("Unsupported dataset! Currently supporting UBFC-rPPG, PURE, MMPD, \
                              SCAMPS, BP4D+ (Normal and BigSmall preprocessing), UBFC-PHYS and iBVP")
@@ -243,7 +255,7 @@ if __name__ == "__main__":
                 device=config.DEVICE)
             data_loader_dict["valid"] = DataLoader(
                 dataset=valid_data,
-                num_workers=16,
+                num_workers=args.num_workers,
                 batch_size=config.TRAIN.BATCH_SIZE,  # batch size for val is the same as train
                 shuffle=False,
                 worker_init_fn=seed_worker,
@@ -252,7 +264,7 @@ if __name__ == "__main__":
         else:
             data_loader_dict['valid'] = None
 
-    if config.TOOLBOX_MODE == "train_and_test" or config.TOOLBOX_MODE == "only_test":
+    if config.TOOLBOX_MODE == "train_and_test" or config.TOOLBOX_MODE == "only_test" or config.TOOLBOX_MODE == "only_preprocess":
         # test_loader
         if config.TEST.DATA.DATASET == "UBFC-rPPG":
             test_loader = data_loader.UBFCrPPGLoader.UBFCrPPGLoader
@@ -293,7 +305,7 @@ if __name__ == "__main__":
                 device=config.DEVICE)
             data_loader_dict["test"] = DataLoader(
                 dataset=test_data,
-                num_workers=16,
+                num_workers=args.num_workers,
                 batch_size=config.INFERENCE.BATCH_SIZE,
                 shuffle=False,
                 worker_init_fn=seed_worker,
@@ -302,7 +314,7 @@ if __name__ == "__main__":
         else:
             data_loader_dict['test'] = None
 
-    elif config.TOOLBOX_MODE == "unsupervised_method":
+    elif config.TOOLBOX_MODE == "unsupervised_method" or (config.TOOLBOX_MODE == "only_preprocess" and config.UNSUPERVISED.DATA.DATASET):
         # unsupervised method dataloader
         if config.UNSUPERVISED.DATA.DATASET == "UBFC-rPPG":
             unsupervised_loader = data_loader.UBFCrPPGLoader.UBFCrPPGLoader
@@ -329,7 +341,7 @@ if __name__ == "__main__":
             device=config.DEVICE)
         data_loader_dict["unsupervised"] = DataLoader(
             dataset=unsupervised_data,
-            num_workers=16,
+            num_workers=args.num_workers,
             batch_size=1,
             shuffle=False,
             worker_init_fn=seed_worker,
@@ -337,7 +349,7 @@ if __name__ == "__main__":
         )
 
     else:
-        raise ValueError("Unsupported toolbox_mode! Currently support train_and_test or only_test or unsupervised_method.")
+        raise ValueError("Unsupported toolbox_mode! Currently support train_and_test, only_test, unsupervised_method, or only_preprocess.")
 
     if config.TOOLBOX_MODE == "train_and_test":
         train_and_test(config, data_loader_dict)
@@ -345,5 +357,7 @@ if __name__ == "__main__":
         test(config, data_loader_dict)
     elif config.TOOLBOX_MODE == "unsupervised_method":
         unsupervised_method_inference(config, data_loader_dict)
+    elif config.TOOLBOX_MODE == "only_preprocess":
+        print("Data preprocessing complete!", end='\n\n')
     else:
-        print("TOOLBOX_MODE only support train_and_test or only_test !", end='\n\n')
+        print("TOOLBOX_MODE only support train_and_test, only_test, unsupervised_method, or only_preprocess!", end='\n\n')

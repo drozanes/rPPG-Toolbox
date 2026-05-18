@@ -5,9 +5,12 @@
 # Written by Ze Liu
 # --------------------------------------------------------'
 
-import os, re
+import os, re, hashlib
 import yaml
 from yacs.config import CfgNode as CN
+
+def get_hash(input_string):
+    return hashlib.md5(input_string.encode()).hexdigest()[:10]
 
 _C = CN()
 
@@ -415,7 +418,7 @@ def update_config(config, args):
         config.TRAIN.DATA.FILE_LIST_PATH = os.path.join(config.TRAIN.DATA.CACHED_PATH, 'DataFileLists')
 
     if config.TRAIN.DATA.EXP_DATA_NAME == '':
-        config.TRAIN.DATA.EXP_DATA_NAME = "_".join([config.TRAIN.DATA.DATASET, "SizeW{0}".format(
+        params = "_".join([config.TRAIN.DATA.DATASET, "SizeW{0}".format(
             str(config.TRAIN.DATA.PREPROCESS.RESIZE.W)), "SizeH{0}".format(str(config.TRAIN.DATA.PREPROCESS.RESIZE.W)), "ClipLength{0}".format(
             str(config.TRAIN.DATA.PREPROCESS.CHUNK_LENGTH)), "DataType{0}".format("_".join(config.TRAIN.DATA.PREPROCESS.DATA_TYPE)),
                                       "DataAug{0}".format("_".join(config.TRAIN.DATA.PREPROCESS.DATA_AUG)),
@@ -428,6 +431,7 @@ def update_config(config, args):
                                         "det_len{0}".format(config.TRAIN.DATA.PREPROCESS.CROP_FACE.DETECTION.DYNAMIC_DETECTION_FREQUENCY),
                                         "Median_face_box{0}".format(config.TRAIN.DATA.PREPROCESS.CROP_FACE.DETECTION.USE_MEDIAN_FACE_BOX)
                                               ])
+        config.TRAIN.DATA.EXP_DATA_NAME = config.TRAIN.DATA.DATASET + "_" + get_hash(params)
     config.TRAIN.DATA.CACHED_PATH = os.path.join(config.TRAIN.DATA.CACHED_PATH, config.TRAIN.DATA.EXP_DATA_NAME)
 
     name, ext = os.path.splitext(config.TRAIN.DATA.FILE_LIST_PATH)
@@ -451,7 +455,7 @@ def update_config(config, args):
             config.VALID.DATA.FILE_LIST_PATH = os.path.join(config.VALID.DATA.CACHED_PATH, 'DataFileLists')
 
         if config.VALID.DATA.EXP_DATA_NAME == '':
-            config.VALID.DATA.EXP_DATA_NAME = "_".join([config.VALID.DATA.DATASET, "SizeW{0}".format(
+            params = "_".join([config.VALID.DATA.DATASET, "SizeW{0}".format(
                 str(config.VALID.DATA.PREPROCESS.RESIZE.W)), "SizeH{0}".format(str(config.VALID.DATA.PREPROCESS.RESIZE.W)), "ClipLength{0}".format(
                 str(config.VALID.DATA.PREPROCESS.CHUNK_LENGTH)), "DataType{0}".format("_".join(config.VALID.DATA.PREPROCESS.DATA_TYPE)),
                                         "DataAug{0}".format("_".join(config.VALID.DATA.PREPROCESS.DATA_AUG)),
@@ -464,6 +468,7 @@ def update_config(config, args):
                                           "det_len{0}".format(config.VALID.DATA.PREPROCESS.CROP_FACE.DETECTION.DYNAMIC_DETECTION_FREQUENCY),
                                           "Median_face_box{0}".format(config.VALID.DATA.PREPROCESS.CROP_FACE.DETECTION.USE_MEDIAN_FACE_BOX)
                                                 ])
+            config.VALID.DATA.EXP_DATA_NAME = config.VALID.DATA.DATASET + "_" + get_hash(params)
         config.VALID.DATA.CACHED_PATH = os.path.join(config.VALID.DATA.CACHED_PATH, config.VALID.DATA.EXP_DATA_NAME)
 
         name, ext = os.path.splitext(config.VALID.DATA.FILE_LIST_PATH)
@@ -488,7 +493,7 @@ def update_config(config, args):
         config.TEST.DATA.FILE_LIST_PATH = os.path.join(config.TEST.DATA.CACHED_PATH, 'DataFileLists')
 
     if config.TEST.DATA.EXP_DATA_NAME == '':
-        config.TEST.DATA.EXP_DATA_NAME = "_".join([config.TEST.DATA.DATASET, "SizeW{0}".format(
+        params = "_".join([config.TEST.DATA.DATASET, "SizeW{0}".format(
             str(config.TEST.DATA.PREPROCESS.RESIZE.W)), "SizeH{0}".format(str(config.TEST.DATA.PREPROCESS.RESIZE.H)), "ClipLength{0}".format(
             str(config.TEST.DATA.PREPROCESS.CHUNK_LENGTH)), "DataType{0}".format("_".join(config.TEST.DATA.PREPROCESS.DATA_TYPE)),
                                       "DataAug{0}".format("_".join(config.TEST.DATA.PREPROCESS.DATA_AUG)),
@@ -501,6 +506,7 @@ def update_config(config, args):
                                         "det_len{0}".format(config.TEST.DATA.PREPROCESS.CROP_FACE.DETECTION.DYNAMIC_DETECTION_FREQUENCY),
                                         "Median_face_box{0}".format(config.TEST.DATA.PREPROCESS.CROP_FACE.DETECTION.USE_MEDIAN_FACE_BOX)
                                               ])
+        config.TEST.DATA.EXP_DATA_NAME = config.TEST.DATA.DATASET + "_" + get_hash(params)
     config.TEST.DATA.CACHED_PATH = os.path.join(config.TEST.DATA.CACHED_PATH, config.TEST.DATA.EXP_DATA_NAME)
 
     name, ext = os.path.splitext(config.TEST.DATA.FILE_LIST_PATH)
@@ -557,7 +563,7 @@ def update_config(config, args):
         config.UNSUPERVISED.DATA.FILE_LIST_PATH = os.path.join(config.UNSUPERVISED.DATA.CACHED_PATH, 'DataFileLists')
 
     if config.UNSUPERVISED.DATA.EXP_DATA_NAME == '':
-        config.UNSUPERVISED.DATA.EXP_DATA_NAME = "_".join([config.UNSUPERVISED.DATA.DATASET, "SizeW{0}".format(
+        params = "_".join([config.UNSUPERVISED.DATA.DATASET, "SizeW{0}".format(
             str(config.UNSUPERVISED.DATA.PREPROCESS.RESIZE.W)), "SizeH{0}".format(str(config.UNSUPERVISED.DATA.PREPROCESS.RESIZE.W)), "ClipLength{0}".format(
             str(config.UNSUPERVISED.DATA.PREPROCESS.CHUNK_LENGTH)), "DataType{0}".format("_".join(config.UNSUPERVISED.DATA.PREPROCESS.DATA_TYPE)),
                                       "DataAug{0}".format("_".join(config.UNSUPERVISED.DATA.PREPROCESS.DATA_AUG)),
@@ -571,6 +577,7 @@ def update_config(config, args):
                                         "Median_face_box{0}".format(config.UNSUPERVISED.DATA.PREPROCESS.CROP_FACE.DETECTION.USE_MEDIAN_FACE_BOX),
                                         "unsupervised"
                                               ])
+        config.UNSUPERVISED.DATA.EXP_DATA_NAME = config.UNSUPERVISED.DATA.DATASET + "_" + get_hash(params)
     config.UNSUPERVISED.DATA.CACHED_PATH = os.path.join(config.UNSUPERVISED.DATA.CACHED_PATH, config.UNSUPERVISED.DATA.EXP_DATA_NAME)
 
     name, ext = os.path.splitext(config.UNSUPERVISED.DATA.FILE_LIST_PATH)
@@ -598,8 +605,10 @@ def update_config(config, args):
         config.TEST.OUTPUT_SAVE_DIR = os.path.join(config.LOG.PATH, config.TEST.DATA.EXP_DATA_NAME, 'saved_test_outputs')
     elif config.TOOLBOX_MODE == 'unsupervised_method':
         config.UNSUPERVISED.OUTPUT_SAVE_DIR = os.path.join(config.LOG.PATH, config.UNSUPERVISED.DATA.EXP_DATA_NAME, 'saved_outputs')
+    elif config.TOOLBOX_MODE == 'only_preprocess':
+        pass
     else:
-        raise ValueError('TOOLBOX_MODE only supports train_and_test, only_test, or unsupervised_method!')
+        raise ValueError('TOOLBOX_MODE only supports train_and_test, only_test, unsupervised_method, or only_preprocess!')
 
     config.freeze()
     return
