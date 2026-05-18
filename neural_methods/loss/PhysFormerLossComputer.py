@@ -25,15 +25,14 @@ def kl_loss(inputs, labels):
 class TorchLossComputer(object):
     @staticmethod
     def compute_complex_absolute_given_k(output, k, N):
-        two_pi_n_over_N = torch.autograd.Variable(2 * math.pi * torch.arange(0, N, dtype=torch.float), requires_grad=True) / N
-        hanning = torch.autograd.Variable(torch.from_numpy(np.hanning(N)).type(torch.FloatTensor), requires_grad=True).view(1, -1)
+        device = output.device
+        two_pi_n_over_N = torch.autograd.Variable(2 * math.pi * torch.arange(0, N, dtype=torch.float), requires_grad=True).to(device) / N
+        hanning = torch.autograd.Variable(torch.from_numpy(np.hanning(N)).type(torch.FloatTensor), requires_grad=True).view(1, -1).to(device)
 
-        k = k.type(torch.FloatTensor).cuda()
-        two_pi_n_over_N = two_pi_n_over_N.cuda()
-        hanning = hanning.cuda()
+        k = k.type(torch.FloatTensor).to(device)
             
         output = output.view(1, -1) * hanning
-        output = output.view(1, 1, -1).type(torch.cuda.FloatTensor)
+        output = output.view(1, 1, -1)
         k = k.view(1, -1, 1)
         two_pi_n_over_N = two_pi_n_over_N.view(1, 1, -1)
         complex_absolute = torch.sum(output * torch.sin(k * two_pi_n_over_N), dim=-1) ** 2 \
@@ -58,9 +57,10 @@ class TorchLossComputer(object):
         
     @staticmethod
     def cross_entropy_power_spectrum_loss(inputs, target, Fs):
+        device = inputs.device
         inputs = inputs.view(1, -1)
         target = target.view(1, -1)
-        bpm_range = torch.arange(40, 180, dtype=torch.float).cuda()
+        bpm_range = torch.arange(40, 180, dtype=torch.float).to(device)
 
         complex_absolute = TorchLossComputer.complex_absolute(inputs, Fs, bpm_range)
 
@@ -71,9 +71,10 @@ class TorchLossComputer(object):
 
     @staticmethod
     def cross_entropy_power_spectrum_focal_loss(inputs, target, Fs, gamma):
+        device = inputs.device
         inputs = inputs.view(1, -1)
         target = target.view(1, -1)
-        bpm_range = torch.arange(40, 180, dtype=torch.float).cuda()
+        bpm_range = torch.arange(40, 180, dtype=torch.float).to(device)
 
         complex_absolute = TorchLossComputer.complex_absolute(inputs, Fs, bpm_range)
 
@@ -88,8 +89,9 @@ class TorchLossComputer(object):
         
     @staticmethod
     def cross_entropy_power_spectrum_forward_pred(inputs, Fs):
+        device = inputs.device
         inputs = inputs.view(1, -1)
-        bpm_range = torch.arange(40, 190, dtype=torch.float).cuda()
+        bpm_range = torch.arange(40, 190, dtype=torch.float).to(device)
 
         complex_absolute = TorchLossComputer.complex_absolute(inputs, Fs, bpm_range)
 
@@ -100,14 +102,15 @@ class TorchLossComputer(object):
     
     @staticmethod
     def cross_entropy_power_spectrum_DLDL_softmax2(inputs, target, Fs, std):
+        device = inputs.device
         target_distribution = [normal_sampling(int(target), i, std) for i in range(40, 180)]
         target_distribution = [i if i > 1e-15 else 1e-15 for i in target_distribution]
-        target_distribution = torch.Tensor(target_distribution).to(torch.device('cuda'))
+        target_distribution = torch.Tensor(target_distribution).to(device)
         
         inputs = inputs.view(1, -1)
         target = target.view(1, -1)
         
-        bpm_range = torch.arange(40, 180, dtype=torch.float).to(torch.device('cuda'))
+        bpm_range = torch.arange(40, 180, dtype=torch.float).to(device)
 
         ca = TorchLossComputer.complex_absolute(inputs, Fs, bpm_range)
         

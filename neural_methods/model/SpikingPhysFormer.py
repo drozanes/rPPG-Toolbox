@@ -197,7 +197,9 @@ class SpikingPhysFormer(nn.Module):
         self.ConvBlockLast = nn.Conv1d(dim//2, 1, 1, stride=1, padding=0)
 
     def forward(self, x):
-        # x: [B, 3, T, H, W]
+        # x: [B, T, C, H, W] in the toolbox data loader
+        # need [B, C, T, H, W] for 3D conv
+        x = x.permute(0, 2, 1, 3, 4)
         B, C, T, H, W = x.shape
         
         # ANN Stem
