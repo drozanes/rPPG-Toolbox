@@ -159,6 +159,7 @@ if __name__ == "__main__":
     # configurations.
     config = get_config(args, unknown)
     config.defrost()
+    config.NUM_WORKERS = args.num_workers
     if args.toolbox_mode:
         config.TOOLBOX_MODE = args.toolbox_mode
     config.freeze()

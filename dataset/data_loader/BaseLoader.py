@@ -473,7 +473,7 @@ class BaseLoader(Dataset):
             count += 1
         return input_path_name_list, label_path_name_list
 
-    def multi_process_manager(self, data_dirs, config_preprocess, multi_process_quota=8):
+    def multi_process_manager(self, data_dirs, config_preprocess, multi_process_quota=4):
         """Allocate dataset preprocessing across multiple processes.
 
         Args:
@@ -483,7 +483,11 @@ class BaseLoader(Dataset):
         Returns:
             file_list_dict(Dict): Dictionary containing information regarding processed data ( path names)
         """
-        print('Preprocessing dataset...')
+        # Try to get quota from config if available, otherwise use default
+        if hasattr(self.config_data, 'NUM_WORKERS'):
+            multi_process_quota = max(1, self.config_data.NUM_WORKERS // 2)
+        
+        print(f'Preprocessing dataset with {multi_process_quota} processes...')
         file_num = len(data_dirs)
         choose_range = range(0, file_num)
         pbar = tqdm(list(choose_range))
