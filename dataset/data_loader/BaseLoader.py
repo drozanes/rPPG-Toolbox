@@ -18,15 +18,7 @@ import math
 import multiprocessing as mp
 import gc
 
-# To be used only for preparing data - for detecting face with YOLO5Face
-try:
-    mp.set_start_method('spawn', force=True)
-except RuntimeError:
-    pass
-
 import cv2
-# Disable OpenCV internal threading to prevent conflicts with multiprocessing
-cv2.setNumThreads(0)
 import numpy as np
 import pandas as pd
 import torch

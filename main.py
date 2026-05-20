@@ -8,7 +8,6 @@ import numpy as np
 import torch
 from config import get_config
 from dataset import data_loader
-from neural_methods import trainer
 from unsupervised_methods.unsupervised_predictor import unsupervised_predict
 from torch.utils.data import DataLoader
 
@@ -65,6 +64,7 @@ def add_args(parser):
 
 def train_and_test(config, data_loader_dict):
     """Trains the model."""
+    from neural_methods import trainer
     if config.MODEL.NAME == "Physnet":
         model_trainer = trainer.PhysnetTrainer.PhysnetTrainer(config, data_loader_dict)
     elif config.MODEL.NAME == "iBVPNet":
