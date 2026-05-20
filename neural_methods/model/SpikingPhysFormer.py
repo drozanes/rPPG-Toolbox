@@ -200,6 +200,12 @@ class SpikingPhysFormer(nn.Module):
         # x: [B, T, C, H, W] in the toolbox data loader
         # need [B, C, T, H, W] for 3D conv
         x = x.permute(0, 2, 1, 3, 4)
+        
+        # If data contains both DiffNormalized and Raw (6 channels), 
+        # take only the first 3 (DiffNormalized)
+        if x.shape[1] == 6:
+            x = x[:, :3, :, :, :]
+            
         B, C, T, H, W = x.shape
         
         # ANN Stem
