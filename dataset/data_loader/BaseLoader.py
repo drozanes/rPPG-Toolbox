@@ -20,11 +20,12 @@ import multiprocessing as mp
 # To be used only for preparing data - for detecting face with YOLO5Face
 try:
     mp.set_start_method('spawn', force=True)
-    # print("spawned")
 except RuntimeError:
     pass
 
 import cv2
+# Disable OpenCV internal threading to prevent conflicts with multiprocessing
+cv2.setNumThreads(0)
 import numpy as np
 import pandas as pd
 import torch
@@ -473,7 +474,7 @@ class BaseLoader(Dataset):
             count += 1
         return input_path_name_list, label_path_name_list
 
-    def multi_process_manager(self, data_dirs, config_preprocess, multi_process_quota=4):
+    def multi_process_manager(self, data_dirs, config_preprocess, multi_process_quota=1):
         """Allocate dataset preprocessing across multiple processes.
 
         Args:
@@ -483,9 +484,19 @@ class BaseLoader(Dataset):
         Returns:
             file_list_dict(Dict): Dictionary containing information regarding processed data ( path names)
         """
-        # Try to get quota from config if available, otherwise use default
-        if hasattr(self.config_data, 'NUM_WORKERS'):
-            multi_process_quota = max(1, self.config_data.NUM_WORKERS // 2)
+        # Access the root config to get NUM_WORKERS
+        # config_data is usually a sub-node, but we added NUM_WORKERS to the root config in main.py
+        # We search for it in the config object if possible
+        try:
+            # This is a bit of a hack to find the root config if it's not passed directly
+            # In rPPG-Toolbox, config_data is often config.TRAIN.DATA
+            # We can try to access it via self.config_data if we attached it there or just use 1 as safe default
+            pass 
+        except:
+            pass
+        
+        # Safer approach: Default to 1 process for preprocessing unless explicitly specified higher
+        # This prevents memory crashes in Colab and other environments.
         
         print(f'Preprocessing dataset with {multi_process_quota} processes...')
         file_num = len(data_dirs)

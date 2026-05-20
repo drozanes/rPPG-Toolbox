@@ -40,7 +40,7 @@ def add_args(parser):
     parser.add_argument('--config_file', required=False,
                         default="configs/train_configs/PURE_PURE_UBFC-rPPG_TSCAN_BASIC.yaml", type=str, help="The name of the model.")
     parser.add_argument('--toolbox_mode', required=False, default=None, type=str, help="The mode of the toolbox.")
-    parser.add_argument('--num_workers', required=False, default=16, type=int, help="The number of workers for the data loader.")
+    parser.add_argument('--num_workers', required=False, default=2, type=int, help="The number of workers for the data loader.")
     '''Neural Method Sample YAML LIST:
       SCAMPS_SCAMPS_UBFC-rPPG_TSCAN_BASIC.yaml
       SCAMPS_SCAMPS_UBFC-rPPG_DEEPPHYS_BASIC.yaml
