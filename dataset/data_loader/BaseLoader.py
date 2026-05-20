@@ -484,32 +484,24 @@ class BaseLoader(Dataset):
         Returns:
             file_list_dict(Dict): Dictionary containing information regarding processed data ( path names)
         """
-        # Access the root config to get NUM_WORKERS
-        # config_data is usually a sub-node, but we added NUM_WORKERS to the root config in main.py
-        # We search for it in the config object if possible
-        try:
-            # This is a bit of a hack to find the root config if it's not passed directly
-            # In rPPG-Toolbox, config_data is often config.TRAIN.DATA
-            # We can try to access it via self.config_data if we attached it there or just use 1 as safe default
-            pass 
-        except:
-            pass
-        
-        # Safer approach: Default to 1 process for preprocessing unless explicitly specified higher
-        # This prevents memory crashes in Colab and other environments.
-        
         print(f'Preprocessing dataset with {multi_process_quota} processes...')
         file_num = len(data_dirs)
         choose_range = range(0, file_num)
-        pbar = tqdm(list(choose_range))
+        
+        if multi_process_quota <= 1:
+            # Sequential processing (Truly single-process, SAFER for Colab)
+            file_list_dict = {}
+            for i in tqdm(choose_range):
+                self.preprocess_dataset_subprocess(data_dirs, config_preprocess, i, file_list_dict)
+            return file_list_dict
 
-        # shared data resource
+        # Multiprocessing (Only if quota > 1)
+        pbar = tqdm(list(choose_range))
         manager = mp.Manager()  # multi-process manager
         file_list_dict = manager.dict()  # dictionary for all processes to store processed files
         p_list = []  # list of processes
         running_num = 0  # number of running processes
 
-        # in range of number of files to process
         for i in choose_range:
             process_flag = True
             while process_flag:  # ensure that every i creates a process
