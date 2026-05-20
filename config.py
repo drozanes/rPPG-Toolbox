@@ -363,6 +363,14 @@ _C.MODEL.SPIKINGPHYSFORMER.THETA = 0.7
 _C.MODEL.SPIKINGPHYSFORMER.T_S = 4
 
 # -----------------------------------------------------------------------------
+# Model Settings for Contrast-Phys+
+# -----------------------------------------------------------------------------
+_C.MODEL.CONTRAST_PHYS = CN()
+_C.MODEL.CONTRAST_PHYS.DELTA_T = 128
+_C.MODEL.CONTRAST_PHYS.K = 10
+_C.MODEL.CONTRAST_PHYS.WEAK_SUPERVISION = True
+
+# -----------------------------------------------------------------------------
 # Inference settings
 # -----------------------------------------------------------------------------
 _C.INFERENCE = CN()
@@ -401,7 +409,7 @@ def _update_config_from_file(config, cfg_file):
     config.freeze()
 
 
-def update_config(config, args):
+def update_config(config, args, opts=None):
 
     # store default file list path for checking against later
     default_TRAIN_FILE_LIST_PATH = config.TRAIN.DATA.FILE_LIST_PATH
@@ -412,6 +420,8 @@ def update_config(config, args):
     # update flag from config file
     _update_config_from_file(config, args.config_file)
     config.defrost()
+    if opts:
+        config.merge_from_list(opts)
     
     # UPDATE TRAIN PATHS
     if config.TRAIN.DATA.FILE_LIST_PATH == default_TRAIN_FILE_LIST_PATH:
@@ -613,11 +623,11 @@ def update_config(config, args):
     config.freeze()
     return
 
-def get_config(args):
+def get_config(args, opts=None):
     # Return a clone so that the defaults will not be altered
     # This is for the "local variable" use pattern
     config = _C.clone()
-    update_config(config, args)
+    update_config(config, args, opts)
 
     return config
 

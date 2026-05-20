@@ -87,6 +87,8 @@ def train_and_test(config, data_loader_dict):
         model_trainer = trainer.RhythmFormerTrainer.RhythmFormerTrainer(config, data_loader_dict)
     elif config.MODEL.NAME == 'SpikingPhysFormer':
         model_trainer = trainer.SpikingPhysFormerTrainer.SpikingPhysFormerTrainer(config, data_loader_dict)
+    elif config.MODEL.NAME == 'ContrastPhys':
+        model_trainer = trainer.ContrastPhysTrainer.ContrastPhysTrainer(config, data_loader_dict)
     else:
         raise ValueError('Your Model is Not Supported  Yet!')
     model_trainer.train(data_loader_dict)
@@ -117,6 +119,8 @@ def test(config, data_loader_dict):
         model_trainer = trainer.RhythmFormerTrainer.RhythmFormerTrainer(config, data_loader_dict)
     elif config.MODEL.NAME == 'SpikingPhysFormer':
         model_trainer = trainer.SpikingPhysFormerTrainer.SpikingPhysFormerTrainer(config, data_loader_dict)
+    elif config.MODEL.NAME == 'ContrastPhys':
+        model_trainer = trainer.ContrastPhysTrainer.ContrastPhysTrainer(config, data_loader_dict)
     else:
         raise ValueError('Your Model is Not Supported  Yet!')
     model_trainer.test(data_loader_dict)
@@ -153,9 +157,8 @@ if __name__ == "__main__":
     args, unknown = parser.parse_known_args()
 
     # configurations.
-    config = get_config(args)
+    config = get_config(args, unknown)
     config.defrost()
-    config.merge_from_list(unknown)
     if args.toolbox_mode:
         config.TOOLBOX_MODE = args.toolbox_mode
     config.freeze()

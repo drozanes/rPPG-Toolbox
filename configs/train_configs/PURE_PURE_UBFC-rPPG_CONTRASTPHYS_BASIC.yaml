@@ -1,0 +1,115 @@
+BASE: ['']
+TOOLBOX_MODE: "train_and_test"
+TRAIN:
+  BATCH_SIZE: 4
+  EPOCHS: 30
+  LR: 1e-4
+  MODEL_FILE_NAME: PURE_PURE_UBFC_contrastphys
+  PLOT_LOSSES_AND_LR: True
+  DATA:
+    FS: 30
+    DATASET: PURE
+    DO_PREPROCESS: False
+    DATA_FORMAT: NDCHW
+    DATA_PATH: "path/to/PURE"
+    CACHED_PATH: "PreprocessedData"
+    EXP_DATA_NAME: ""
+    BEGIN: 0.0
+    END: 0.8
+    PREPROCESS:
+      DATA_TYPE: ['DiffNormalized']
+      DATA_AUG: ['None']
+      LABEL_TYPE: DiffNormalized
+      DO_CHUNK: True
+      CHUNK_LENGTH: 128
+      CROP_FACE:
+        DO_CROP_FACE: True
+        BACKEND: 'HC'
+        USE_LARGE_FACE_BOX: True
+        LARGE_BOX_COEF: 1.5
+        DETECTION:
+          DO_DYNAMIC_DETECTION: False
+          DYNAMIC_DETECTION_FREQUENCY: 30
+          USE_MEDIAN_FACE_BOX: False
+      RESIZE:
+        H: 128
+        W: 128
+VALID:
+  DATA:
+    FS: 30
+    DATASET: PURE
+    DO_PREPROCESS: False
+    DATA_FORMAT: NDCHW
+    DATA_PATH: "path/to/PURE"
+    CACHED_PATH: "PreprocessedData"
+    EXP_DATA_NAME: ""
+    BEGIN: 0.8
+    END: 1.0
+    PREPROCESS:
+      DATA_TYPE: ['DiffNormalized']
+      DATA_AUG: ['None']
+      LABEL_TYPE: DiffNormalized
+      DO_CHUNK: True
+      CHUNK_LENGTH: 128
+      CROP_FACE:
+        DO_CROP_FACE: True
+        BACKEND: 'HC'
+        USE_LARGE_FACE_BOX: True
+        LARGE_BOX_COEF: 1.5
+        DETECTION:
+          DO_DYNAMIC_DETECTION: False
+          DYNAMIC_DETECTION_FREQUENCY : 30
+          USE_MEDIAN_FACE_BOX: False
+      RESIZE:
+        H: 128
+        W: 128
+TEST:
+  METRICS: ['MAE', 'RMSE', 'MAPE', 'Pearson', 'SNR', 'BA']
+  USE_LAST_EPOCH: True
+  DATA:
+    FS: 30
+    DATASET: UBFC-rPPG
+    DO_PREPROCESS: False
+    DATA_FORMAT: NDCHW
+    DATA_PATH: "path/to/UBFC-rPPG"
+    CACHED_PATH: "PreprocessedData"
+    EXP_DATA_NAME: ""
+    BEGIN: 0.0
+    END: 1.0
+    PREPROCESS:
+      DATA_TYPE: ['DiffNormalized']
+      LABEL_TYPE: DiffNormalized
+      DO_CHUNK: True
+      CHUNK_LENGTH: 128
+      CROP_FACE:
+        DO_CROP_FACE: True
+        BACKEND: 'HC'
+        USE_LARGE_FACE_BOX: True
+        LARGE_BOX_COEF: 1.5
+        DETECTION:
+          DO_DYNAMIC_DETECTION: False
+          DYNAMIC_DETECTION_FREQUENCY: 30
+          USE_MEDIAN_FACE_BOX: False
+      RESIZE:
+        H: 128
+        W: 128
+DEVICE: cuda:0
+NUM_OF_GPU_TRAIN: 1
+LOG:
+  PATH: runs/exp
+MODEL:
+  DROP_RATE: 0.2
+  NAME: ContrastPhys
+  PHYSNET:
+    FRAME_NUM: 128
+  CONTRAST_PHYS:
+    DELTA_T: 128
+    K: 10
+    WEAK_SUPERVISION: True
+INFERENCE:
+  BATCH_SIZE: 4
+  EVALUATION_METHOD: "FFT"
+  EVALUATION_WINDOW:
+    USE_SMALLER_WINDOW: False
+    WINDOW_SIZE: 10
+  MODEL_PATH:   ""
