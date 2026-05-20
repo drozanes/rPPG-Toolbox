@@ -8,6 +8,7 @@ import numpy as np
 import torch
 from config import get_config
 from dataset import data_loader
+from neural_methods.trainer.BaseTrainer import BaseTrainer
 from unsupervised_methods.unsupervised_predictor import unsupervised_predict
 from torch.utils.data import DataLoader
 
@@ -152,7 +153,7 @@ if __name__ == "__main__":
     # parse arguments.
     parser = argparse.ArgumentParser()
     parser = add_args(parser)
-    parser = trainer.BaseTrainer.BaseTrainer.add_trainer_args(parser)
+    parser = BaseTrainer.add_trainer_args(parser)
     parser = data_loader.BaseLoader.BaseLoader.add_data_loader_args(parser)
     args, unknown = parser.parse_known_args()
 
