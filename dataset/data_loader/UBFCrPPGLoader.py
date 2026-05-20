@@ -104,6 +104,7 @@ class UBFCrPPGLoader(BaseLoader):
             frame = np.asarray(frame)
             frames.append(frame)
             success, frame = VidObj.read()
+        VidObj.release() # CRITICAL: Release the video object
         return np.asarray(frames)
 
     @staticmethod

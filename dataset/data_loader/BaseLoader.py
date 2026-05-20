@@ -16,6 +16,7 @@ from unsupervised_methods.methods import POS_WANG
 from unsupervised_methods import utils
 import math
 import multiprocessing as mp
+import gc
 
 # To be used only for preparing data - for detecting face with YOLO5Face
 try:
@@ -493,6 +494,8 @@ class BaseLoader(Dataset):
             file_list_dict = {}
             for i in tqdm(choose_range):
                 self.preprocess_dataset_subprocess(data_dirs, config_preprocess, i, file_list_dict)
+                # Manual garbage collection to clear large video arrays
+                gc.collect()
             return file_list_dict
 
         # Multiprocessing (Only if quota > 1)
