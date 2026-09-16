@@ -151,11 +151,7 @@ def unsupervised_method_inference(config, data_loader):
 
 
 if __name__ == "__main__":
-    try:
-        import wandb
-        wandb.init(project="rPPG-Master-Thesis")
-    except ImportError:
-        pass
+
 
     # parse arguments.
     parser = argparse.ArgumentParser()
@@ -174,6 +170,24 @@ if __name__ == "__main__":
     
     print('Configuration:')
     print(config, end='\n\n')
+    try:
+        import wandb
+        dataset = config.TRAIN.DATA.DATASET if config.TOOLBOX_MODE in ["train_and_test", "only_preprocess"] else config.TEST.DATA.DATASET
+        if not dataset and config.TOOLBOX_MODE == "unsupervised_method":
+            dataset = config.UNSUPERVISED.DATA.DATASET if hasattr(config.UNSUPERVISED.DATA, "DATASET") else "UnknownDataset"
+        model_name = config.MODEL.NAME if config.TOOLBOX_MODE != "unsupervised_method" else config.UNSUPERVISED.METHOD
+        if isinstance(model_name, list) and len(model_name) > 0:
+            model_name = model_name[0]
+        lr = config.TRAIN.LR if hasattr(config.TRAIN, "LR") else "N/A"
+        bs = config.TRAIN.BATCH_SIZE if hasattr(config.TRAIN, "BATCH_SIZE") else "N/A"
+        epochs = config.TRAIN.EPOCHS if hasattr(config.TRAIN, "EPOCHS") else "N/A"
+        run_name = f"{dataset}_{model_name}_lr{lr}_bs{bs}_ep{epochs}"
+        
+        # We save config as a dict to wandb
+        wandb.init(project="rPPG-Master-Thesis", name=run_name, config=dict(config))
+    except ImportError:
+        pass
+
 
     data_loader_dict = dict() # dictionary of data loaders 
     if config.TOOLBOX_MODE == "train_and_test" or config.TOOLBOX_MODE == "only_preprocess":
