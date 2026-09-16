@@ -1,3 +1,8 @@
+try:
+    import wandb
+except ImportError:
+    pass
+import sys
 import torch
 from torch.autograd import Variable
 import matplotlib.pyplot as plt

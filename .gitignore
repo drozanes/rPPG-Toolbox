@@ -23,3 +23,9 @@ test_data/
 test_data_cached/
 test_data_cached_neural/
 *.avi
+
+# Added by AI
+venv/
+wandb/
+**/.DS_Store
+.DS_Store

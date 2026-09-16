@@ -1,3 +1,8 @@
+try:
+    import wandb
+except ImportError:
+    pass
+import sys
 import os
 import numpy as np
 import math
@@ -140,6 +145,11 @@ class SpikingPhysFormerTrainer(BaseTrainer):
                     
             lrs.append(self.scheduler.get_last_lr())
             mean_training_losses.append(np.mean(loss_rPPG_avg))
+            try:
+                if 'wandb' in sys.modules:
+                    wandb.log({'Train Loss': mean_training_losses[-1], 'Epoch': epoch})
+            except Exception:
+                pass
             self.save_model(epoch)
             self.scheduler.step()
             self.model.eval()
@@ -147,6 +157,11 @@ class SpikingPhysFormerTrainer(BaseTrainer):
             if not self.config.TEST.USE_LAST_EPOCH: 
                 valid_loss = self.valid(data_loader)
                 mean_valid_losses.append(valid_loss)
+                try:
+                    if 'wandb' in sys.modules:
+                        wandb.log({'Validation Loss': mean_valid_losses[-1], 'Epoch': epoch})
+                except Exception:
+                    pass
                 print(f'Validation RMSE:{valid_loss:.3f}, batch:{idx+1}')
                 if self.min_valid_loss is None or (valid_loss < self.min_valid_loss):
                     self.min_valid_loss = valid_loss

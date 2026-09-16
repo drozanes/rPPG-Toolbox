@@ -1,3 +1,8 @@
+try:
+    import wandb
+except ImportError:
+    pass
+import sys
 """Trainer for TSCAN."""
 
 import logging
@@ -93,11 +98,21 @@ class TscanTrainer(BaseTrainer):
 
             # Append the mean training loss for the epoch
             mean_training_losses.append(np.mean(train_loss))
+            try:
+                if 'wandb' in sys.modules:
+                    wandb.log({'Train Loss': mean_training_losses[-1], 'Epoch': epoch})
+            except Exception:
+                pass
 
             self.save_model(epoch)
             if not self.config.TEST.USE_LAST_EPOCH: 
                 valid_loss = self.valid(data_loader)
                 mean_valid_losses.append(valid_loss)
+                try:
+                    if 'wandb' in sys.modules:
+                        wandb.log({'Validation Loss': mean_valid_losses[-1], 'Epoch': epoch})
+                except Exception:
+                    pass
                 print('validation loss: ', valid_loss)
                 if self.min_valid_loss is None:
                     self.min_valid_loss = valid_loss

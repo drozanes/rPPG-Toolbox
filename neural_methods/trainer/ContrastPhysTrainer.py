@@ -1,3 +1,8 @@
+try:
+    import wandb
+except ImportError:
+    pass
+import sys
 import os
 import numpy as np
 import torch
@@ -70,11 +75,21 @@ class ContrastPhysTrainer(BaseTrainer):
                 tbar.set_postfix(loss=loss.item())
 
             mean_training_losses.append(np.mean(train_loss))
+            try:
+                if 'wandb' in sys.modules:
+                    wandb.log({'Train Loss': mean_training_losses[-1], 'Epoch': epoch})
+            except Exception:
+                pass
             self.save_model(epoch)
             
             if not self.config.TEST.USE_LAST_EPOCH: 
                 valid_loss = self.valid(data_loader)
                 mean_valid_losses.append(valid_loss)
+                try:
+                    if 'wandb' in sys.modules:
+                        wandb.log({'Validation Loss': mean_valid_losses[-1], 'Epoch': epoch})
+                except Exception:
+                    pass
                 if self.min_valid_loss is None or valid_loss < self.min_valid_loss:
                     self.min_valid_loss = valid_loss
                     self.best_epoch = epoch

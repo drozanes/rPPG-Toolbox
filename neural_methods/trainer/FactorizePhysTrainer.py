@@ -1,3 +1,8 @@
+try:
+    import wandb
+except ImportError:
+    pass
+import sys
 """
 FactorizePhys: Matrix Factorization for Multidimensional Attention in Remote Physiological Sensing
 NeurIPS 2024
@@ -155,6 +160,11 @@ class FactorizePhysTrainer(BaseTrainer):
 
             # Append the mean training loss for the epoch
             mean_training_losses.append(np.mean(train_loss))
+            try:
+                if 'wandb' in sys.modules:
+                    wandb.log({'Train Loss': mean_training_losses[-1], 'Epoch': epoch})
+            except Exception:
+                pass
             if self.use_fsam:
                 mean_appx_error.append(np.mean(appx_error_list))
                 print("Mean train loss: {}, Mean appx error: {}".format(
@@ -166,6 +176,11 @@ class FactorizePhysTrainer(BaseTrainer):
             if not self.config.TEST.USE_LAST_EPOCH: 
                 valid_loss = self.valid(data_loader)
                 mean_valid_losses.append(valid_loss)
+                try:
+                    if 'wandb' in sys.modules:
+                        wandb.log({'Validation Loss': mean_valid_losses[-1], 'Epoch': epoch})
+                except Exception:
+                    pass
                 print('validation loss: ', valid_loss)
                 if self.min_valid_loss is None:
                     self.min_valid_loss = valid_loss

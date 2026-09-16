@@ -98,6 +98,7 @@ def train_and_test(config, data_loader_dict):
 
 def test(config, data_loader_dict):
     """Tests the model."""
+    from neural_methods import trainer
     if config.MODEL.NAME == "Physnet":
         model_trainer = trainer.PhysnetTrainer.PhysnetTrainer(config, data_loader_dict)
     elif config.MODEL.NAME == "iBVPNet":
@@ -150,6 +151,12 @@ def unsupervised_method_inference(config, data_loader):
 
 
 if __name__ == "__main__":
+    try:
+        import wandb
+        wandb.init(project="rPPG-Master-Thesis")
+    except ImportError:
+        pass
+
     # parse arguments.
     parser = argparse.ArgumentParser()
     parser = add_args(parser)

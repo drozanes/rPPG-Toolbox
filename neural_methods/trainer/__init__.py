@@ -9,11 +9,11 @@ import neural_methods.trainer.PhysFormerTrainer
 try:
     import neural_methods.trainer.PhysMambaTrainer
 except ImportError:
-    print("PhysMambaTrainer not imported due to missing dependencies.")
+    pass # print("PhysMambaTrainer not imported due to missing dependencies.")
 import neural_methods.trainer.RhythmFormerTrainer
 import neural_methods.trainer.FactorizePhysTrainer
 import neural_methods.trainer.ContrastPhysTrainer
 try:
     import neural_methods.trainer.SpikingPhysFormerTrainer
 except ImportError:
-    print("SpikingPhysFormerTrainer not imported due to missing dependencies.")
+    pass # print("SpikingPhysFormerTrainer not imported due to missing dependencies.")
