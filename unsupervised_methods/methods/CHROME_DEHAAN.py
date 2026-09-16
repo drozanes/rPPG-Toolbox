@@ -51,10 +51,28 @@ def CHROME_DEHAAN(frames,FS):
     BVP = S
     return BVP
 
-def process_video(frames):
+def process_video(frames, use_skin_mask=True):
+    import cv2
     "Calculates the average value of each frame."
     RGB = []
     for frame in frames:
-        sum = np.sum(np.sum(frame, axis=0), axis=0)
-        RGB.append(sum/(frame.shape[0]*frame.shape[1]))
+        if use_skin_mask:
+            f_uint8 = np.clip(frame, 0, 255).astype(np.uint8)
+            hsv = cv2.cvtColor(f_uint8, cv2.COLOR_RGB2HSV)
+            lower_skin1 = np.array([0, 20, 50], dtype=np.uint8)
+            upper_skin1 = np.array([20, 255, 255], dtype=np.uint8)
+            mask1 = cv2.inRange(hsv, lower_skin1, upper_skin1)
+            lower_skin2 = np.array([170, 20, 50], dtype=np.uint8)
+            upper_skin2 = np.array([180, 255, 255], dtype=np.uint8)
+            mask2 = cv2.inRange(hsv, lower_skin2, upper_skin2)
+            mask = mask1 | mask2
+            skin_pixels = frame[mask == 255]
+            if len(skin_pixels) > 0:
+                avg_color = np.mean(skin_pixels, axis=0)
+            else:
+                avg_color = np.mean(frame, axis=(0, 1))
+        else:
+            sum = np.sum(np.sum(frame, axis=0), axis=0)
+            avg_color = sum/(frame.shape[0]*frame.shape[1])
+        RGB.append(avg_color)
     return np.asarray(RGB)
