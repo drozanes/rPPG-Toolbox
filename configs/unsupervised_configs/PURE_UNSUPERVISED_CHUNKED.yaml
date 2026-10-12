@@ -1,0 +1,40 @@
+BASE: ['']
+TOOLBOX_MODE: "unsupervised_method"
+UNSUPERVISED:
+  METHOD: ['CHROM']
+  METRICS: ['MAE', 'RMSE', 'MAPE', 'Pearson', 'SNR', 'BA']
+  DATA:
+    FS: 30
+    DATASET: PURE
+    DO_PREPROCESS: False
+    DATA_FORMAT: NDHWC
+    DATA_PATH: "./PURE_dataset"
+    CACHED_PATH: "PreprocessedData"
+    EXP_DATA_NAME: "PURE_5c306b9a2c"
+    BEGIN: 0.0
+    END: 1.0
+    PREPROCESS:
+      DATA_TYPE: ['Raw']
+      DATA_AUG: ['None']
+      LABEL_TYPE: Raw
+      DO_CHUNK: True
+      CHUNK_LENGTH: 180
+      CROP_FACE:
+        DO_CROP_FACE: True
+        BACKEND: 'HC'
+        USE_LARGE_FACE_BOX: True
+        LARGE_BOX_COEF: 1.5
+        DETECTION:
+          DO_DYNAMIC_DETECTION: False
+          DYNAMIC_DETECTION_FREQUENCY: 30
+          USE_MEDIAN_FACE_BOX: False
+      RESIZE:
+        H: 72
+        W: 72
+LOG:
+  PATH: runs/exp
+INFERENCE:
+  EVALUATION_METHOD: "FFT"
+  EVALUATION_WINDOW:
+    USE_SMALLER_WINDOW: False
+    WINDOW_SIZE: 10
