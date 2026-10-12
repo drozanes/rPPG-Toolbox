@@ -17,9 +17,10 @@ def kl_loss(inputs, labels):
     # Reshape the labels tensor to match the shape of inputs
     labels = labels.view(1, -1)
     
-    # Compute the KL Div Loss
-    criterion = nn.KLDivLoss(reduction='sum')
-    loss = criterion(F.log_softmax(inputs, dim=-1), labels)
+    # Compute the KL Div Loss: inputs are log-probabilities, labels are probabilities
+    criterion = nn.KLDivLoss(reduction='batchmean')
+    outputs = torch.log(inputs.clamp(min=1e-12))
+    loss = criterion(outputs, labels)
     return loss
  
 class TorchLossComputer(object):
@@ -103,21 +104,26 @@ class TorchLossComputer(object):
     @staticmethod
     def cross_entropy_power_spectrum_DLDL_softmax2(inputs, target, Fs, std):
         device = inputs.device
-        target_distribution = [normal_sampling(int(target), i, std) for i in range(40, 180)]
+        bpm_range = torch.arange(40, 180, dtype=torch.float).to(device)
+        target_clamped = torch.clamp(target, min=40.0, max=179.0)
+        target_val = float(target_clamped.item())
+        
+        target_distribution = [normal_sampling(target_val, i, std) for i in range(40, 180)]
         target_distribution = [i if i > 1e-15 else 1e-15 for i in target_distribution]
-        target_distribution = torch.Tensor(target_distribution).to(device)
+        target_distribution = torch.tensor(target_distribution, dtype=torch.float, device=device)
+        target_distribution = target_distribution / target_distribution.sum()
         
         inputs = inputs.view(1, -1)
-        target = target.view(1, -1)
-        
-        bpm_range = torch.arange(40, 180, dtype=torch.float).to(device)
+        target_idx = (target_clamped - bpm_range[0]).long().view(1)
 
         ca = TorchLossComputer.complex_absolute(inputs, Fs, bpm_range)
-        
-        fre_distribution = ca/torch.sum(ca)
+        fre_distribution = ca / torch.sum(ca)
         loss_distribution_kl = kl_loss(fre_distribution, target_distribution)
+        
+        # Power spectrum cross-entropy: -log(P[target_idx])
+        loss_ce = F.nll_loss(torch.log(fre_distribution.clamp(min=1e-12)), target_idx)
         
         whole_max_val, whole_max_idx = ca.view(-1).max(0)
         whole_max_idx = whole_max_idx.type(torch.float)
-        return loss_distribution_kl, F.cross_entropy(ca, (target-bpm_range[0]).view(1).type(torch.long)),  torch.abs(target[0]-bpm_range[0]-whole_max_idx)
+        return loss_distribution_kl, loss_ce, torch.abs(target_clamped.view(1) - bpm_range[0] - whole_max_idx)
         

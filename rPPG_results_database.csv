@@ -17,4 +17,5 @@ PURE,Unsupervised,CHROM (Toolbox Baseline),7.238,16.864,13.863,0.751,-2.312,0.0,
 PURE,Supervised,DeepPhys,1.728,9.481,1.756,0.917,4.975,1.5,Fast,Yes,Standard 2D-CNN evaluated on 6s chunks. Highly accurate signal.
 PURE,Supervised,SpikingPhysFormer,2.100,10.119,2.865,0.917,3.674,1.45,Fast,Yes,SNN+Transformer evaluated on 6s chunks. Highly robust against outliers.
 PURE,Weakly-Supervised,ContrastPhys,15.813,25.695,18.590,0.137,-6.839,6.2,3.1,Yes,3D-CNN evaluated on 6s chunks (Epoch 4 best val loss).
-PURE,Supervised,PhysFormer,23.142,38.711,29.387,0.276,0.421,6.3,Fast,Yes,Standard Transformer evaluated on 6s chunks (Epoch 26 best val loss).
+PURE,Supervised,PhysFormer (Epoch 3 pre-corruption),6.827,18.488,8.740,0.679,N/A,1.0,Fast,Yes,Standard Transformer on 10s windows (before harmonic bug degradation at late epochs).
+PURE,Supervised,PhysFormer (Epoch 26 corrupted baseline),23.142,38.711,29.387,0.276,0.421,6.3,Fast,Yes,Epoch 26 corrupted by unmitigated 2nd harmonic frequency loss.

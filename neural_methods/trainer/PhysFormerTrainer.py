@@ -26,7 +26,8 @@ from neural_methods.loss.PhysFormerLossComputer import TorchLossComputer
 from neural_methods.model.PhysFormer import ViT_ST_ST_Compact3_TDC_gra_sharp
 from neural_methods.trainer.BaseTrainer import BaseTrainer
 from tqdm import tqdm
-from scipy.signal import welch
+from scipy.signal import welch, butter, filtfilt
+import scipy.signal
 
 class PhysFormerTrainer(BaseTrainer):
 
@@ -86,11 +87,10 @@ class PhysFormerTrainer(BaseTrainer):
         if data_loader["train"] is None:
             raise ValueError("No data for train")
 
-        # a --> Pearson loss; b --> frequency loss
-        a_start = 1.0
+        # a --> Pearson loss (alpha = 0.1 in paper); b --> frequency loss (beta in [1.0, 5.0] exponential ascent)
+        a = 0.1
         b_start = 1.0
-        exp_a = 0.5     # Unused
-        exp_b = 1.0
+        exp_b = 5.0
 
         # TODO: Expand tracking and subsequent plotting of these losses for PhysFormer
         mean_training_losses = []
@@ -137,15 +137,10 @@ class PhysFormerTrainer(BaseTrainer):
                 kl_loss /= data.shape[0]
                 train_mae /= data.shape[0]
 
-                if epoch>10:
-                    a = 0.05
-                    b = 5.0
-                else:
-                    a = a_start
-                    # exp ascend
-                    b = b_start*math.pow(exp_b, epoch/10.0)
+                # Exponential increment as in paper Eq. 7: beta = beta_0 * (eta ** (epoch / total_epochs))
+                b = b_start * math.pow(exp_b, epoch / float(self.max_epoch_num))
 
-                loss = a*loss_rPPG + b*(fre_loss+kl_loss)
+                loss = a * loss_rPPG + b * (fre_loss + kl_loss)
                 loss.backward()
                 self.optimizer.step()
 
@@ -211,7 +206,7 @@ class PhysFormerTrainer(BaseTrainer):
                 data, label = val_batch[0].float().to(self.device), val_batch[1].float().to(self.device)
                 gra_sharp = 2.0
                 rPPG, _, _, _ = self.model(data, gra_sharp)
-                rPPG = (rPPG-torch.mean(rPPG, axis=-1).view(-1, 1))/torch.std(rPPG).view(-1, 1)
+                rPPG = (rPPG-torch.mean(rPPG, axis=-1).view(-1, 1))/torch.std(rPPG, axis=-1).view(-1, 1)
                 for _1, _2 in zip(rPPG, label):
                     hrs.append((self.get_hr(_1.cpu().detach().numpy(), sr=self.frame_rate_valid), self.get_hr(_2.cpu().detach().numpy(), sr=self.frame_rate_valid)))
             RMSE = np.mean([(i-j)**2 for i, j in hrs])**0.5
@@ -231,10 +226,18 @@ class PhysFormerTrainer(BaseTrainer):
         predictions = dict()
         labels = dict()
 
+        def load_checkpoint(path):
+            state_dict = torch.load(path, map_location=self.device)
+            if hasattr(self.model, 'module') and not any(k.startswith('module.') for k in state_dict.keys()):
+                state_dict = {'module.' + k: v for k, v in state_dict.items()}
+            elif not hasattr(self.model, 'module') and any(k.startswith('module.') for k in state_dict.keys()):
+                state_dict = {k.replace('module.', ''): v for k, v in state_dict.items()}
+            self.model.load_state_dict(state_dict)
+
         if self.config.TOOLBOX_MODE == "only_test":
             if not os.path.exists(self.config.INFERENCE.MODEL_PATH):
                 raise ValueError("Inference model path error! Please check INFERENCE.MODEL_PATH in your yaml.")
-            self.model.load_state_dict(torch.load(self.config.INFERENCE.MODEL_PATH))
+            load_checkpoint(self.config.INFERENCE.MODEL_PATH)
             print("Testing uses pretrained model!")
             print(self.config.INFERENCE.MODEL_PATH)
         else:
@@ -243,13 +246,13 @@ class PhysFormerTrainer(BaseTrainer):
                 self.model_dir, self.model_file_name + '_Epoch' + str(self.max_epoch_num - 1) + '.pth')
                 print("Testing uses last epoch as non-pretrained model!")
                 print(last_epoch_model_path)
-                self.model.load_state_dict(torch.load(last_epoch_model_path))
+                load_checkpoint(last_epoch_model_path)
             else:
                 best_model_path = os.path.join(
                     self.model_dir, self.model_file_name + '_Epoch' + str(self.best_epoch) + '.pth')
                 print("Testing uses best epoch selected using model selection as non-pretrained model!")
                 print(best_model_path)
-                self.model.load_state_dict(torch.load(best_model_path))
+                load_checkpoint(best_model_path)
 
         self.model = self.model.to(self.config.DEVICE)
         self.model.eval()
@@ -283,7 +286,15 @@ class PhysFormerTrainer(BaseTrainer):
         torch.save(self.model.state_dict(), model_path)
         print('Saved Model Path: ', model_path)
 
-    # HR calculation based on ground truth label
-    def get_hr(self, y, sr=30, min=30, max=180):
-        p, q = welch(y, sr, nfft=1e5/sr, nperseg=np.min((len(y)-1, 256)))
-        return p[(p>min/60)&(p<max/60)][np.argmax(q[(p>min/60)&(p<max/60)])]*60
+    # HR calculation based on ground truth label / prediction
+    def get_hr(self, y, sr=30, min=40, max=180):
+        y = y - np.mean(y)
+        low_hz = max(min / 60.0, 0.6)
+        high_hz = min(max / 60.0, 3.0)
+        [b, a] = butter(2, [low_hz / sr * 2, high_hz / sr * 2], btype='bandpass')
+        y = filtfilt(b, a, np.double(y))
+        p, q = welch(y, sr, nfft=1e5/sr, nperseg=len(y))
+        mask = (p >= min / 60.0) & (p <= max / 60.0)
+        if np.sum(mask) == 0:
+            return 60.0
+        return p[mask][np.argmax(q[mask])] * 60.0
