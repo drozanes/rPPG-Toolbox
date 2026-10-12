@@ -3,7 +3,7 @@ TOOLBOX_MODE: "train_and_test"
 TRAIN:
   BATCH_SIZE: 4
   EPOCHS: 30
-  LR: 1e-4
+  LR: 1e-5
   MODEL_FILE_NAME: UBFC-rPPG_ContrastPhys
   PLOT_LOSSES_AND_LR: True
   DATA:
@@ -104,7 +104,7 @@ MODEL:
     FRAME_NUM: 128
   CONTRAST_PHYS:
     DELTA_T: 128
-    K: 10
+    K: 4
     WEAK_SUPERVISION: True
 INFERENCE:
   BATCH_SIZE: 4

@@ -31,8 +31,8 @@ class ContrastPhysTrainer(BaseTrainer):
         if config.TOOLBOX_MODE == "train_and_test":
             self.num_train_batches = len(data_loader["train"])
             self.loss_model = ContrastPhysLoss(config)
-            self.optimizer = optim.Adam(
-                self.model.parameters(), lr=config.TRAIN.LR)
+            self.optimizer = optim.AdamW(
+                self.model.parameters(), lr=config.TRAIN.LR, weight_decay=5e-5)
             self.scheduler = torch.optim.lr_scheduler.OneCycleLR(
                 self.optimizer, max_lr=config.TRAIN.LR, epochs=config.TRAIN.EPOCHS, steps_per_epoch=self.num_train_batches)
         elif config.TOOLBOX_MODE == "only_test":
