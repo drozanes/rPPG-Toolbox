@@ -197,9 +197,10 @@ class SpikingPhysFormer(nn.Module):
         self.ConvBlockLast = nn.Conv1d(dim//2, 1, 1, stride=1, padding=0)
 
     def forward(self, x):
-        # x: [B, T, C, H, W] in the toolbox data loader
-        # need [B, C, T, H, W] for 3D conv
-        x = x.permute(0, 2, 1, 3, 4)
+        # Ensure shape is [B, C, T, H, W] for 3D convolutions
+        if x.shape[1] != 3 and x.shape[1] != 6:
+            # Input is [B, T, C, H, W], permute to [B, C, T, H, W]
+            x = x.permute(0, 2, 1, 3, 4)
         
         # If data contains both DiffNormalized and Raw (6 channels), 
         # take only the first 3 (DiffNormalized)
