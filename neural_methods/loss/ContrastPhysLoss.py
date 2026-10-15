@@ -9,7 +9,7 @@ class CalculateNormPSD(nn.Module):
         self.high_pass = high_pass
         self.low_pass = low_pass
 
-    def forward(self, x, zero_pad=0):
+    def forward(self, x, zero_pad=3):
         # x shape: [..., T]
         x = x - torch.mean(x, dim=-1, keepdim=True)
         if zero_pad > 0:
@@ -54,8 +54,8 @@ class ContrastPhysLoss(nn.Module):
     def forward(self, st_block, labels=None):
         # st_block shape: [B, N, T]
         B, N, T = st_block.shape
-        # Use delta_t if T > delta_t, otherwise sample over T/2 or T
-        sample_len = self.delta_t if (self.delta_t < T) else max(int(T // 2), 1)
+        # Use delta_t if T >= delta_t, otherwise sample over T/2 or T
+        sample_len = self.delta_t if (self.delta_t <= T) else max(int(T // 2), 1)
 
         # 1. Spatio-temporal sampling of rPPG
         samples_rppg = []

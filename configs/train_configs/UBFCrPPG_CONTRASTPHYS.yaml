@@ -3,7 +3,7 @@ TOOLBOX_MODE: "train_and_test"
 TRAIN:
   BATCH_SIZE: 4
   EPOCHS: 30
-  LR: 1e-5
+  LR: 1e-4
   MODEL_FILE_NAME: UBFC-rPPG_ContrastPhys
   PLOT_LOSSES_AND_LR: True
   DATA:
@@ -13,7 +13,7 @@ TRAIN:
     DATA_FORMAT: NCDHW
     DATA_PATH: "/Users/drozanes/Downloads/UBFC-rPPG_Raw/DATASET_2" # Update this to your raw data path
     CACHED_PATH: "PreprocessedData"
-    EXP_DATA_NAME: ""
+    EXP_DATA_NAME: "UBFC-rPPG_8ac63bff29"
     BEGIN: 0.0
     END: 0.8
     PREPROCESS:
@@ -42,7 +42,7 @@ VALID:
     DATA_FORMAT: NCDHW
     DATA_PATH: "/Users/drozanes/Downloads/UBFC-rPPG_Raw/DATASET_2"
     CACHED_PATH: "PreprocessedData"
-    EXP_DATA_NAME: ""
+    EXP_DATA_NAME: "UBFC-rPPG_8ac63bff29"
     BEGIN: 0.8
     END: 1.0
     PREPROCESS:
@@ -73,7 +73,7 @@ TEST:
     DATA_FORMAT: NCDHW
     DATA_PATH: "/Users/drozanes/Downloads/UBFC-rPPG_Raw/DATASET_2"
     CACHED_PATH: "PreprocessedData"
-    EXP_DATA_NAME: ""
+    EXP_DATA_NAME: "UBFC-rPPG_8ac63bff29"
     BEGIN: 0.0
     END: 1.0
     PREPROCESS:
@@ -112,4 +112,4 @@ INFERENCE:
   EVALUATION_WINDOW:
     USE_SMALLER_WINDOW: False
     WINDOW_SIZE: 10
-  MODEL_PATH: "runs/exp/UBFC-rPPG_8ac63bff29/PreTrainedModels/UBFC-rPPG_ContrastPhys_Epoch8.pth"
+  MODEL_PATH: ""

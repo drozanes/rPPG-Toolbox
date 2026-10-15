@@ -1,0 +1,65 @@
+BASE: ['']
+TOOLBOX_MODE: "only_preprocess"
+TRAIN:
+  BATCH_SIZE: 4
+  DATA:
+    FS: 30
+    DATASET: UBFC-rPPG
+    DO_PREPROCESS: True
+    DATA_FORMAT: NCDHW
+    DATA_PATH: "/Users/drozanes/Downloads/UBFC-rPPG_Raw/DATASET_2"
+    CACHED_PATH: "PreprocessedData"
+    EXP_DATA_NAME: ""
+    BEGIN: 0.0
+    END: 1.0
+    PREPROCESS:
+      DATA_TYPE: ['Standardized']
+      DATA_AUG: ['None']
+      LABEL_TYPE: Raw
+      DO_CHUNK: True
+      CHUNK_LENGTH: 128
+      CROP_FACE:
+        DO_CROP_FACE: True
+        BACKEND: 'HC'
+        USE_LARGE_FACE_BOX: True
+        LARGE_BOX_COEF: 1.5
+        DETECTION:
+          DO_DYNAMIC_DETECTION: False
+          DYNAMIC_DETECTION_FREQUENCY: 30
+          USE_MEDIAN_FACE_BOX: False
+      RESIZE:
+        H: 128
+        W: 128
+VALID:
+  DATA:
+    DATASET: None
+    DO_PREPROCESS: False
+TEST:
+  DATA:
+    FS: 30
+    DATASET: UBFC-rPPG
+    DO_PREPROCESS: False
+    DATA_FORMAT: NCDHW
+    DATA_PATH: "/Users/drozanes/Downloads/UBFC-rPPG_Raw/DATASET_2"
+    CACHED_PATH: "PreprocessedData"
+    EXP_DATA_NAME: ""
+    BEGIN: 0.0
+    END: 1.0
+    PREPROCESS:
+      DATA_TYPE: ['Standardized']
+      DATA_AUG: ['None']
+      LABEL_TYPE: Raw
+      DO_CHUNK: True
+      CHUNK_LENGTH: 128
+      CROP_FACE:
+        DO_CROP_FACE: True
+        BACKEND: 'HC'
+        USE_LARGE_FACE_BOX: True
+        LARGE_BOX_COEF: 1.5
+        DETECTION:
+          DO_DYNAMIC_DETECTION: False
+          DYNAMIC_DETECTION_FREQUENCY: 30
+          USE_MEDIAN_FACE_BOX: False
+      RESIZE:
+        H: 128
+        W: 128

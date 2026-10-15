@@ -1,7 +1,7 @@
 BASE: ['']
 TOOLBOX_MODE: "unsupervised_method"
 UNSUPERVISED:
-  METHOD: ['CHROM']
+  METHOD: ['POS', 'CHROM', 'PBV', 'ICA']
   METRICS: ['MAE', 'RMSE', 'MAPE', 'Pearson', 'SNR', 'BA']
   DATA:
     FS: 30

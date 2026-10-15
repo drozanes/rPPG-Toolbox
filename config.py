@@ -361,6 +361,7 @@ _C.MODEL.SPIKINGPHYSFORMER.NUM_HEADS = 4
 _C.MODEL.SPIKINGPHYSFORMER.NUM_LAYERS = 4
 _C.MODEL.SPIKINGPHYSFORMER.THETA = 0.7
 _C.MODEL.SPIKINGPHYSFORMER.T_S = 4
+_C.MODEL.SPIKINGPHYSFORMER.PRETRAINED_PE_PATH = ""
 
 # -----------------------------------------------------------------------------
 # Model Settings for Contrast-Phys+

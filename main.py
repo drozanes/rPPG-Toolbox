@@ -1,5 +1,7 @@
 """ The main function of rPPG deep learning pipeline."""
 
+import os
+os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 import argparse
 import random
 import time
@@ -190,7 +192,7 @@ if __name__ == "__main__":
 
 
     data_loader_dict = dict() # dictionary of data loaders 
-    if config.TOOLBOX_MODE == "train_and_test" or config.TOOLBOX_MODE == "only_preprocess":
+    if config.TOOLBOX_MODE == "train_and_test" or (config.TOOLBOX_MODE == "only_preprocess" and not config.UNSUPERVISED.DATA.DATASET):
         # train_loader
         if config.TRAIN.DATA.DATASET == "UBFC-rPPG":
             train_loader = data_loader.UBFCrPPGLoader.UBFCrPPGLoader
@@ -214,6 +216,8 @@ if __name__ == "__main__":
             train_loader = data_loader.LADHLoader.LADHLoader
         elif config.TRAIN.DATA.DATASET == "SUMS":
             train_loader = data_loader.SUMSLoader.SUMSLoader
+        elif config.TRAIN.DATA.DATASET == "MCD-rPPG":
+            train_loader = data_loader.MCDrPPGLoader.MCDrPPGLoader
         elif config.TOOLBOX_MODE == "only_preprocess" and not config.TRAIN.DATA.DATASET:
             pass
         else:
@@ -263,6 +267,8 @@ if __name__ == "__main__":
             valid_loader = data_loader.LADHLoader.LADHLoader
         elif config.VALID.DATA.DATASET == "SUMS":
             valid_loader = data_loader.SUMSLoader.SUMSLoader
+        elif config.VALID.DATA.DATASET == "MCD-rPPG":
+            valid_loader = data_loader.MCDrPPGLoader.MCDrPPGLoader
         elif config.VALID.DATA.DATASET is None and not config.TEST.USE_LAST_EPOCH:
             raise ValueError("Validation dataset not specified despite USE_LAST_EPOCH set to False!")
         elif config.TOOLBOX_MODE == "only_preprocess" and not config.VALID.DATA.DATASET:
@@ -290,7 +296,7 @@ if __name__ == "__main__":
         else:
             data_loader_dict['valid'] = None
 
-    if config.TOOLBOX_MODE == "train_and_test" or config.TOOLBOX_MODE == "only_test" or config.TOOLBOX_MODE == "only_preprocess":
+    if config.TOOLBOX_MODE == "train_and_test" or config.TOOLBOX_MODE == "only_test" or (config.TOOLBOX_MODE == "only_preprocess" and not config.UNSUPERVISED.DATA.DATASET):
         # test_loader
         if config.TEST.DATA.DATASET == "UBFC-rPPG":
             test_loader = data_loader.UBFCrPPGLoader.UBFCrPPGLoader
@@ -314,6 +320,10 @@ if __name__ == "__main__":
             test_loader = data_loader.LADHLoader.LADHLoader
         elif config.TEST.DATA.DATASET == "SUMS":
             test_loader = data_loader.SUMSLoader.SUMSLoader
+        elif config.TEST.DATA.DATASET == "MCD-rPPG":
+            test_loader = data_loader.MCDrPPGLoader.MCDrPPGLoader
+        elif config.TOOLBOX_MODE == "only_preprocess" and not config.TEST.DATA.DATASET:
+            pass
         else:
             raise ValueError("Unsupported dataset! Currently supporting UBFC-rPPG, PURE, MMPD, \
                              SCAMPS, BP4D+ (Normal and BigSmall preprocessing), UBFC-PHYS and iBVP.")
@@ -356,6 +366,8 @@ if __name__ == "__main__":
             unsupervised_loader = data_loader.UBFCPHYSLoader.UBFCPHYSLoader
         elif config.UNSUPERVISED.DATA.DATASET == "iBVP":
             unsupervised_loader = data_loader.iBVPLoader.iBVPLoader
+        elif config.UNSUPERVISED.DATA.DATASET == "MCD-rPPG":
+            unsupervised_loader = data_loader.MCDrPPGLoader.MCDrPPGLoader
         else:
             raise ValueError("Unsupported dataset! Currently supporting UBFC-rPPG, PURE, MMPD, \
                              SCAMPS, BP4D+, UBFC-PHYS and iBVP.")

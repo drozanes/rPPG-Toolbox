@@ -3,7 +3,7 @@ TOOLBOX_MODE: "train_and_test"
 TRAIN:
   BATCH_SIZE: 4
   EPOCHS: 30
-  LR: 1e-5
+  LR: 1e-4
   MODEL_FILE_NAME: PURE_ContrastPhys
   PLOT_LOSSES_AND_LR: True
   DATA:

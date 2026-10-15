@@ -134,6 +134,8 @@ class PURELoader(BaseLoader):
         all_png = sorted(glob.glob(video_file + '*.png'))
         for png_path in all_png:
             img = cv2.imread(png_path)
+            if img is None:
+                continue
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             frames.append(img)
         return np.asarray(frames)

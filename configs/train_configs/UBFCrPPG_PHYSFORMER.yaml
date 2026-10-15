@@ -9,11 +9,11 @@ TRAIN:
   DATA:
     FS: 30
     DATASET: UBFC-rPPG
-    DO_PREPROCESS: True # MUST BE TRUE FOR FIRST RUN
+    DO_PREPROCESS: False # MUST BE TRUE FOR FIRST RUN
     DATA_FORMAT: NCDHW
     DATA_PATH: "/Users/drozanes/Downloads/UBFC-rPPG_Raw/DATASET_2"
     CACHED_PATH: "PreprocessedData"
-    EXP_DATA_NAME: ""
+    EXP_DATA_NAME: "UBFC-rPPG_b9115a3e49"
     BEGIN: 0.0
     END: 0.8
     PREPROCESS:
@@ -38,11 +38,11 @@ VALID:
   DATA:
     FS: 30
     DATASET: UBFC-rPPG
-    DO_PREPROCESS: True
+    DO_PREPROCESS: False
     DATA_FORMAT: NCDHW
     DATA_PATH: "/Users/drozanes/Downloads/UBFC-rPPG_Raw/DATASET_2"
     CACHED_PATH: "PreprocessedData"
-    EXP_DATA_NAME: ""
+    EXP_DATA_NAME: "UBFC-rPPG_b9115a3e49"
     BEGIN: 0.8
     END: 1.0
     PREPROCESS:
@@ -69,11 +69,11 @@ TEST:
   DATA:
     FS: 30
     DATASET: UBFC-rPPG
-    DO_PREPROCESS: True
+    DO_PREPROCESS: False
     DATA_FORMAT: NCDHW
     DATA_PATH: "/Users/drozanes/Downloads/UBFC-rPPG_Raw/DATASET_2"
     CACHED_PATH: "PreprocessedData"
-    EXP_DATA_NAME: ""
+    EXP_DATA_NAME: "UBFC-rPPG_b9115a3e49"
     BEGIN: 0.0
     END: 1.0
     PREPROCESS:

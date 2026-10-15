@@ -17,10 +17,9 @@ def kl_loss(inputs, labels):
     # Reshape the labels tensor to match the shape of inputs
     labels = labels.view(1, -1)
     
-    # Compute the KL Div Loss: inputs are log-probabilities, labels are probabilities
-    criterion = nn.KLDivLoss(reduction='batchmean')
-    outputs = torch.log(inputs.clamp(min=1e-12))
-    loss = criterion(outputs, labels)
+    # Compute the KL Div Loss on log_softmax as in the official PhysFormer repo
+    criterion = nn.KLDivLoss(reduction='sum')
+    loss = criterion(F.log_softmax(inputs, dim=-1), labels)
     return loss
  
 class TorchLossComputer(object):
@@ -117,11 +116,8 @@ class TorchLossComputer(object):
         target_idx = (target_clamped - bpm_range[0]).long().view(1)
 
         ca = TorchLossComputer.complex_absolute(inputs, Fs, bpm_range)
-        fre_distribution = ca / torch.sum(ca)
-        loss_distribution_kl = kl_loss(fre_distribution, target_distribution)
-        
-        # Power spectrum cross-entropy: -log(P[target_idx])
-        loss_ce = F.nll_loss(torch.log(fre_distribution.clamp(min=1e-12)), target_idx)
+        loss_distribution_kl = kl_loss(ca, target_distribution)
+        loss_ce = F.cross_entropy(ca, target_idx)
         
         whole_max_val, whole_max_idx = ca.view(-1).max(0)
         whole_max_idx = whole_max_idx.type(torch.float)

@@ -287,14 +287,17 @@ class PhysFormerTrainer(BaseTrainer):
         print('Saved Model Path: ', model_path)
 
     # HR calculation based on ground truth label / prediction
-    def get_hr(self, y, sr=30, min=40, max=180):
+    def get_hr(self, y, sr=30, min_bpm=40, max_bpm=180):
+        if isinstance(y, torch.Tensor):
+            y = y.cpu().detach().numpy()
+        y = np.asarray(y, dtype=np.float64).flatten()
         y = y - np.mean(y)
-        low_hz = max(min / 60.0, 0.6)
-        high_hz = min(max / 60.0, 3.0)
+        low_hz = max(min_bpm / 60.0, 0.6)
+        high_hz = min(max_bpm / 60.0, 3.0)
         [b, a] = butter(2, [low_hz / sr * 2, high_hz / sr * 2], btype='bandpass')
-        y = filtfilt(b, a, np.double(y))
+        y = filtfilt(b, a, y)
         p, q = welch(y, sr, nfft=1e5/sr, nperseg=len(y))
-        mask = (p >= min / 60.0) & (p <= max / 60.0)
+        mask = (p >= min_bpm / 60.0) & (p <= max_bpm / 60.0)
         if np.sum(mask) == 0:
             return 60.0
-        return p[mask][np.argmax(q[mask])] * 60.0
+        return float(p[mask][np.argmax(q[mask])] * 60.0)

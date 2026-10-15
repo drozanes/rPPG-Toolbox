@@ -14,7 +14,7 @@ from neural_methods.loss.PhysFormerLossComputer import TorchLossComputer
 from neural_methods.model.SpikingPhysFormer import SpikingPhysFormer
 from neural_methods.trainer.BaseTrainer import BaseTrainer
 from tqdm import tqdm
-from scipy.signal import welch
+from scipy.signal import welch, butter, filtfilt
 from spikingjelly.activation_based import functional
 
 class SpikingPhysFormerTrainer(BaseTrainer):
@@ -48,6 +48,20 @@ class SpikingPhysFormerTrainer(BaseTrainer):
                 ff_dim=self.ff_dim, theta=self.theta, T_s=self.T_s, frame=self.chunk_len
             ).to(self.device)
             self.model = torch.nn.DataParallel(self.model, device_ids=list(range(config.NUM_OF_GPU_TRAIN)))
+
+            # Load pre-trained PhysFormer patch embedding if specified (Two-Phase Training, arXiv:2402.04798)
+            pe_path = getattr(config.MODEL.SPIKINGPHYSFORMER, "PRETRAINED_PE_PATH", "")
+            if pe_path and os.path.exists(pe_path):
+                print(f"Loading pre-trained PhysFormer Patch Embedding (PE) from: {pe_path}")
+                state_dict = torch.load(pe_path, map_location=self.device)
+                pe_dict = {}
+                for k, v in state_dict.items():
+                    clean_k = k.replace('module.', '')
+                    if any(prefix in clean_k for prefix in ['Stem0', 'Stem1', 'Stem2', 'patch_embedding']):
+                        pe_dict[clean_k] = v
+                m = self.model.module if hasattr(self.model, 'module') else self.model
+                m.load_state_dict(pe_dict, strict=False)
+                print(f"Successfully transferred {len(pe_dict)} pre-trained PE parameters to SpikingPhysFormer!")
 
             self.num_train_batches = len(data_loader["train"])
             self.criterion_reg = torch.nn.MSELoss()
@@ -186,7 +200,7 @@ class SpikingPhysFormerTrainer(BaseTrainer):
                 data, label = val_batch[0].float().to(self.device), val_batch[1].float().to(self.device)
                 rPPG = self.model(data)
                 functional.reset_net(self.model)
-                rPPG = (rPPG-torch.mean(rPPG, axis=-1).view(-1, 1))/torch.std(rPPG).view(-1, 1)
+                rPPG = (rPPG - torch.mean(rPPG, axis=-1, keepdim=True)) / torch.std(rPPG, axis=-1, keepdim=True)
                 for _1, _2 in zip(rPPG, label):
                     hrs.append((self.get_hr(_1.cpu().detach().numpy(), sr=self.frame_rate_valid), self.get_hr(_2.cpu().detach().numpy(), sr=self.frame_rate_valid)))
             RMSE = np.mean([(i-j)**2 for i, j in hrs])**0.5
@@ -204,11 +218,11 @@ class SpikingPhysFormerTrainer(BaseTrainer):
         labels = dict()
 
         if self.config.TOOLBOX_MODE == "only_test":
-            self.model.load_state_dict(torch.load(self.config.INFERENCE.MODEL_PATH))
+            self.model.load_state_dict(torch.load(self.config.INFERENCE.MODEL_PATH, map_location=self.device))
         else:
             epoch = self.max_epoch_num - 1 if self.config.TEST.USE_LAST_EPOCH else self.best_epoch
             model_path = os.path.join(self.model_dir, self.model_file_name + '_Epoch' + str(epoch) + '.pth')
-            self.model.load_state_dict(torch.load(model_path))
+            self.model.load_state_dict(torch.load(model_path, map_location=self.device))
 
         self.model.eval()
         with torch.no_grad():
@@ -236,6 +250,17 @@ class SpikingPhysFormerTrainer(BaseTrainer):
         model_path = os.path.join(self.model_dir, self.model_file_name + '_Epoch' + str(index) + '.pth')
         torch.save(self.model.state_dict(), model_path)
 
-    def get_hr(self, y, sr=30, min=30, max=180):
-        p, q = welch(y, sr, nfft=1e5/sr, nperseg=np.min((len(y)-1, 256)))
-        return p[(p>min/60)&(p<max/60)][np.argmax(q[(p>min/60)&(p<max/60)])]*60
+    def get_hr(self, y, sr=30, min_bpm=40, max_bpm=180):
+        if isinstance(y, torch.Tensor):
+            y = y.cpu().detach().numpy()
+        y = np.asarray(y, dtype=np.float64).flatten()
+        y = y - np.mean(y)
+        low_hz = max(min_bpm / 60.0, 0.6)
+        high_hz = min(max_bpm / 60.0, 3.0)
+        [b, a] = butter(2, [low_hz / sr * 2, high_hz / sr * 2], btype='bandpass')
+        y = filtfilt(b, a, y)
+        p, q = welch(y, sr, nfft=1e5/sr, nperseg=len(y))
+        mask = (p >= min_bpm / 60.0) & (p <= max_bpm / 60.0)
+        if np.sum(mask) == 0:
+            return 60.0
+        return float(p[mask][np.argmax(q[mask])] * 60.0)
