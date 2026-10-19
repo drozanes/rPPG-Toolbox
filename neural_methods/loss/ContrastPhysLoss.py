@@ -3,115 +3,102 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class CalculateNormPSD(nn.Module):
-    def __init__(self, Fs=30, high_pass=40, low_pass=250):
-        super().__init__()
-        self.Fs = Fs
+    def __init__(self, fs=30, high_pass=40, low_pass=250):
+        super(CalculateNormPSD, self).__init__()
+        self.fs = fs
         self.high_pass = high_pass
         self.low_pass = low_pass
 
-    def forward(self, x, zero_pad=3):
-        # x shape: [..., T]
+    def forward(self, x):
+        # x: [T]
+        T = x.shape[-1]
         x = x - torch.mean(x, dim=-1, keepdim=True)
-        if zero_pad > 0:
-            L = x.shape[-1]
-            x = F.pad(x, (int(zero_pad / 2 * L), int(zero_pad / 2 * L)), 'constant', 0)
-
-        # Get PSD using forward normalized rfft
-        fft_res = torch.fft.rfft(x, dim=-1, norm='forward')
-        psd = torch.abs(fft_res) ** 2
-
-        # Filter PSD strictly within physiological range [40 bpm, 250 bpm]
-        Fn = self.Fs / 2
-        freqs = torch.linspace(0, Fn, psd.shape[-1], device=x.device)
-        use_freqs = torch.logical_and(freqs >= self.high_pass / 60, freqs <= self.low_pass / 60)
-        psd_filtered = psd[..., use_freqs]
-
-        # Normalize PSD so sum equals 1
-        psd_sum = torch.sum(psd_filtered, dim=-1, keepdim=True) + 1e-9
-        psd_norm = psd_filtered / psd_sum
+        psd = torch.abs(torch.fft.rfft(x, n=T))**2
+        freq = torch.fft.rfftfreq(T, d=1/self.fs)
+        mask = (freq >= self.high_pass / 60) & (freq <= self.low_pass / 60)
+        psd = psd * mask.to(psd.device)
+        psd_sum = torch.sum(psd, dim=-1, keepdim=True) + 1e-9
+        psd_norm = psd / psd_sum
         return psd_norm
-
 
 class ContrastPhysLoss(nn.Module):
     def __init__(self, config):
-        super().__init__()
+        super(ContrastPhysLoss, self).__init__()
         self.fs = config.TRAIN.DATA.FS
-        self.delta_t = getattr(config.MODEL.CONTRAST_PHYS, "DELTA_T", 128)
-        self.K = getattr(config.MODEL.CONTRAST_PHYS, "K", 4)
-        self.norm_psd = CalculateNormPSD(Fs=self.fs, high_pass=40, low_pass=250)
-        self.distance_func = nn.MSELoss(reduction='mean')
-
-    def compare_samples(self, list_a, list_b, exclude_same=False):
-        total_distance = 0.0
-        M = 0
-        for i in range(len(list_a)):
-            for j in range(len(list_b)):
-                if not (exclude_same and i == j):
-                    total_distance += self.distance_func(list_a[i], list_b[j])
-                    M += 1
-        return total_distance / max(M, 1)
-
+        self.norm_psd = CalculateNormPSD(fs=self.fs)
+        self.delta_t = config.MODEL.CONTRAST_PHYS.DELTA_T
+        self.K = config.MODEL.CONTRAST_PHYS.K
+        
     def forward(self, st_block, labels=None):
-        # st_block shape: [B, N, T]
         B, N, T = st_block.shape
-        # Use delta_t if T >= delta_t, otherwise sample over T/2 or T
-        sample_len = self.delta_t if (self.delta_t <= T) else max(int(T // 2), 1)
-
-        # 1. Spatio-temporal sampling of rPPG
-        samples_rppg = []
+        total_loss = 0
+        
+        video_mean_psds = []
+        video_mean_gt_psds = []
+        
+        intra_loss = 0
+        
         for b in range(B):
-            samples_per_video = []
+            # 1. Temporal sampling for rPPG signals
+            psds = []
             for n in range(N):
                 for k in range(self.K):
-                    if T > sample_len:
-                        offset = torch.randint(0, T - sample_len + 1, (1,), device=st_block.device).item()
-                        seg = st_block[b, n, offset : offset + sample_len]
+                    if T > self.delta_t:
+                        offset = torch.randint(0, T - self.delta_t + 1, (1,))
+                        segment = st_block[b, n, offset : offset + self.delta_t]
                     else:
-                        seg = st_block[b, n, :]
-                    samples_per_video.append(self.norm_psd(seg))
-            samples_rppg.append(samples_per_video)
+                        segment = st_block[b, n, :]
+                    psds.append(self.norm_psd(segment))
+            psds = torch.stack(psds)
+            mean_psd = torch.mean(psds, dim=0)
+            video_mean_psds.append(mean_psd)
+            
+            # L_p^{RR}: Intra-video rPPG-rPPG Positive Loss
+            intra_loss += torch.mean((psds - mean_psd)**2)
+            
+            if labels is not None:
+                # 2. Temporal sampling for GT signals (Matching the paper!)
+                gt_psds = []
+                # Sample the same number of temporal chunks as rPPG
+                for _ in range(N * self.K):
+                    if T > self.delta_t:
+                        offset = torch.randint(0, T - self.delta_t + 1, (1,))
+                        gt_segment = labels[b, offset : offset + self.delta_t]
+                    else:
+                        gt_segment = labels[b, :]
+                    gt_psds.append(self.norm_psd(gt_segment))
+                gt_psds = torch.stack(gt_psds)
+                mean_gt_psd = torch.mean(gt_psds, dim=0)
+                video_mean_gt_psds.append(mean_gt_psd)
+                
+                # L_p^{GR}: Intra-video GT-rPPG Positive Loss
+                intra_loss += torch.mean((psds - mean_gt_psd)**2)
 
-        # 2. Intra-video positive loss (L_p^{RR})
-        pos_loss = 0.0
-        for b in range(B):
-            pos_loss += self.compare_samples(samples_rppg[b], samples_rppg[b], exclude_same=True)
-        pos_loss /= max(B, 1)
-
-        # 3. Inter-video negative loss (L_n^{RR})
-        neg_loss = 0.0
-        num_pairs = B * (B - 1) / 2
+        intra_loss /= B
+        
+        # Inter-video losses
+        inter_loss = 0
         if B > 1:
+            video_mean_psds = torch.stack(video_mean_psds)
+            if labels is not None:
+                video_mean_gt_psds = torch.stack(video_mean_gt_psds)
+                
+            num_pairs = B * (B - 1) / 2
             for i in range(B):
                 for j in range(i + 1, B):
-                    neg_loss -= self.compare_samples(samples_rppg[i], samples_rppg[j])
-            neg_loss /= num_pairs
+                    # L_n^{RR}: Inter-video rPPG-rPPG Negative Loss
+                    inter_loss -= torch.mean((video_mean_psds[i] - video_mean_psds[j])**2)
+                    
+                    # L_n^{GR}: Inter-video GT-rPPG Negative Loss (Added to match the paper!)
+                    if labels is not None:
+                        inter_loss -= torch.mean((video_mean_psds[i] - video_mean_gt_psds[j])**2)
+                        inter_loss -= torch.mean((video_mean_psds[j] - video_mean_gt_psds[i])**2)
+            
+            # Normalize negative losses
+            if labels is not None:
+                inter_loss /= (num_pairs * 3) # RR + GR(i,j) + GR(j,i)
+            else:
+                inter_loss /= num_pairs
 
-        # 4. Weak supervision with GT signals if available
-        pos_loss_gt = 0.0
-        neg_loss_gt = 0.0
-        if labels is not None and labels.numel() > 0:
-            samples_gt = []
-            for b in range(B):
-                samples_per_gt = []
-                for _ in range(N * self.K):
-                    if labels.shape[-1] > sample_len:
-                        offset = torch.randint(0, labels.shape[-1] - sample_len + 1, (1,), device=labels.device).item()
-                        gt_seg = labels[b, offset : offset + sample_len]
-                    else:
-                        gt_seg = labels[b, :]
-                    samples_per_gt.append(self.norm_psd(gt_seg))
-                samples_gt.append(samples_per_gt)
-
-            for b in range(B):
-                pos_loss_gt += self.compare_samples(samples_rppg[b], samples_gt[b])
-            pos_loss_gt /= max(B, 1)
-
-            if B > 1:
-                for i in range(B):
-                    for j in range(i + 1, B):
-                        neg_loss_gt -= self.compare_samples(samples_rppg[i], samples_gt[j])
-                        neg_loss_gt -= self.compare_samples(samples_rppg[j], samples_gt[i])
-                neg_loss_gt /= (num_pairs * 2)
-
-        total_loss = pos_loss + neg_loss + pos_loss_gt + neg_loss_gt
+        total_loss = intra_loss + inter_loss
         return total_loss

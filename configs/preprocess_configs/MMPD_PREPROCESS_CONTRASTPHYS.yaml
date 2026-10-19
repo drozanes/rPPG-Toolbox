@@ -1,0 +1,83 @@
+BASE: ['']
+TOOLBOX_MODE: "only_preprocess"
+TRAIN:
+  BATCH_SIZE: 4
+  DATA:
+    FS: 30
+    DATASET: MMPD
+    DO_PREPROCESS: True
+    DATA_FORMAT: NCDHW
+    DATA_PATH: "./MMPD_dataset"
+    CACHED_PATH: "PreprocessedData"
+    EXP_DATA_NAME: ""
+    BEGIN: 0.0
+    END: 0.061
+    INFO:
+      LIGHT: [1, 2, 3, 4]
+      MOTION: [1, 2, 3, 4]
+      EXERCISE: [1, 2]
+      SKIN_COLOR: [1, 2, 3, 4, 5, 6]
+      GENDER: [1, 2]
+      GLASSER: [1, 2]
+      HAIR_COVER: [1, 2]
+      MAKEUP: [1, 2]
+    PREPROCESS:
+      DATA_TYPE: ['DiffNormalized']
+      DATA_AUG: ['None']
+      LABEL_TYPE: DiffNormalized
+      DO_CHUNK: True
+      CHUNK_LENGTH: 128
+      CROP_FACE:
+        DO_CROP_FACE: True
+        BACKEND: 'HC'
+        USE_LARGE_FACE_BOX: True
+        LARGE_BOX_COEF: 1.5
+        DETECTION:
+          DO_DYNAMIC_DETECTION: False
+          DYNAMIC_DETECTION_FREQUENCY: 30
+          USE_MEDIAN_FACE_BOX: False
+      RESIZE:
+        H: 128
+        W: 128
+VALID:
+  DATA:
+    DATASET: None
+    DO_PREPROCESS: False
+TEST:
+  DATA:
+    FS: 30
+    DATASET: MMPD
+    DO_PREPROCESS: False
+    DATA_FORMAT: NCDHW
+    DATA_PATH: "./MMPD_dataset"
+    CACHED_PATH: "PreprocessedData"
+    EXP_DATA_NAME: ""
+    BEGIN: 0.0
+    END: 0.061
+    INFO:
+      LIGHT: [1, 2, 3, 4]
+      MOTION: [1, 2, 3, 4]
+      EXERCISE: [1, 2]
+      SKIN_COLOR: [1, 2, 3, 4, 5, 6]
+      GENDER: [1, 2]
+      GLASSER: [1, 2]
+      HAIR_COVER: [1, 2]
+      MAKEUP: [1, 2]
+    PREPROCESS:
+      DATA_TYPE: ['DiffNormalized']
+      DATA_AUG: ['None']
+      LABEL_TYPE: DiffNormalized
+      DO_CHUNK: True
+      CHUNK_LENGTH: 128
+      CROP_FACE:
+        DO_CROP_FACE: True
+        BACKEND: 'HC'
+        USE_LARGE_FACE_BOX: True
+        LARGE_BOX_COEF: 1.5
+        DETECTION:
+          DO_DYNAMIC_DETECTION: False
+          DYNAMIC_DETECTION_FREQUENCY: 30
+          USE_MEDIAN_FACE_BOX: False
+      RESIZE:
+        H: 128
+        W: 128

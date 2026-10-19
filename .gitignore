@@ -29,3 +29,11 @@ venv/
 wandb/
 **/.DS_Store
 .DS_Store
+MMPD_Videos/
+MMPD_dataset/
+PURE_videos/
+trained_models/
+pretrained_models/
+*.pdf
+pdf_preview/
+*.qlpreview/

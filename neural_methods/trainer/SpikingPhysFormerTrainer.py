@@ -217,12 +217,20 @@ class SpikingPhysFormerTrainer(BaseTrainer):
         predictions = dict()
         labels = dict()
 
+        def load_checkpoint(path):
+            state_dict = torch.load(path, map_location=self.device)
+            if hasattr(self.model, 'module') and not any(k.startswith('module.') for k in state_dict.keys()):
+                state_dict = {'module.' + k: v for k, v in state_dict.items()}
+            elif not hasattr(self.model, 'module') and any(k.startswith('module.') for k in state_dict.keys()):
+                state_dict = {k.replace('module.', ''): v for k, v in state_dict.items()}
+            self.model.load_state_dict(state_dict)
+
         if self.config.TOOLBOX_MODE == "only_test":
-            self.model.load_state_dict(torch.load(self.config.INFERENCE.MODEL_PATH, map_location=self.device))
+            load_checkpoint(self.config.INFERENCE.MODEL_PATH)
         else:
             epoch = self.max_epoch_num - 1 if self.config.TEST.USE_LAST_EPOCH else self.best_epoch
             model_path = os.path.join(self.model_dir, self.model_file_name + '_Epoch' + str(epoch) + '.pth')
-            self.model.load_state_dict(torch.load(model_path, map_location=self.device))
+            load_checkpoint(model_path)
 
         self.model.eval()
         with torch.no_grad():

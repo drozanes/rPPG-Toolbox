@@ -33,10 +33,13 @@ class DeepPhysTrainer(BaseTrainer):
         self.config = config
         self.min_valid_loss = None
         self.best_epoch = 0
+        self.patience = getattr(config.TRAIN, 'PATIENCE', 3)
+        self.patience_counter = 0
         
         if config.TOOLBOX_MODE == "train_and_test":
             self.model = DeepPhys(img_size=config.TRAIN.DATA.PREPROCESS.RESIZE.H).to(self.device)
-            self.model = torch.nn.DataParallel(self.model, device_ids=list(range(config.NUM_OF_GPU_TRAIN)))
+            if config.NUM_OF_GPU_TRAIN > 1 and self.device.type == 'cuda':
+                self.model = torch.nn.DataParallel(self.model, device_ids=list(range(config.NUM_OF_GPU_TRAIN)))
 
             self.num_train_batches = len(data_loader["train"])
             self.criterion = torch.nn.MSELoss()
@@ -47,7 +50,8 @@ class DeepPhysTrainer(BaseTrainer):
                 self.optimizer, max_lr=config.TRAIN.LR, epochs=config.TRAIN.EPOCHS, steps_per_epoch=self.num_train_batches)
         elif config.TOOLBOX_MODE == "only_test":
             self.model = DeepPhys(img_size=config.TEST.DATA.PREPROCESS.RESIZE.H).to(self.device)
-            self.model = torch.nn.DataParallel(self.model, device_ids=list(range(config.NUM_OF_GPU_TRAIN)))
+            if config.NUM_OF_GPU_TRAIN > 1 and self.device.type == 'cuda':
+                self.model = torch.nn.DataParallel(self.model, device_ids=list(range(config.NUM_OF_GPU_TRAIN)))
         else:
             raise ValueError("DeepPhys trainer initialized in incorrect toolbox mode!")
 
@@ -69,15 +73,20 @@ class DeepPhysTrainer(BaseTrainer):
             tbar = tqdm(data_loader["train"], ncols=80)
             for idx, batch in enumerate(tbar):
                 tbar.set_description("Train epoch %s" % epoch)
-                data, labels = batch[0].to(
-                    self.device), batch[1].to(self.device)
+                data = batch[0].to(self.device).contiguous()
+                labels = batch[1].to(self.device).contiguous()
                 N, D, C, H, W = data.shape
-                data = data.view(N * D, C, H, W)
-                labels = labels.view(-1, 1)
+                data = data.view(N * D, C, H, W).contiguous()
+                labels = labels.view(-1, 1).contiguous()
                 self.optimizer.zero_grad()
                 pred_ppg = self.model(data)
                 loss = self.criterion(pred_ppg, labels)
+                if torch.isnan(loss) or torch.isinf(loss):
+                    print(f"Warning: NaN/Inf loss encountered at epoch {epoch}, batch {idx}. Skipping step.")
+                    self.optimizer.zero_grad()
+                    continue
                 loss.backward()
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
 
                 # Append the current learning rate to the list
                 lrs.append(self.scheduler.get_last_lr())
@@ -110,14 +119,17 @@ class DeepPhysTrainer(BaseTrainer):
                 except Exception:
                     pass
                 print('validation loss: ', valid_loss)
-                if self.min_valid_loss is None:
+                if self.min_valid_loss is None or valid_loss < self.min_valid_loss:
                     self.min_valid_loss = valid_loss
                     self.best_epoch = epoch
-                    print("Update best model! Best epoch: {}".format(self.best_epoch))
-                elif (valid_loss < self.min_valid_loss):
-                    self.min_valid_loss = valid_loss
-                    self.best_epoch = epoch
-                    print("Update best model! Best epoch: {}".format(self.best_epoch))
+                    self.patience_counter = 0
+                    print("Update best model! Best epoch: {}, min_val_loss: {:.4f}".format(self.best_epoch, self.min_valid_loss))
+                else:
+                    self.patience_counter += 1
+                    print(f"Validation loss did not improve ({valid_loss:.4f} >= {self.min_valid_loss:.4f}). Early stopping patience: {self.patience_counter}/{self.patience}")
+                    if self.patience_counter >= self.patience:
+                        print(f"Early stopping triggered at epoch {epoch}! Best epoch was {self.best_epoch} with val loss {self.min_valid_loss:.4f}")
+                        break
         if not self.config.TEST.USE_LAST_EPOCH: 
             print("best trained epoch: {}, min_val_loss: {}".format(self.best_epoch, self.min_valid_loss))
         if self.config.TRAIN.PLOT_LOSSES_AND_LR:
@@ -137,11 +149,11 @@ class DeepPhysTrainer(BaseTrainer):
             vbar = tqdm(data_loader["valid"], ncols=80)
             for valid_idx, valid_batch in enumerate(vbar):
                 vbar.set_description("Validation")
-                data_valid, labels_valid = valid_batch[0].to(
-                    self.device), valid_batch[1].to(self.device)
+                data_valid = valid_batch[0].to(self.device).contiguous()
+                labels_valid = valid_batch[1].to(self.device).contiguous()
                 N, D, C, H, W = data_valid.shape
-                data_valid = data_valid.view(N * D, C, H, W)
-                labels_valid = labels_valid.view(-1, 1)
+                data_valid = data_valid.view(N * D, C, H, W).contiguous()
+                labels_valid = labels_valid.view(-1, 1).contiguous()
                 pred_ppg_valid = self.model(data_valid)
                 loss = self.criterion(pred_ppg_valid, labels_valid)
                 valid_loss.append(loss.item())
@@ -189,11 +201,11 @@ class DeepPhysTrainer(BaseTrainer):
         with torch.no_grad():
             for _, test_batch in enumerate(tqdm(data_loader["test"], ncols=80)):
                 batch_size = test_batch[0].shape[0]
-                data_test, labels_test = test_batch[0].to(
-                    self.config.DEVICE), test_batch[1].to(self.config.DEVICE)
+                data_test = test_batch[0].to(self.config.DEVICE).contiguous()
+                labels_test = test_batch[1].to(self.config.DEVICE).contiguous()
                 N, D, C, H, W = data_test.shape
-                data_test = data_test.view(N * D, C, H, W)
-                labels_test = labels_test.view(-1, 1)
+                data_test = data_test.view(N * D, C, H, W).contiguous()
+                labels_test = labels_test.view(-1, 1).contiguous()
                 pred_ppg_test = self.model(data_test)
 
                 if self.config.TEST.OUTPUT_SAVE_DIR:

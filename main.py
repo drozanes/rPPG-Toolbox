@@ -43,6 +43,7 @@ def add_args(parser):
                         default="configs/train_configs/PURE_PURE_UBFC-rPPG_TSCAN_BASIC.yaml", type=str, help="The name of the model.")
     parser.add_argument('--toolbox_mode', required=False, default=None, type=str, help="The mode of the toolbox.")
     parser.add_argument('--num_workers', required=False, default=2, type=int, help="The number of workers for the data loader.")
+    parser.add_argument('--device', required=False, default=None, type=str, help="The device to run on (cuda, mps, cpu).")
     '''Neural Method Sample YAML LIST:
       SCAMPS_SCAMPS_UBFC-rPPG_TSCAN_BASIC.yaml
       SCAMPS_SCAMPS_UBFC-rPPG_DEEPPHYS_BASIC.yaml
@@ -166,6 +167,12 @@ if __name__ == "__main__":
     config = get_config(args, unknown)
     config.defrost()
     config.NUM_WORKERS = args.num_workers
+    if args.device:
+        config.DEVICE = args.device
+    elif config.DEVICE == 'mps' and not torch.backends.mps.is_available():
+        config.DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
+    elif config.DEVICE == 'cuda' and not torch.cuda.is_available():
+        config.DEVICE = 'mps' if torch.backends.mps.is_available() else 'cpu'
     if args.toolbox_mode:
         config.TOOLBOX_MODE = args.toolbox_mode
     config.freeze()
@@ -233,14 +240,44 @@ if __name__ == "__main__":
                 data_path=config.TRAIN.DATA.DATA_PATH,
                 config_data=config.TRAIN.DATA,
                 device=config.DEVICE)
-            data_loader_dict['train'] = DataLoader(
-                dataset=train_data_loader,
-                num_workers=args.num_workers,
-                batch_size=config.TRAIN.BATCH_SIZE,
-                shuffle=True,
-                worker_init_fn=seed_worker,
-                generator=train_generator
-            )
+            if getattr(config.TRAIN.DATA, 'ONLINE', False):
+                from torch.utils.data import Sampler
+                class OnlineVideoSampler(Sampler):
+                    def __init__(self, dataset, chunk_len=10):
+                        self.num_samples = len(dataset)
+                        self.chunk_len = max(1, chunk_len)
+                        self.num_videos = self.num_samples // self.chunk_len
+
+                    def __iter__(self):
+                        video_order = torch.randperm(self.num_videos, generator=train_generator).tolist()
+                        indices = []
+                        for v in video_order:
+                            chunk_order = torch.randperm(self.chunk_len, generator=train_generator).tolist()
+                            for c in chunk_order:
+                                indices.append(v * self.chunk_len + c)
+                        return iter(indices)
+
+                    def __len__(self):
+                        return self.num_samples
+
+                chunk_len = 1800 // config.TRAIN.DATA.PREPROCESS.CHUNK_LENGTH
+                train_sampler = OnlineVideoSampler(train_data_loader, chunk_len=chunk_len)
+                data_loader_dict['train'] = DataLoader(
+                    dataset=train_data_loader,
+                    num_workers=args.num_workers,
+                    batch_size=config.TRAIN.BATCH_SIZE,
+                    sampler=train_sampler,
+                    worker_init_fn=seed_worker,
+                )
+            else:
+                data_loader_dict['train'] = DataLoader(
+                    dataset=train_data_loader,
+                    num_workers=args.num_workers,
+                    batch_size=config.TRAIN.BATCH_SIZE,
+                    shuffle=True,
+                    worker_init_fn=seed_worker,
+                    generator=train_generator
+                )
         else:
             data_loader_dict['train'] = None
 

@@ -25,13 +25,18 @@ def unsupervised_predict(config, data_loader, method_name):
     gt_hr_fft_all = []
     SNR_all = []
     MACC_all = []
+    save_predictions = dict()
+    save_labels = dict()
     sbar = tqdm(data_loader["unsupervised"], ncols=80)
     for _, test_batch in enumerate(sbar):
         batch_size = test_batch[0].shape[0]
+        filenames = test_batch[2]
+        chunk_ids = test_batch[3]
         for idx in range(batch_size):
             data_input, labels_input = test_batch[0][idx].cpu().numpy(), test_batch[1][idx].cpu().numpy()
-            print(f"DEBUG: data_input shape: {data_input.shape}")
-            print(f"DEBUG: labels_input shape: {labels_input.shape}")
+            if _ == 0 and idx == 0:
+                print(f"DEBUG: data_input shape: {data_input.shape}")
+                print(f"DEBUG: labels_input shape: {labels_input.shape}")
             data_input = data_input[..., :3]
             if method_name == "POS":
                 BVP = POS_WANG(data_input, config.UNSUPERVISED.DATA.FS)
@@ -50,22 +55,16 @@ def unsupervised_predict(config, data_loader, method_name):
             else:
                 raise ValueError("unsupervised method name wrong!")
             
-            # Save unsupervised outputs to pickle
-            output_dir = os.path.join(config.LOG.PATH, config.UNSUPERVISED.DATA.EXP_DATA_NAME, 'saved_test_outputs')
-            os.makedirs(output_dir, exist_ok=True)
-            filename_id = method_name + "_" + config.UNSUPERVISED.DATA.DATASET
-            output_path = os.path.join(output_dir, filename_id + '_outputs.pickle')
-            
-            save_data = {
-                'predictions': { 'subject1': { 0: torch.from_numpy(BVP.copy()) } },
-                'labels': { 'subject1': { 0: torch.from_numpy(labels_input.copy()) } },
-                'fs': config.UNSUPERVISED.DATA.FS
-            }
-            with open(output_path, 'wb') as f:
-                pickle.dump(save_data, f)
-            print(f"Saved unsupervised outputs to {output_path}")
+            fn = filenames[idx]
+            cid = int(chunk_ids[idx])
+            if fn not in save_predictions:
+                save_predictions[fn] = dict()
+                save_labels[fn] = dict()
+            save_predictions[fn][cid] = torch.from_numpy(BVP.copy())
+            save_labels[fn][cid] = torch.from_numpy(labels_input.copy())
 
-            print(f"DEBUG: BVP length: {len(BVP)}")
+            if _ == 0 and idx == 0:
+                print(f"DEBUG: BVP length: {len(BVP)}")
 
             video_frame_size = test_batch[0].shape[1]
             if config.INFERENCE.EVALUATION_WINDOW.USE_SMALLER_WINDOW:
@@ -99,6 +98,21 @@ def unsupervised_predict(config, data_loader, method_name):
                     MACC_all.append(macc)
                 else:
                     raise ValueError("Inference evaluation method name wrong!")
+
+    # Save unsupervised outputs to pickle
+    output_dir = os.path.join(config.LOG.PATH, config.UNSUPERVISED.DATA.EXP_DATA_NAME, 'saved_test_outputs')
+    os.makedirs(output_dir, exist_ok=True)
+    filename_id = method_name + "_" + config.UNSUPERVISED.DATA.DATASET
+    output_path = os.path.join(output_dir, filename_id + '_outputs.pickle')
+    save_data = {
+        'predictions': save_predictions,
+        'labels': save_labels,
+        'fs': config.UNSUPERVISED.DATA.FS
+    }
+    with open(output_path, 'wb') as f:
+        pickle.dump(save_data, f)
+    print(f"Saved unsupervised outputs to {output_path}")
+
     print("Used Unsupervised Method: " + method_name)
 
     # Filename ID to be used in any results files (e.g., Bland-Altman plots) that get saved

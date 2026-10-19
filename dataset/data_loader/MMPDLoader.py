@@ -15,6 +15,7 @@ import pandas as pd
 import scipy.io as sio
 import sys
 import itertools
+import collections
 from warnings import simplefilter
 # from dataset.data_loader.process_tool import *
 from scipy.signal import butter, filtfilt
@@ -49,7 +50,32 @@ class MMPDLoader(BaseLoader):
                 config_data(CfgNode): data settings(ref:config.py).
         """
         self.info = config_data.INFO
-        super().__init__(name, data_path, config_data, device)
+        self.online = getattr(config_data, 'ONLINE', False)
+        if self.online:
+            self.inputs = list()
+            self.labels = list()
+            self.dataset_name = "MMPD"
+            self.raw_data_path = data_path
+            self.cached_path = getattr(config_data, 'CACHED_PATH', '')
+            self.file_list_path = getattr(config_data, 'FILE_LIST_PATH', '')
+            self.preprocessed_data_len = 0
+            self.data_format = config_data.DATA_FORMAT
+            self.do_preprocess = False
+            self.config_data = config_data
+            self.device = device
+
+            if 'Y5F' in self.config_data.PREPROCESS.CROP_FACE.BACKEND:
+                from dataset.data_loader.face_detector.YOLO5Face import YOLO5Face
+                self.Y5FObj = YOLO5Face(self.config_data.PREPROCESS.CROP_FACE.BACKEND, device)
+
+            assert (config_data.BEGIN < config_data.END)
+            assert (config_data.BEGIN >= 0)
+            assert (config_data.END <= 1)
+
+            self.setup_online_loader(config_data.BEGIN, config_data.END)
+            print(f" {self.dataset_name} (ONLINE MODE) Dataset Length: {self.preprocessed_data_len}", end='\n\n')
+        else:
+            super().__init__(name, data_path, config_data, device)
 
 
     def get_raw_data(self, raw_data_path):
@@ -63,6 +89,8 @@ class MMPDLoader(BaseLoader):
             subject = int(os.path.split(data_dir)[-1][7:])
             mat_dirs = os.listdir(data_dir)
             for mat_dir in mat_dirs:
+                if not mat_dir.endswith('.mat'):
+                    continue
                 index = mat_dir.split('_')[-1].split('.')[0]
                 dirs.append({'index': index, 
                              'path': data_dir+os.sep+mat_dir,
@@ -104,6 +132,98 @@ class MMPDLoader(BaseLoader):
             data_dirs_new += data_info[subj_num]
 
         return data_dirs_new
+
+    def setup_online_loader(self, begin, end):
+        """Indexes all chunk offsets in memory without writing to disk."""
+        raw_dirs = self.get_raw_data(self.raw_data_path)
+        raw_dirs_split = self.split_raw_data(raw_dirs, begin, end)
+
+        self.samples = []
+        chunk_len = self.config_data.PREPROCESS.CHUNK_LENGTH
+
+        for item in raw_dirs_split:
+            mat_file = item['path']
+            try:
+                meta = sio.loadmat(mat_file, variable_names=['light', 'motion', 'exercise', 'skin_color', 'gender', 'glasser', 'hair_cover', 'makeup'])
+                info = [meta['light'], meta['motion'], meta['exercise'], meta['skin_color'], meta['gender'], meta['glasser'], meta['hair_cover'], meta['makeup']]
+                light, motion, exercise, skin_color, gender, glasser, hair_cover, makeup = self.get_information(info)
+            except Exception:
+                continue
+
+            if (light in self.info.LIGHT) and (motion in self.info.MOTION) and \
+                (exercise in self.info.EXERCISE) and (skin_color in self.info.SKIN_COLOR) and \
+                (gender in self.info.GENDER) and (glasser in self.info.GLASSER) and \
+                (hair_cover in self.info.HAIR_COVER) and (makeup in self.info.MAKEUP):
+
+                saved_filename = f"subject{item['subject']}_L{light}_MO{motion}_E{exercise}_S{skin_color}_GE{gender}_GL{glasser}_H{hair_cover}_MA{makeup}"
+
+                do_chunk = getattr(self.config_data.PREPROCESS, 'DO_CHUNK', True)
+                if do_chunk:
+                    clip_num = 1800 // chunk_len
+                else:
+                    clip_num = 1
+                    
+                for c in range(clip_num):
+                    self.samples.append({
+                        'path': mat_file,
+                        'subject': item['subject'],
+                        'saved_filename': saved_filename,
+                        'chunk_idx': c
+                    })
+                    self.inputs.append(f"{saved_filename}_input{c}.npy")
+                    self.labels.append(f"{saved_filename}_label{c}.npy")
+
+        self.preprocessed_data_len = len(self.samples)
+
+    def __getitem__(self, index):
+        if not self.online:
+            return super().__getitem__(index)
+
+        sample = self.samples[index]
+        frames_clips, bvps_clips = self.get_online_clips(sample['path'])
+        c = sample['chunk_idx']
+
+        data = frames_clips[c]
+        label = bvps_clips[c]
+
+        if self.data_format == 'NDCHW':
+            data = np.transpose(data, (0, 3, 1, 2))
+        elif self.data_format == 'NCDHW':
+            data = np.transpose(data, (3, 0, 1, 2))
+        elif self.data_format == 'NDHWC':
+            pass
+        else:
+            raise ValueError('Unsupported Data Format!')
+
+        data = np.float32(data)
+        label = np.float32(label)
+        filename = sample['saved_filename']
+        chunk_id = str(c)
+        return data, label, filename, chunk_id
+
+    def get_online_clips(self, mat_path):
+        if not hasattr(self, '_online_cache'):
+            self._online_cache = collections.OrderedDict()
+            self._online_cache_size = getattr(self.config_data, 'CACHE_SIZE', 8)
+
+        if mat_path in self._online_cache:
+            self._online_cache.move_to_end(mat_path)
+            return self._online_cache[mat_path]
+
+        frames, bvps, _, _, _, _, _, _, _, _ = self.read_mat(mat_path)
+        frames = (np.round(frames * 255)).astype(np.uint8)
+        target_length = frames.shape[0]
+        bvps = BaseLoader.resample_ppg(bvps, target_length)
+        frames_clips, bvps_clips = self.preprocess(frames, bvps, self.config_data.PREPROCESS)
+
+        frames_clips = np.float32(frames_clips)
+        bvps_clips = np.float32(bvps_clips)
+
+        if len(self._online_cache) >= self._online_cache_size:
+            self._online_cache.popitem(last=False)
+
+        self._online_cache[mat_path] = (frames_clips, bvps_clips)
+        return frames_clips, bvps_clips
 
     def preprocess_dataset_subprocess(self, data_dirs, config_preprocess, i, file_list_dict):
         """  Invoked by preprocess_dataset for multi_process.   """
