@@ -181,8 +181,9 @@ if __name__ == "__main__":
     print(config, end='\n\n')
     try:
         import wandb
-        # In non-interactive or headless environments (e.g. Colab), disable wandb if no API key is configured
-        if not os.environ.get("WANDB_API_KEY") and not os.environ.get("WANDB_MODE"):
+        # In headless environments, check for API key or saved login (~/.netrc). If neither is present, disable wandb to avoid blocking prompts
+        has_login = bool(os.environ.get("WANDB_API_KEY")) or os.path.exists(os.path.expanduser("~/.netrc"))
+        if not has_login and not os.environ.get("WANDB_MODE"):
             os.environ["WANDB_MODE"] = "disabled"
 
         dataset = config.TRAIN.DATA.DATASET if config.TOOLBOX_MODE in ["train_and_test", "only_preprocess"] else config.TEST.DATA.DATASET

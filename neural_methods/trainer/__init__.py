@@ -1,19 +1,46 @@
 import neural_methods.trainer.BaseTrainer
-import neural_methods.trainer.PhysnetTrainer
-import neural_methods.trainer.iBVPNetTrainer
-import neural_methods.trainer.TscanTrainer
+try:
+    import neural_methods.trainer.PhysnetTrainer
+except ImportError:
+    pass
+try:
+    import neural_methods.trainer.iBVPNetTrainer
+except ImportError:
+    pass
+try:
+    import neural_methods.trainer.TscanTrainer
+except ImportError:
+    pass
 import neural_methods.trainer.DeepPhysTrainer
-import neural_methods.trainer.EfficientPhysTrainer
-import neural_methods.trainer.BigSmallTrainer
-import neural_methods.trainer.PhysFormerTrainer
+try:
+    import neural_methods.trainer.EfficientPhysTrainer
+except ImportError:
+    pass
+try:
+    import neural_methods.trainer.BigSmallTrainer
+except ImportError:
+    pass
+try:
+    import neural_methods.trainer.PhysFormerTrainer
+except ImportError:
+    pass
 try:
     import neural_methods.trainer.PhysMambaTrainer
 except ImportError:
-    pass # print("PhysMambaTrainer not imported due to missing dependencies.")
-import neural_methods.trainer.RhythmFormerTrainer
-import neural_methods.trainer.FactorizePhysTrainer
-import neural_methods.trainer.ContrastPhysTrainer
+    pass
+try:
+    import neural_methods.trainer.RhythmFormerTrainer
+except ImportError:
+    pass
+try:
+    import neural_methods.trainer.FactorizePhysTrainer
+except ImportError:
+    pass
+try:
+    import neural_methods.trainer.ContrastPhysTrainer
+except ImportError:
+    pass
 try:
     import neural_methods.trainer.SpikingPhysFormerTrainer
 except ImportError:
-    pass # print("SpikingPhysFormerTrainer not imported due to missing dependencies.")
+    pass

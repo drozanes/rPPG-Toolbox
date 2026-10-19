@@ -258,6 +258,19 @@ class DeepPhysTrainer(BaseTrainer):
             except Exception as e:
                 print(f"Note: Could not auto-append to database CSV: {e}")
 
+        if metrics:
+            try:
+                if 'wandb' in sys.modules:
+                    wandb.log({
+                        'Test MAE': metrics.get('MAE', 0.0),
+                        'Test RMSE': metrics.get('RMSE', 0.0),
+                        'Test MAPE': metrics.get('MAPE', 0.0),
+                        'Test Pearson': metrics.get('Pearson', 0.0),
+                        'Test SNR': metrics.get('SNR', 0.0)
+                    })
+            except Exception:
+                pass
+
     def save_model(self, index):
         """Inits parameters from args and the writer for TensorboardX."""
         if not os.path.exists(self.model_dir):

@@ -1,14 +1,46 @@
 import dataset.data_loader.BaseLoader
-import dataset.data_loader.COHFACELoader
-import dataset.data_loader.UBFCrPPGLoader
-import dataset.data_loader.PURELoader
-import dataset.data_loader.iBVPLoader
-import dataset.data_loader.SCAMPSLoader
+try:
+    import dataset.data_loader.COHFACELoader
+except ImportError:
+    pass
+try:
+    import dataset.data_loader.UBFCrPPGLoader
+except ImportError:
+    pass
+try:
+    import dataset.data_loader.PURELoader
+except ImportError:
+    pass
+try:
+    import dataset.data_loader.iBVPLoader
+except ImportError:
+    pass
+try:
+    import dataset.data_loader.SCAMPSLoader
+except ImportError:
+    pass
 import dataset.data_loader.MMPDLoader
-import dataset.data_loader.BP4DPlusLoader
-import dataset.data_loader.BP4DPlusBigSmallLoader
-import dataset.data_loader.UBFCPHYSLoader
-# import dataset.data_loader.PhysDriveLoader
-import dataset.data_loader.LADHLoader
-import dataset.data_loader.SUMSLoader
-import dataset.data_loader.MCDrPPGLoader
+try:
+    import dataset.data_loader.BP4DPlusLoader
+except ImportError:
+    pass
+try:
+    import dataset.data_loader.BP4DPlusBigSmallLoader
+except ImportError:
+    pass
+try:
+    import dataset.data_loader.UBFCPHYSLoader
+except ImportError:
+    pass
+try:
+    import dataset.data_loader.LADHLoader
+except ImportError:
+    pass
+try:
+    import dataset.data_loader.SUMSLoader
+except ImportError:
+    pass
+try:
+    import dataset.data_loader.MCDrPPGLoader
+except ImportError:
+    pass
