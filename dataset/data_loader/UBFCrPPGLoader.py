@@ -47,7 +47,7 @@ class UBFCrPPGLoader(BaseLoader):
         if not data_dirs:
             raise ValueError(self.dataset_name + " data paths empty!")
         dirs = [{"index": re.search(
-            'subject(\d+)', data_dir).group(0), "path": data_dir} for data_dir in data_dirs]
+            r'subject(\d+)', data_dir).group(0), "path": data_dir} for data_dir in data_dirs]
         return dirs
 
     def split_raw_data(self, data_dirs, begin, end):
