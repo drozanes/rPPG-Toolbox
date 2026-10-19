@@ -36,10 +36,29 @@ class DeepPhysTrainer(BaseTrainer):
         self.patience = getattr(config.TRAIN, 'PATIENCE', 3)
         self.patience_counter = 0
         
+        self.start_epoch = 0
         if config.TOOLBOX_MODE == "train_and_test":
             self.model = DeepPhys(img_size=config.TRAIN.DATA.PREPROCESS.RESIZE.H).to(self.device)
             if config.NUM_OF_GPU_TRAIN > 1 and self.device.type == 'cuda':
                 self.model = torch.nn.DataParallel(self.model, device_ids=list(range(config.NUM_OF_GPU_TRAIN)))
+
+            resume_path = getattr(config.MODEL, 'RESUME', '')
+            if resume_path and os.path.exists(resume_path):
+                print(f"Loading checkpoint to resume: {resume_path}")
+                state_dict = torch.load(resume_path, map_location=self.device)
+                if hasattr(self.model, 'module') and not any(k.startswith('module.') for k in state_dict.keys()):
+                    state_dict = {'module.' + k: v for k, v in state_dict.items()}
+                elif not hasattr(self.model, 'module') and any(k.startswith('module.') for k in state_dict.keys()):
+                    state_dict = {k.replace('module.', ''): v for k, v in state_dict.items()}
+                self.model.load_state_dict(state_dict)
+
+                import re
+                match = re.search(r'Epoch(\d+)', resume_path)
+                if match:
+                    resumed_epoch = int(match.group(1))
+                    self.start_epoch = resumed_epoch + 1
+                    self.best_epoch = resumed_epoch
+                    print(f"Resuming training starting from Epoch {self.start_epoch} (previous checkpoint was Epoch {self.best_epoch})")
 
             self.num_train_batches = len(data_loader["train"])
             self.criterion = torch.nn.MSELoss()
@@ -60,10 +79,19 @@ class DeepPhysTrainer(BaseTrainer):
         if data_loader["train"] is None:
             raise ValueError("No data for train")
 
+        # Align learning rate scheduler and compute initial baseline validation loss if resuming
+        if self.start_epoch > 0:
+            print(f"Advancing scheduler for {self.start_epoch} epochs ({self.start_epoch * self.num_train_batches} steps)...")
+            for _ in range(self.start_epoch * self.num_train_batches):
+                self.scheduler.step()
+            print("Evaluating initial validation loss of resumed model...")
+            self.min_valid_loss = self.valid(data_loader)
+            print(f"Resumed baseline validation loss: {self.min_valid_loss:.4f}")
+
         mean_training_losses = []
         mean_valid_losses = []
         lrs = []
-        for epoch in range(self.max_epoch_num):
+        for epoch in range(self.start_epoch, self.max_epoch_num):
             print('')
             print(f"====Training Epoch: {epoch}====")
             running_loss = 0.0

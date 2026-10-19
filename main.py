@@ -44,6 +44,8 @@ def add_args(parser):
     parser.add_argument('--toolbox_mode', required=False, default=None, type=str, help="The mode of the toolbox.")
     parser.add_argument('--num_workers', required=False, default=2, type=int, help="The number of workers for the data loader.")
     parser.add_argument('--device', required=False, default=None, type=str, help="The device to run on (cuda, mps, cpu).")
+    parser.add_argument('--model_path', required=False, default=None, type=str, help="Path to checkpoint for testing/evaluation.")
+    parser.add_argument('--resume', required=False, default=None, type=str, help="Path to checkpoint to resume training from.")
     '''Neural Method Sample YAML LIST:
       SCAMPS_SCAMPS_UBFC-rPPG_TSCAN_BASIC.yaml
       SCAMPS_SCAMPS_UBFC-rPPG_DEEPPHYS_BASIC.yaml
@@ -175,6 +177,10 @@ if __name__ == "__main__":
         config.DEVICE = 'mps' if torch.backends.mps.is_available() else 'cpu'
     if args.toolbox_mode:
         config.TOOLBOX_MODE = args.toolbox_mode
+    if args.model_path:
+        config.INFERENCE.MODEL_PATH = args.model_path
+    if args.resume:
+        config.MODEL.RESUME = args.resume
     config.freeze()
     
     print('Configuration:')
@@ -441,3 +447,11 @@ if __name__ == "__main__":
         print("Data preprocessing complete!", end='\n\n')
     else:
         print("TOOLBOX_MODE only support train_and_test, only_test, unsupervised_method, or only_preprocess!", end='\n\n')
+
+    try:
+        if 'wandb' in sys.modules:
+            import wandb
+            wandb.finish()
+    except Exception:
+        pass
+
