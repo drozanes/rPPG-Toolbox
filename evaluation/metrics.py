@@ -105,6 +105,7 @@ def calculate_metrics(predictions, labels, config):
     else:
         raise ValueError('Metrics.py evaluation only supports train_and_test and only_test!')
 
+    results = dict()
     if config.INFERENCE.EVALUATION_METHOD == "FFT":
         gt_hr_fft_all = np.array(gt_hr_fft_all)
         predict_hr_fft_all = np.array(predict_hr_fft_all)
@@ -116,31 +117,34 @@ def calculate_metrics(predictions, labels, config):
                 MAE_FFT = np.mean(np.abs(predict_hr_fft_all - gt_hr_fft_all))
                 standard_error = np.std(np.abs(predict_hr_fft_all - gt_hr_fft_all)) / np.sqrt(num_test_samples)
                 print("FFT MAE (FFT Label): {0} +/- {1}".format(MAE_FFT, standard_error))
+                results['MAE'] = float(MAE_FFT)
             elif metric == "RMSE":
-                # Calculate the squared errors, then RMSE, in order to allow
-                # for a more robust and intuitive standard error that won't
-                # be influenced by abnormal distributions of errors.
                 squared_errors = np.square(predict_hr_fft_all - gt_hr_fft_all)
                 RMSE_FFT = np.sqrt(np.mean(squared_errors))
                 standard_error = np.sqrt(np.std(squared_errors) / np.sqrt(num_test_samples))
                 print("FFT RMSE (FFT Label): {0} +/- {1}".format(RMSE_FFT, standard_error))
+                results['RMSE'] = float(RMSE_FFT)
             elif metric == "MAPE":
                 MAPE_FFT = np.mean(np.abs((predict_hr_fft_all - gt_hr_fft_all) / gt_hr_fft_all)) * 100
                 standard_error = np.std(np.abs((predict_hr_fft_all - gt_hr_fft_all) / gt_hr_fft_all)) / np.sqrt(num_test_samples) * 100
                 print("FFT MAPE (FFT Label): {0} +/- {1}".format(MAPE_FFT, standard_error))
+                results['MAPE'] = float(MAPE_FFT)
             elif metric == "Pearson":
                 Pearson_FFT = np.corrcoef(predict_hr_fft_all, gt_hr_fft_all)
                 correlation_coefficient = Pearson_FFT[0][1]
                 standard_error = np.sqrt((1 - correlation_coefficient**2) / (num_test_samples - 2))
                 print("FFT Pearson (FFT Label): {0} +/- {1}".format(correlation_coefficient, standard_error))
+                results['Pearson'] = float(correlation_coefficient)
             elif metric == "SNR":
                 SNR_FFT = np.mean(SNR_all)
                 standard_error = np.std(SNR_all) / np.sqrt(num_test_samples)
                 print("FFT SNR (FFT Label): {0} +/- {1} (dB)".format(SNR_FFT, standard_error))
+                results['SNR'] = float(SNR_FFT)
             elif metric == "MACC":
                 MACC_avg = np.mean(MACC_all)
                 standard_error = np.std(MACC_all) / np.sqrt(num_test_samples)
                 print("FFT MACC (FFT Label): {0} +/- {1}".format(MACC_avg, standard_error))
+                results['MACC'] = float(MACC_avg)
             elif "AU" in metric:
                 pass
             elif "BA" in metric:  
@@ -170,31 +174,34 @@ def calculate_metrics(predictions, labels, config):
                 MAE_PEAK = np.mean(np.abs(predict_hr_peak_all - gt_hr_peak_all))
                 standard_error = np.std(np.abs(predict_hr_peak_all - gt_hr_peak_all)) / np.sqrt(num_test_samples)
                 print("Peak MAE (Peak Label): {0} +/- {1}".format(MAE_PEAK, standard_error))
+                results['MAE'] = float(MAE_PEAK)
             elif metric == "RMSE":
-                # Calculate the squared errors, then RMSE, in order to allow
-                # for a more robust and intuitive standard error that won't
-                # be influenced by abnormal distributions of errors.
                 squared_errors = np.square(predict_hr_peak_all - gt_hr_peak_all)
                 RMSE_PEAK = np.sqrt(np.mean(squared_errors))
                 standard_error = np.sqrt(np.std(squared_errors) / np.sqrt(num_test_samples))
                 print("PEAK RMSE (Peak Label): {0} +/- {1}".format(RMSE_PEAK, standard_error))
+                results['RMSE'] = float(RMSE_PEAK)
             elif metric == "MAPE":
                 MAPE_PEAK = np.mean(np.abs((predict_hr_peak_all - gt_hr_peak_all) / gt_hr_peak_all)) * 100
                 standard_error = np.std(np.abs((predict_hr_peak_all - gt_hr_peak_all) / gt_hr_peak_all)) / np.sqrt(num_test_samples) * 100
                 print("PEAK MAPE (Peak Label): {0} +/- {1}".format(MAPE_PEAK, standard_error))
+                results['MAPE'] = float(MAPE_PEAK)
             elif metric == "Pearson":
                 Pearson_PEAK = np.corrcoef(predict_hr_peak_all, gt_hr_peak_all)
                 correlation_coefficient = Pearson_PEAK[0][1]
                 standard_error = np.sqrt((1 - correlation_coefficient**2) / (num_test_samples - 2))
                 print("PEAK Pearson (Peak Label): {0} +/- {1}".format(correlation_coefficient, standard_error))
+                results['Pearson'] = float(correlation_coefficient)
             elif metric == "SNR":
                 SNR_PEAK = np.mean(SNR_all)
                 standard_error = np.std(SNR_all) / np.sqrt(num_test_samples)
                 print("PEAK SNR (PEAK Label): {0} +/- {1} (dB)".format(SNR_PEAK, standard_error))
+                results['SNR'] = float(SNR_PEAK)
             elif metric == "MACC":
                 MACC_avg = np.mean(MACC_all)
                 standard_error = np.std(MACC_all) / np.sqrt(num_test_samples)
                 print("PEAK MACC (PEAK Label): {0} +/- {1}".format(MACC_avg, standard_error))
+                results['MACC'] = float(MACC_avg)
             elif "AU" in metric:
                 pass
             elif "BA" in metric:
@@ -215,3 +222,5 @@ def calculate_metrics(predictions, labels, config):
                 raise ValueError("Wrong Test Metric Type")
     else:
         raise ValueError("Inference evaluation method name wrong!")
+
+    return results

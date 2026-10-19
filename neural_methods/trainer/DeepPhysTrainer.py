@@ -176,24 +176,32 @@ class DeepPhysTrainer(BaseTrainer):
 
         predictions = dict()
         labels = dict()
+        def load_checkpoint(path):
+            state_dict = torch.load(path, map_location=self.device)
+            if hasattr(self.model, 'module') and not any(k.startswith('module.') for k in state_dict.keys()):
+                state_dict = {'module.' + k: v for k, v in state_dict.items()}
+            elif not hasattr(self.model, 'module') and any(k.startswith('module.') for k in state_dict.keys()):
+                state_dict = {k.replace('module.', ''): v for k, v in state_dict.items()}
+            self.model.load_state_dict(state_dict)
+
         if self.config.TOOLBOX_MODE == "only_test":
             if not os.path.exists(self.config.INFERENCE.MODEL_PATH):
                 raise ValueError("Inference model path error! Please check INFERENCE.MODEL_PATH in your yaml.")
-            self.model.load_state_dict(torch.load(self.config.INFERENCE.MODEL_PATH, map_location=self.device))
+            load_checkpoint(self.config.INFERENCE.MODEL_PATH)
             print("Testing uses pretrained model!")
         else:
             if self.config.TEST.USE_LAST_EPOCH:
                 last_epoch_model_path = os.path.join(
-                self.model_dir, self.model_file_name + '_Epoch' + str(self.max_epoch_num - 1) + '.pth')
+                    self.model_dir, self.model_file_name + '_Epoch' + str(self.max_epoch_num - 1) + '.pth')
                 print("Testing uses last epoch as non-pretrained model!")
                 print(last_epoch_model_path)
-                self.model.load_state_dict(torch.load(last_epoch_model_path, map_location=self.device))
+                load_checkpoint(last_epoch_model_path)
             else:
                 best_model_path = os.path.join(
                     self.model_dir, self.model_file_name + '_Epoch' + str(self.best_epoch) + '.pth')
                 print("Testing uses best epoch selected using model selection as non-pretrained model!")
                 print(best_model_path)
-                self.model.load_state_dict(torch.load(best_model_path, map_location=self.device))
+                load_checkpoint(best_model_path)
 
         self.model = self.model.to(self.config.DEVICE)
         self.model.eval()
@@ -208,9 +216,9 @@ class DeepPhysTrainer(BaseTrainer):
                 labels_test = labels_test.view(-1, 1).contiguous()
                 pred_ppg_test = self.model(data_test)
 
-                if self.config.TEST.OUTPUT_SAVE_DIR:
-                    labels_test = labels_test.cpu()
-                    pred_ppg_test = pred_ppg_test.cpu()
+                # Always detach and move to CPU to avoid GPU VRAM leaks and ensure numpy compatibility
+                labels_test = labels_test.detach().cpu()
+                pred_ppg_test = pred_ppg_test.detach().cpu()
 
                 for idx in range(batch_size):
                     subj_index = test_batch[2][idx]
@@ -222,9 +230,33 @@ class DeepPhysTrainer(BaseTrainer):
                     labels[subj_index][sort_index] = labels_test[idx * self.chunk_len:(idx + 1) * self.chunk_len]
         
         print('')
-        calculate_metrics(predictions, labels, self.config)
+        metrics = calculate_metrics(predictions, labels, self.config)
         if self.config.TEST.OUTPUT_SAVE_DIR: # saving test outputs
             self.save_test_outputs(predictions, labels, self.config)
+
+        # Auto-append test results to rPPG_results_database.csv if present
+        if metrics and os.path.exists("rPPG_results_database.csv"):
+            try:
+                import csv
+                with open("rPPG_results_database.csv", "a", newline="") as f:
+                    writer = csv.writer(f)
+                    writer.writerow([
+                        self.config.TEST.DATA.DATASET,
+                        "Supervised",
+                        "DeepPhys",
+                        f"{metrics.get('MAE', 0.0):.3f}",
+                        f"{metrics.get('RMSE', 0.0):.3f}",
+                        f"{metrics.get('MAPE', 0.0):.3f}",
+                        f"{metrics.get('Pearson', 0.0):.3f}",
+                        f"{metrics.get('SNR', 0.0):.3f}",
+                        "0.0",
+                        "Fast",
+                        "Yes",
+                        f"Online training with Early Stopping (best epoch {self.best_epoch}, val loss {self.min_valid_loss:.4f})."
+                    ])
+                print("Appended DeepPhys benchmark results to rPPG_results_database.csv!")
+            except Exception as e:
+                print(f"Note: Could not auto-append to database CSV: {e}")
 
     def save_model(self, index):
         """Inits parameters from args and the writer for TensorboardX."""

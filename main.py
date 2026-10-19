@@ -181,6 +181,10 @@ if __name__ == "__main__":
     print(config, end='\n\n')
     try:
         import wandb
+        # In non-interactive or headless environments (e.g. Colab), disable wandb if no API key is configured
+        if not os.environ.get("WANDB_API_KEY") and not os.environ.get("WANDB_MODE"):
+            os.environ["WANDB_MODE"] = "disabled"
+
         dataset = config.TRAIN.DATA.DATASET if config.TOOLBOX_MODE in ["train_and_test", "only_preprocess"] else config.TEST.DATA.DATASET
         if not dataset and config.TOOLBOX_MODE == "unsupervised_method":
             dataset = config.UNSUPERVISED.DATA.DATASET if hasattr(config.UNSUPERVISED.DATA, "DATASET") else "UnknownDataset"
@@ -194,7 +198,7 @@ if __name__ == "__main__":
         
         # We save config as a dict to wandb
         wandb.init(project="rPPG-Master-Thesis", name=run_name, config=dict(config))
-    except ImportError:
+    except Exception:
         pass
 
 
