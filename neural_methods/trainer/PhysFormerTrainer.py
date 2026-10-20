@@ -52,6 +52,7 @@ class PhysFormerTrainer(BaseTrainer):
         self.config = config 
         self.min_valid_loss = None
         self.best_epoch = 0
+        self.start_epoch = 0
 
         if config.TOOLBOX_MODE == "train_and_test":
             self.chunk_len = config.TRAIN.DATA.PREPROCESS.CHUNK_LENGTH
@@ -60,6 +61,24 @@ class PhysFormerTrainer(BaseTrainer):
                 patches=(self.patch_size,) * 3, dim=self.dim, ff_dim=self.ff_dim, num_heads=self.num_heads, num_layers=self.num_layers, 
                 dropout_rate=self.dropout_rate, theta=self.theta).to(self.device)
             self.model = torch.nn.DataParallel(self.model, device_ids=list(range(config.NUM_OF_GPU_TRAIN)))
+
+            resume_path = getattr(config.MODEL, 'RESUME', '')
+            if resume_path and os.path.exists(resume_path):
+                print(f"Loading checkpoint to resume: {resume_path}")
+                state_dict = torch.load(resume_path, map_location=self.device)
+                if hasattr(self.model, 'module') and not any(k.startswith('module.') for k in state_dict.keys()):
+                    state_dict = {'module.' + k: v for k, v in state_dict.items()}
+                elif not hasattr(self.model, 'module') and any(k.startswith('module.') for k in state_dict.keys()):
+                    state_dict = {k.replace('module.', ''): v for k, v in state_dict.items()}
+                self.model.load_state_dict(state_dict)
+
+                import re
+                match = re.search(r'Epoch(\d+)', resume_path)
+                if match:
+                    resumed_epoch = int(match.group(1))
+                    self.start_epoch = resumed_epoch + 1
+                    self.best_epoch = resumed_epoch
+                    print(f"Resuming PhysFormer starting from Epoch {self.start_epoch} (previous checkpoint was Epoch {self.best_epoch})")
 
             self.num_train_batches = len(data_loader["train"])
             self.criterion_reg = torch.nn.MSELoss()
@@ -97,7 +116,7 @@ class PhysFormerTrainer(BaseTrainer):
         mean_valid_losses = []
         lrs = []
 
-        for epoch in range(self.max_epoch_num):
+        for epoch in range(self.start_epoch, self.max_epoch_num):
             print('')
             print(f"====Training Epoch: {epoch}====")
             loss_rPPG_avg = []
@@ -274,9 +293,53 @@ class PhysFormerTrainer(BaseTrainer):
                     labels[subj_index][sort_index] = label[idx]
 
         print('')
-        calculate_metrics(predictions, labels, self.config)
+        metrics = calculate_metrics(predictions, labels, self.config)
         if self.config.TEST.OUTPUT_SAVE_DIR: # saving test outputs
             self.save_test_outputs(predictions, labels, self.config)
+
+        # Auto-append test results to rPPG_results_database.csv if present
+        if metrics and os.path.exists("rPPG_results_database.csv"):
+            try:
+                import csv
+                with open("rPPG_results_database.csv", "a", newline="") as f:
+                    writer = csv.writer(f)
+                    writer.writerow([
+                        self.config.TEST.DATA.DATASET,
+                        "Supervised",
+                        "PhysFormer",
+                        f"{metrics.get('MAE', 0.0):.3f}",
+                        f"{metrics.get('RMSE', 0.0):.3f}",
+                        f"{metrics.get('MAPE', 0.0):.3f}",
+                        f"{metrics.get('Pearson', 0.0):.3f}",
+                        f"{metrics.get('SNR', 0.0):.3f}",
+                        "0.0",
+                        "Moderate",
+                        "Yes",
+                        f"Spatiotemporal Vision Transformer (12 layers, 160 frames, theta={self.theta})."
+                    ])
+                print("Appended PhysFormer benchmark results to rPPG_results_database.csv!")
+                backup_dir = getattr(self.config.MODEL, 'BACKUP_DIR', '') or (
+                    '/content/drive/MyDrive/rPPG_Checkpoints' if os.path.exists('/content/drive/MyDrive') else ''
+                )
+                if backup_dir and os.path.exists(backup_dir):
+                    import shutil
+                    shutil.copy2("rPPG_results_database.csv", os.path.join(backup_dir, "rPPG_results_database.csv"))
+                    print(f"--> [Google Drive / Backup Sync] Mirrored rPPG_results_database.csv to {backup_dir}")
+            except Exception as e:
+                print(f"Note: Could not auto-append to database CSV: {e}")
+
+        if metrics:
+            try:
+                if 'wandb' in sys.modules:
+                    wandb.log({
+                        'Test MAE': metrics.get('MAE', 0.0),
+                        'Test RMSE': metrics.get('RMSE', 0.0),
+                        'Test MAPE': metrics.get('MAPE', 0.0),
+                        'Test Pearson': metrics.get('Pearson', 0.0),
+                        'Test SNR': metrics.get('SNR', 0.0)
+                    })
+            except Exception:
+                pass
 
     def save_model(self, index):
         if not os.path.exists(self.model_dir):
@@ -285,6 +348,20 @@ class PhysFormerTrainer(BaseTrainer):
             self.model_dir, self.model_file_name + '_Epoch' + str(index) + '.pth')
         torch.save(self.model.state_dict(), model_path)
         print('Saved Model Path: ', model_path)
+
+        # Automatic real-time mirroring to Google Drive or custom backup directory
+        backup_dir = getattr(self.config.MODEL, 'BACKUP_DIR', '') or (
+            '/content/drive/MyDrive/rPPG_Checkpoints' if os.path.exists('/content/drive/MyDrive') else ''
+        )
+        if backup_dir:
+            try:
+                import shutil
+                os.makedirs(backup_dir, exist_ok=True)
+                backup_file = os.path.join(backup_dir, self.model_file_name + f'_Epoch{index}.pth')
+                shutil.copy2(model_path, backup_file)
+                print(f"--> [Google Drive / Backup Sync] Successfully mirrored checkpoint: {backup_file}")
+            except Exception as e:
+                print(f"Warning: Could not mirror checkpoint to backup dir {backup_dir}: {e}")
 
     # HR calculation based on ground truth label / prediction
     def get_hr(self, y, sr=30, min_bpm=40, max_bpm=180):
