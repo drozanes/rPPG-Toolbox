@@ -82,8 +82,11 @@ class DeepPhysTrainer(BaseTrainer):
         # Align learning rate scheduler and compute initial baseline validation loss if resuming
         if self.start_epoch > 0:
             print(f"Advancing scheduler for {self.start_epoch} epochs ({self.start_epoch * self.num_train_batches} steps)...")
-            for _ in range(self.start_epoch * self.num_train_batches):
-                self.scheduler.step()
+            import warnings
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                for _ in range(self.start_epoch * self.num_train_batches):
+                    self.scheduler.step()
             print("Evaluating initial validation loss of resumed model...")
             self.min_valid_loss = self.valid(data_loader)
             print(f"Resumed baseline validation loss: {self.min_valid_loss:.4f}")
