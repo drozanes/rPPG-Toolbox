@@ -290,8 +290,6 @@ if __name__ == "__main__":
                     batch_size=config.TRAIN.BATCH_SIZE,
                     sampler=train_sampler,
                     worker_init_fn=seed_worker,
-                    pin_memory=(config.DEVICE == 'cuda'),
-                    persistent_workers=(args.num_workers > 0)
                 )
             else:
                 data_loader_dict['train'] = DataLoader(
@@ -300,9 +298,7 @@ if __name__ == "__main__":
                     batch_size=config.TRAIN.BATCH_SIZE,
                     shuffle=True,
                     worker_init_fn=seed_worker,
-                    generator=train_generator,
-                    pin_memory=(config.DEVICE == 'cuda'),
-                    persistent_workers=(args.num_workers > 0)
+                    generator=train_generator
                 )
         else:
             data_loader_dict['train'] = None
@@ -354,9 +350,7 @@ if __name__ == "__main__":
                 batch_size=config.TRAIN.BATCH_SIZE,  # batch size for val is the same as train
                 shuffle=False,
                 worker_init_fn=seed_worker,
-                generator=general_generator,
-                pin_memory=(config.DEVICE == 'cuda'),
-                persistent_workers=(args.num_workers > 0)
+                generator=general_generator
             )
         else:
             data_loader_dict['valid'] = None
@@ -410,9 +404,7 @@ if __name__ == "__main__":
                 batch_size=config.INFERENCE.BATCH_SIZE,
                 shuffle=False,
                 worker_init_fn=seed_worker,
-                generator=general_generator,
-                pin_memory=(config.DEVICE == 'cuda'),
-                persistent_workers=(args.num_workers > 0)
+                generator=general_generator
             )
         else:
             data_loader_dict['test'] = None
