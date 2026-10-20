@@ -3,6 +3,7 @@ TOOLBOX_MODE: "train_and_test"
 TRAIN:
   BATCH_SIZE: 4
   EPOCHS: 30
+  PATIENCE: 3
   LR: 1e-4
   MODEL_FILE_NAME: MMPD_PhysFormer_Online
   PLOT_LOSSES_AND_LR: True
@@ -85,7 +86,7 @@ VALID:
         W: 128
 TEST:
   METRICS: ['MAE', 'RMSE', 'MAPE', 'Pearson', 'SNR', 'BA']
-  USE_LAST_EPOCH: True
+  USE_LAST_EPOCH: False
   DATA:
     INFO:
       LIGHT: [1, 2, 3, 4]

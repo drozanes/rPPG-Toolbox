@@ -53,6 +53,8 @@ class PhysFormerTrainer(BaseTrainer):
         self.min_valid_loss = None
         self.best_epoch = 0
         self.start_epoch = 0
+        self.patience = getattr(config.TRAIN, 'PATIENCE', 3)
+        self.patience_counter = 0
 
         if config.TOOLBOX_MODE == "train_and_test":
             self.chunk_len = config.TRAIN.DATA.PREPROCESS.CHUNK_LENGTH
@@ -202,14 +204,17 @@ class PhysFormerTrainer(BaseTrainer):
                 except Exception:
                     pass
                 print(f'Validation RMSE:{valid_loss:.3f}, batch:{idx+1}')
-                if self.min_valid_loss is None:
+                if self.min_valid_loss is None or valid_loss < self.min_valid_loss:
                     self.min_valid_loss = valid_loss
                     self.best_epoch = epoch
-                    print("Update best model! Best epoch: {}".format(self.best_epoch))
-                elif (valid_loss < self.min_valid_loss):
-                    self.min_valid_loss = valid_loss
-                    self.best_epoch = epoch
-                    print("Update best model! Best epoch: {}".format(self.best_epoch))
+                    self.patience_counter = 0
+                    print(f"Update best model! Best epoch: {self.best_epoch}, min_val_loss (RMSE): {self.min_valid_loss:.4f}")
+                else:
+                    self.patience_counter += 1
+                    print(f"Validation loss did not improve ({valid_loss:.4f} >= {self.min_valid_loss:.4f}). Early stopping patience: {self.patience_counter}/{self.patience}")
+                    if self.patience_counter >= self.patience:
+                        print(f"Early stopping triggered at epoch {epoch}! Best epoch was {self.best_epoch} with val loss {self.min_valid_loss:.4f}")
+                        break
         if not self.config.TEST.USE_LAST_EPOCH: 
             print("best trained epoch: {}, min_val_loss: {}".format(
                 self.best_epoch, self.min_valid_loss))
