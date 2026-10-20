@@ -53,7 +53,10 @@ class TorchLossComputer(object):
         # only calculate feasible PSD range [0.7,4] Hz
         complex_absolute = TorchLossComputer.compute_complex_absolute_given_k(output, k, N)
 
-        return (1.0 / complex_absolute.sum()) * complex_absolute	# Analogous Softmax operator      
+        sum_ca = complex_absolute.sum()
+        if sum_ca == 0 or torch.isnan(sum_ca):
+            return complex_absolute
+        return (1.0 / (sum_ca + 1e-7)) * complex_absolute	# Analogous Softmax operator      
         
     @staticmethod
     def cross_entropy_power_spectrum_loss(inputs, target, Fs):

@@ -31,7 +31,10 @@ class Neg_Pearson(nn.Module):
             sum_x2 = torch.sum(torch.pow(preds[i],2))  
             sum_y2 = torch.sum(torch.pow(labels[i],2)) 
             N = preds.shape[1]
-            pearson = (N*sum_xy - sum_x*sum_y)/(torch.sqrt((N*sum_x2 - torch.pow(sum_x,2))*(N*sum_y2 - torch.pow(sum_y,2))))
+            var_x = N * sum_x2 - torch.pow(sum_x, 2)
+            var_y = N * sum_y2 - torch.pow(sum_y, 2)
+            denom = torch.sqrt(torch.clamp(var_x * var_y, min=1e-8))
+            pearson = (N * sum_xy - sum_x * sum_y) / (denom + 1e-8)
             loss += 1 - pearson
             
             

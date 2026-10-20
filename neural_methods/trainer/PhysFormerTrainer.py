@@ -160,7 +160,13 @@ class PhysFormerTrainer(BaseTrainer):
                 b = b_start * math.pow(exp_b, epoch / float(self.max_epoch_num))
 
                 loss = a * loss_rPPG + b * (fre_loss + kl_loss)
+                if torch.isnan(loss) or torch.isinf(loss):
+                    print(f'\nWarning: NaN/Inf detected in loss at epoch {epoch}, batch {idx + 1}. Skipping step to protect weights.')
+                    self.optimizer.zero_grad()
+                    continue
+
                 loss.backward()
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=5.0)
                 self.optimizer.step()
 
                 n = data.size(0)
@@ -169,7 +175,7 @@ class PhysFormerTrainer(BaseTrainer):
                 loss_kl_avg_test.append(float(kl_loss.data))
                 loss_hr_mae.append(float(train_mae))
                 if idx % 100 == 99:  # print every 100 mini-batches
-                    print(f'\nepoch:{epoch}, batch:{idx + 1}, total:{len(data_loader["train"]) // self.batch_size}, '
+                    print(f'\nepoch:{epoch}, batch:{idx + 1}, total:{len(data_loader["train"])}, '
                         f'lr:0.0001, sharp:{gra_sharp:.3f}, a:{a:.3f}, NegPearson:{np.mean(loss_rPPG_avg[-2000:]):.4f}, '
                         f'\nb:{b:.3f}, kl:{np.mean(loss_kl_avg_test[-2000:]):.3f}, fre_CEloss:{np.mean(loss_peak_avg[-2000:]):.3f}, '
                         f'hr_mae:{np.mean(loss_hr_mae[-2000:]):.3f}')
