@@ -49,6 +49,7 @@ def add_args(parser):
     parser.add_argument('--resume', required=False, default=None, type=str, help="Path to checkpoint to resume training from.")
     parser.add_argument('--backup_dir', required=False, default=None, type=str, help="Directory (e.g. Google Drive) to mirror saved checkpoints in real-time.")
     parser.add_argument('--batch_size', required=False, default=None, type=int, help="Batch size for training and testing.")
+    parser.add_argument('--lr', required=False, default=None, type=float, help="Learning rate override.")
     '''Neural Method Sample YAML LIST:
       SCAMPS_SCAMPS_UBFC-rPPG_TSCAN_BASIC.yaml
       SCAMPS_SCAMPS_UBFC-rPPG_DEEPPHYS_BASIC.yaml
@@ -189,6 +190,8 @@ if __name__ == "__main__":
     if args.batch_size:
         config.TRAIN.BATCH_SIZE = args.batch_size
         config.INFERENCE.BATCH_SIZE = args.batch_size
+    if args.lr:
+        config.TRAIN.LR = args.lr
     config.freeze()
     
     if config.DEVICE == 'cuda' and torch.cuda.is_available():
