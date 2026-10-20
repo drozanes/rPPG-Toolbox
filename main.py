@@ -49,6 +49,9 @@ def add_args(parser):
     parser.add_argument('--resume', required=False, default=None, type=str, help="Path to checkpoint to resume training from.")
     parser.add_argument('--backup_dir', required=False, default=None, type=str, help="Directory (e.g. Google Drive) to mirror saved checkpoints in real-time.")
     parser.add_argument('--batch_size', required=False, default=None, type=int, help="Batch size for training and testing.")
+    parser.add_argument('--use_fusion_stem', nargs='?', const=True, default=None,
+                        type=lambda x: str(x).lower() in ['true', '1', 'yes'],
+                        help="Enable modular FusionStem before model backbone.")
     '''Neural Method Sample YAML LIST:
       SCAMPS_SCAMPS_UBFC-rPPG_TSCAN_BASIC.yaml
       SCAMPS_SCAMPS_UBFC-rPPG_DEEPPHYS_BASIC.yaml
@@ -191,6 +194,12 @@ if __name__ == "__main__":
         config.INFERENCE.BATCH_SIZE = args.batch_size
     if args.lr:
         config.TRAIN.LR = args.lr
+    if args.use_fusion_stem is not None:
+        config.MODEL.USE_FUSION_STEM = args.use_fusion_stem
+        if hasattr(config.MODEL, config.MODEL.NAME.upper()):
+            model_subcfg = getattr(config.MODEL, config.MODEL.NAME.upper())
+            if hasattr(model_subcfg, "USE_FUSION_STEM"):
+                model_subcfg.USE_FUSION_STEM = args.use_fusion_stem
     config.freeze()
     
     if config.DEVICE == 'cuda' and torch.cuda.is_available():
