@@ -37,8 +37,18 @@ class DeepPhysTrainer(BaseTrainer):
         self.patience_counter = 0
         
         self.start_epoch = 0
+        use_fusion_stem = getattr(config.MODEL, "USE_FUSION_STEM", False) or \
+            (hasattr(config.MODEL, "DEEPPHYS") and getattr(config.MODEL.DEEPPHYS, "USE_FUSION_STEM", False))
+        alpha = getattr(getattr(config.MODEL, "FUSION_STEM", None), "ALPHA", 0.5)
+        beta = getattr(getattr(config.MODEL, "FUSION_STEM", None), "BETA", 0.5)
+
         if config.TOOLBOX_MODE == "train_and_test":
-            self.model = DeepPhys(img_size=config.TRAIN.DATA.PREPROCESS.RESIZE.H).to(self.device)
+            self.model = DeepPhys(
+                img_size=config.TRAIN.DATA.PREPROCESS.RESIZE.H,
+                use_fusion_stem=use_fusion_stem,
+                fusion_stem_alpha=alpha,
+                fusion_stem_beta=beta
+            ).to(self.device)
             if config.NUM_OF_GPU_TRAIN > 1 and self.device.type == 'cuda':
                 self.model = torch.nn.DataParallel(self.model, device_ids=list(range(config.NUM_OF_GPU_TRAIN)))
 
@@ -68,7 +78,12 @@ class DeepPhysTrainer(BaseTrainer):
             self.scheduler = torch.optim.lr_scheduler.OneCycleLR(
                 self.optimizer, max_lr=config.TRAIN.LR, epochs=config.TRAIN.EPOCHS, steps_per_epoch=self.num_train_batches)
         elif config.TOOLBOX_MODE == "only_test":
-            self.model = DeepPhys(img_size=config.TEST.DATA.PREPROCESS.RESIZE.H).to(self.device)
+            self.model = DeepPhys(
+                img_size=config.TEST.DATA.PREPROCESS.RESIZE.H,
+                use_fusion_stem=use_fusion_stem,
+                fusion_stem_alpha=alpha,
+                fusion_stem_beta=beta
+            ).to(self.device)
             if config.NUM_OF_GPU_TRAIN > 1 and self.device.type == 'cuda':
                 self.model = torch.nn.DataParallel(self.model, device_ids=list(range(config.NUM_OF_GPU_TRAIN)))
         else:

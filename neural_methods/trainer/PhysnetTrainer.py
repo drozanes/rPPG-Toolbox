@@ -34,8 +34,17 @@ class PhysnetTrainer(BaseTrainer):
         self.min_valid_loss = None
         self.best_epoch = 0
 
+        use_fusion_stem = getattr(config.MODEL, "USE_FUSION_STEM", False) or \
+            (hasattr(config.MODEL, "PHYSNET") and getattr(config.MODEL.PHYSNET, "USE_FUSION_STEM", False))
+        alpha = getattr(getattr(config.MODEL, "FUSION_STEM", None), "ALPHA", 0.5)
+        beta = getattr(getattr(config.MODEL, "FUSION_STEM", None), "BETA", 0.5)
+
         self.model = PhysNet_padding_Encoder_Decoder_MAX(
-            frames=config.MODEL.PHYSNET.FRAME_NUM).to(self.device)  # [3, T, 128,128]
+            frames=config.MODEL.PHYSNET.FRAME_NUM,
+            use_fusion_stem=use_fusion_stem,
+            fusion_stem_alpha=alpha,
+            fusion_stem_beta=beta
+        ).to(self.device)  # [3, T, 128,128]
 
         if config.TOOLBOX_MODE == "train_and_test":
             self.num_train_batches = len(data_loader["train"])

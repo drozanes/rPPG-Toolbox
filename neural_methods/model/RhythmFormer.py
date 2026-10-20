@@ -8,6 +8,7 @@ from torch.nn import functional as F
 import math
 from typing import Tuple, Union
 from timm.models.layers import trunc_normal_, DropPath
+from neural_methods.model.FusionStem import FusionStem, Fusion_Stem
 
 
 
@@ -240,63 +241,22 @@ class video_BiFormerBlock(nn.Module):
         x = x + self.drop_path(self.mlp(self.norm2(x)))
         return x
 
-class Fusion_Stem(nn.Module):
-    def __init__(self,apha=0.5,belta=0.5):
-        super(Fusion_Stem, self).__init__()
-
-        self.stem11 = nn.Sequential(nn.Conv2d(3, 64, kernel_size=5, stride=2, padding=2),
-            nn.BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
+class Raw_Stem(nn.Module):
+    """Raw frame stem without temporal difference fusion (used for ablation studies)."""
+    def __init__(self, in_channels: int = 3, out_channels: int = 64):
+        super(Raw_Stem, self).__init__()
+        self.stem = nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, kernel_size=5, stride=2, padding=2),
+            nn.BatchNorm2d(out_channels, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=3, stride=2, padding=1, dilation=1, ceil_mode=False)
-            )
-        
-        self.stem12 = nn.Sequential(nn.Conv2d(12, 64, kernel_size=5, stride=2, padding=2),
-            nn.BatchNorm2d(64),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2, padding=1, dilation=1, ceil_mode=False)
-            )
-
-        self.stem21 =nn.Sequential(
-            nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(64),
-            nn.ReLU(inplace=True),
         )
 
-        self.stem22 =nn.Sequential(
-            nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(64),
-            nn.ReLU(inplace=True),
-        )
-
-        self.apha = apha
-        self.belta = belta
-
-    def forward(self, x):
-        """Definition of Fusion_Stem.
-        Args:
-          x [N,D,C,H,W]
-        Returns:
-          fusion_x [N*D,C,H/4,W/4]
-        """
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         N, D, C, H, W = x.shape
-        x1 = torch.cat([x[:,:1,:,:,:],x[:,:1,:,:,:],x[:,:D-2,:,:,:]],1)
-        x2 = torch.cat([x[:,:1,:,:,:],x[:,:D-1,:,:,:]],1)
-        x3 = x
-        x4 = torch.cat([x[:,1:,:,:,:],x[:,D-1:,:,:,:]],1)
-        x5 = torch.cat([x[:,2:,:,:,:],x[:,D-1:,:,:,:],x[:,D-1:,:,:,:]],1)
-        x_diff = self.stem12(torch.cat([x2-x1,x3-x2,x4-x3,x5-x4],2).view(N * D, 12, H, W))
-        x3 = x3.contiguous().view(N * D, C, H, W)
-        x = self.stem11(x3)
+        return self.stem(x.contiguous().view(N * D, C, H, W))
 
-        #fusion layer1
-        x_path1 = self.apha*x + self.belta*x_diff
-        x_path1 = self.stem21(x_path1)
-        #fusion layer2
-        x_path2 = self.stem22(x_diff)
-        x = self.apha*x_path1 + self.belta*x_path2
-        
-        return x
-    
+
 class TPT_Block(nn.Module):
     def __init__(self, dim, depth, num_heads, t_patch, topk,
                  mlp_ratio=4., drop_path=0., side_dwconv=5):
@@ -366,6 +326,9 @@ class RhythmFormer(nn.Module):
         side_dwconv:int=3,
         drop_path_rate=0.,
         use_checkpoint_stages=[],
+        use_fusion_stem: bool = True,
+        fusion_stem_alpha: float = 0.5,
+        fusion_stem_beta: float = 0.5,
     ):
         super().__init__()
 
@@ -373,8 +336,18 @@ class RhythmFormer(nn.Module):
         self.frame = frame  
         self.dim = dim              
         self.stage_n = stage_n
+        self.use_fusion_stem = use_fusion_stem
 
-        self.Fusion_Stem = Fusion_Stem()
+        if use_fusion_stem:
+            self.Fusion_Stem = FusionStem(
+                in_channels=3,
+                out_channels=dim,
+                alpha=fusion_stem_alpha,
+                beta=fusion_stem_beta,
+                output_format="ND_flattened"
+            )
+        else:
+            self.Fusion_Stem = Raw_Stem(in_channels=3, out_channels=dim)
         self.patch_embedding = nn.Conv3d(in_chans,embed_dim[0], kernel_size=(1, 4, 4), stride=(1, 4, 4))
         self.ConvBlockLast = nn.Conv1d(embed_dim[-1], 1, kernel_size=1,stride=1, padding=0)
 

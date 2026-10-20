@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from spikingjelly.activation_based import neuron, functional, surrogate, layer
 import math
+from neural_methods.model.FusionStem import FusionStem
 
 class CDC_T(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size=3, stride=1,
@@ -142,31 +143,43 @@ class ParallelSpikeTransformerBlock(nn.Module):
         return x + attn_out + mlp_out
 
 class SpikingPhysFormer(nn.Module):
-    def __init__(self, num_layers=4, dim=96, num_heads=4, ff_dim=144, theta=0.7, T_s=4, frame=160):
+    def __init__(self, num_layers=4, dim=96, num_heads=4, ff_dim=144, theta=0.7, T_s=4, frame=160,
+                 use_fusion_stem: bool = False, fusion_stem_alpha: float = 0.5, fusion_stem_beta: float = 0.5):
         super().__init__()
         self.dim = dim
         self.T_s = T_s
         self.frame = frame
+        self.use_fusion_stem = use_fusion_stem
 
-        # ANN Stem
-        self.Stem0 = nn.Sequential(
-            nn.Conv3d(3, dim//4, [1, 5, 5], stride=1, padding=[0,2,2]),
-            nn.BatchNorm3d(dim//4),
-            nn.ReLU(inplace=True),
-            nn.MaxPool3d((1, 2, 2), stride=(1, 2, 2)),
-        )
-        self.Stem1 = nn.Sequential(
-            nn.Conv3d(dim//4, dim//2, [3, 3, 3], stride=1, padding=1),
-            nn.BatchNorm3d(dim//2),
-            nn.ReLU(inplace=True),
-            nn.MaxPool3d((1, 2, 2), stride=(1, 2, 2)),
-        )
-        self.Stem2 = nn.Sequential(
-            nn.Conv3d(dim//2, dim, [3, 3, 3], stride=1, padding=1),
-            nn.BatchNorm3d(dim),
-            nn.ReLU(inplace=True),
-            nn.MaxPool3d((1, 2, 2), stride=(1, 2, 2)),
-        )
+        if self.use_fusion_stem:
+            self.fusion_stem = FusionStem(
+                in_channels=3,
+                out_channels=dim,
+                alpha=fusion_stem_alpha,
+                beta=fusion_stem_beta,
+                output_format="NCDHW"
+            )
+            self.fusion_pool = nn.MaxPool3d((1, 2, 2), stride=(1, 2, 2))
+        else:
+            # ANN Stem
+            self.Stem0 = nn.Sequential(
+                nn.Conv3d(3, dim//4, [1, 5, 5], stride=1, padding=[0,2,2]),
+                nn.BatchNorm3d(dim//4),
+                nn.ReLU(inplace=True),
+                nn.MaxPool3d((1, 2, 2), stride=(1, 2, 2)),
+            )
+            self.Stem1 = nn.Sequential(
+                nn.Conv3d(dim//4, dim//2, [3, 3, 3], stride=1, padding=1),
+                nn.BatchNorm3d(dim//2),
+                nn.ReLU(inplace=True),
+                nn.MaxPool3d((1, 2, 2), stride=(1, 2, 2)),
+            )
+            self.Stem2 = nn.Sequential(
+                nn.Conv3d(dim//2, dim, [3, 3, 3], stride=1, padding=1),
+                nn.BatchNorm3d(dim),
+                nn.ReLU(inplace=True),
+                nn.MaxPool3d((1, 2, 2), stride=(1, 2, 2)),
+            )
         
         # Patch Embedding (ft=4, fh=4, fw=4 in SpikingPhysFormer if following 32x downsampling spatially)
         # 128 -> 4 is 32x. Stem0,1,2 each 2x maxpool = 8x. Patch embedding needs 4x.
@@ -210,9 +223,13 @@ class SpikingPhysFormer(nn.Module):
         B, C, T, H, W = x.shape
         
         # ANN Stem
-        x = self.Stem0(x)
-        x = self.Stem1(x)
-        x = self.Stem2(x)
+        if self.use_fusion_stem:
+            x = self.fusion_stem(x)
+            x = self.fusion_pool(x)
+        else:
+            x = self.Stem0(x)
+            x = self.Stem1(x)
+            x = self.Stem2(x)
         x = self.patch_embedding(x) # [B, dim, T/4, H/32, W/32]
         
         # Direct Encoding: replicate for T_s timesteps

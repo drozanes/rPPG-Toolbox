@@ -6,6 +6,8 @@ Weixuan Chen, Daniel McDuff
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
+from neural_methods.model.FusionStem import FusionStem
 
 
 class Attention_mask(nn.Module):
@@ -27,11 +29,13 @@ class Attention_mask(nn.Module):
 class DeepPhys(nn.Module):
 
     def __init__(self, in_channels=3, nb_filters1=32, nb_filters2=64, kernel_size=3, dropout_rate1=0.25,
-                 dropout_rate2=0.5, pool_size=(2, 2), nb_dense=128, img_size=36):
+                 dropout_rate2=0.5, pool_size=(2, 2), nb_dense=128, img_size=36,
+                 use_fusion_stem: bool = False, fusion_stem_alpha: float = 0.5, fusion_stem_beta: float = 0.5):
         """Definition of DeepPhys.
         Args:
           in_channels: the number of input channel. Default: 3
           img_size: height/width of each frame. Default: 36.
+          use_fusion_stem: Whether to use modular Fusion Stem (from RhythmFormer CVPR 2024). Default: False.
         Returns:
           DeepPhys model.
         """
@@ -44,23 +48,36 @@ class DeepPhys(nn.Module):
         self.nb_filters1 = nb_filters1
         self.nb_filters2 = nb_filters2
         self.nb_dense = nb_dense
-        # Motion branch convs
-        self.motion_conv1 = nn.Conv2d(self.in_channels, self.nb_filters1, kernel_size=self.kernel_size, padding=(1, 1),
-                                      bias=True)
-        self.motion_conv2 = nn.Conv2d(self.nb_filters1, self.nb_filters1, kernel_size=self.kernel_size, bias=True)
+        self.use_fusion_stem = use_fusion_stem
+
+        if self.use_fusion_stem:
+            self.fusion_stem = FusionStem(
+                in_channels=self.in_channels,
+                out_channels=self.nb_filters1,
+                alpha=fusion_stem_alpha,
+                beta=fusion_stem_beta,
+                downsample_stride=1,
+                output_format="flattened"
+            )
+        else:
+            # Motion branch convs
+            self.motion_conv1 = nn.Conv2d(self.in_channels, self.nb_filters1, kernel_size=self.kernel_size, padding=(1, 1),
+                                          bias=True)
+            self.motion_conv2 = nn.Conv2d(self.nb_filters1, self.nb_filters1, kernel_size=self.kernel_size, bias=True)
+            # Apperance branch convs
+            self.apperance_conv1 = nn.Conv2d(self.in_channels, self.nb_filters1, kernel_size=self.kernel_size,
+                                             padding=(1, 1), bias=True)
+            self.apperance_conv2 = nn.Conv2d(self.nb_filters1, self.nb_filters1, kernel_size=self.kernel_size, bias=True)
+            # Attention layers
+            self.apperance_att_conv1 = nn.Conv2d(self.nb_filters1, 1, kernel_size=1, padding=(0, 0), bias=True)
+            self.attn_mask_1 = Attention_mask()
+
         self.motion_conv3 = nn.Conv2d(self.nb_filters1, self.nb_filters2, kernel_size=self.kernel_size, padding=(1, 1),
                                       bias=True)
         self.motion_conv4 = nn.Conv2d(self.nb_filters2, self.nb_filters2, kernel_size=self.kernel_size, bias=True)
-        # Apperance branch convs
-        self.apperance_conv1 = nn.Conv2d(self.in_channels, self.nb_filters1, kernel_size=self.kernel_size,
-                                         padding=(1, 1), bias=True)
-        self.apperance_conv2 = nn.Conv2d(self.nb_filters1, self.nb_filters1, kernel_size=self.kernel_size, bias=True)
         self.apperance_conv3 = nn.Conv2d(self.nb_filters1, self.nb_filters2, kernel_size=self.kernel_size,
                                          padding=(1, 1), bias=True)
         self.apperance_conv4 = nn.Conv2d(self.nb_filters2, self.nb_filters2, kernel_size=self.kernel_size, bias=True)
-        # Attention layers
-        self.apperance_att_conv1 = nn.Conv2d(self.nb_filters1, 1, kernel_size=1, padding=(0, 0), bias=True)
-        self.attn_mask_1 = Attention_mask()
         self.apperance_att_conv2 = nn.Conv2d(self.nb_filters2, 1, kernel_size=1, padding=(0, 0), bias=True)
         self.attn_mask_2 = Attention_mask()
         # Avg pooling
@@ -85,24 +102,34 @@ class DeepPhys(nn.Module):
 
     def forward(self, inputs, params=None):
 
-        diff_input = inputs[:, :3, :, :]
-        raw_input = inputs[:, 3:, :, :]
+        if self.use_fusion_stem:
+            x_fused = self.fusion_stem(inputs)
+            H_in, W_in = inputs.shape[-2], inputs.shape[-1]
+            x_fused = F.adaptive_avg_pool2d(x_fused, (H_in - 2, W_in - 2))
+            d3 = self.avg_pooling_1(x_fused)
+            d4 = self.dropout_1(d3)
 
-        d1 = torch.tanh(self.motion_conv1(diff_input))
-        d2 = torch.tanh(self.motion_conv2(d1))
+            r3 = self.avg_pooling_2(x_fused)
+            r4 = self.dropout_2(r3)
+        else:
+            diff_input = inputs[:, :3, :, :]
+            raw_input = inputs[:, 3:, :, :]
 
-        r1 = torch.tanh(self.apperance_conv1(raw_input))
-        r2 = torch.tanh(self.apperance_conv2(r1))
+            d1 = torch.tanh(self.motion_conv1(diff_input))
+            d2 = torch.tanh(self.motion_conv2(d1))
 
-        g1 = torch.sigmoid(self.apperance_att_conv1(r2))
-        g1 = self.attn_mask_1(g1)
-        gated1 = d2 * g1
+            r1 = torch.tanh(self.apperance_conv1(raw_input))
+            r2 = torch.tanh(self.apperance_conv2(r1))
 
-        d3 = self.avg_pooling_1(gated1)
-        d4 = self.dropout_1(d3)
+            g1 = torch.sigmoid(self.apperance_att_conv1(r2))
+            g1 = self.attn_mask_1(g1)
+            gated1 = d2 * g1
 
-        r3 = self.avg_pooling_2(r2)
-        r4 = self.dropout_2(r3)
+            d3 = self.avg_pooling_1(gated1)
+            d4 = self.dropout_1(d3)
+
+            r3 = self.avg_pooling_2(r2)
+            r4 = self.dropout_2(r3)
 
         d5 = torch.tanh(self.motion_conv3(d4))
         d6 = torch.tanh(self.motion_conv4(d5))

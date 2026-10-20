@@ -56,12 +56,18 @@ class PhysFormerTrainer(BaseTrainer):
         self.patience = getattr(config.TRAIN, 'PATIENCE', 3)
         self.patience_counter = 0
 
+        use_fusion_stem = getattr(config.MODEL, "USE_FUSION_STEM", False) or \
+            (hasattr(config.MODEL, "PHYSFORMER") and getattr(config.MODEL.PHYSFORMER, "USE_FUSION_STEM", False))
+        alpha = getattr(getattr(config.MODEL, "FUSION_STEM", None), "ALPHA", 0.5)
+        beta = getattr(getattr(config.MODEL, "FUSION_STEM", None), "BETA", 0.5)
+
         if config.TOOLBOX_MODE == "train_and_test":
             self.chunk_len = config.TRAIN.DATA.PREPROCESS.CHUNK_LENGTH
             self.model = ViT_ST_ST_Compact3_TDC_gra_sharp(
                 image_size=(self.chunk_len,config.TRAIN.DATA.PREPROCESS.RESIZE.H,config.TRAIN.DATA.PREPROCESS.RESIZE.W), 
                 patches=(self.patch_size,) * 3, dim=self.dim, ff_dim=self.ff_dim, num_heads=self.num_heads, num_layers=self.num_layers, 
-                dropout_rate=self.dropout_rate, theta=self.theta).to(self.device)
+                dropout_rate=self.dropout_rate, theta=self.theta,
+                use_fusion_stem=use_fusion_stem, fusion_stem_alpha=alpha, fusion_stem_beta=beta).to(self.device)
             self.model = torch.nn.DataParallel(self.model, device_ids=list(range(config.NUM_OF_GPU_TRAIN)))
 
             resume_path = getattr(config.MODEL, 'RESUME', '')
@@ -97,7 +103,8 @@ class PhysFormerTrainer(BaseTrainer):
             self.model = ViT_ST_ST_Compact3_TDC_gra_sharp(
                 image_size=(self.chunk_len,config.TRAIN.DATA.PREPROCESS.RESIZE.H,config.TRAIN.DATA.PREPROCESS.RESIZE.W), 
                 patches=(self.patch_size,) * 3, dim=self.dim, ff_dim=self.ff_dim, num_heads=self.num_heads, num_layers=self.num_layers, 
-                dropout_rate=self.dropout_rate, theta=self.theta).to(self.device)
+                dropout_rate=self.dropout_rate, theta=self.theta,
+                use_fusion_stem=use_fusion_stem, fusion_stem_alpha=alpha, fusion_stem_beta=beta).to(self.device)
             self.model = torch.nn.DataParallel(self.model, device_ids=list(range(config.NUM_OF_GPU_TRAIN)))
         else:
             raise ValueError("Physformer trainer initialized in incorrect toolbox mode!")

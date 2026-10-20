@@ -34,6 +34,7 @@ _C.TRAIN.OPTIMIZER.BETAS = (0.9, 0.999)
 _C.TRAIN.OPTIMIZER.MOMENTUM = 0.9
 _C.TRAIN.MODEL_FILE_NAME = ''
 _C.TRAIN.PLOT_LOSSES_AND_LR = True
+_C.TRAIN.PATIENCE = 3
 # Train.Data settings
 _C.TRAIN.DATA = CN()
 _C.TRAIN.DATA.INFO = CN()
@@ -301,9 +302,30 @@ _C.MODEL.BACKUP_DIR = ''
 _C.MODEL.DROP_RATE = 0.0
 _C.MODEL.MODEL_DIR = 'PreTrainedModels'
 
+# -----------------------------------------------------------------------------
+# Modular Fusion Stem settings (from RhythmFormer CVPR 2024)
+# -----------------------------------------------------------------------------
+_C.MODEL.USE_FUSION_STEM = False
+_C.MODEL.FUSION_STEM = CN()
+_C.MODEL.FUSION_STEM.ALPHA = 0.5
+_C.MODEL.FUSION_STEM.BETA = 0.5
+
 # Specific parameters for physnet parameters
 _C.MODEL.PHYSNET = CN()
 _C.MODEL.PHYSNET.FRAME_NUM = 64
+_C.MODEL.PHYSNET.USE_FUSION_STEM = False
+
+# -----------------------------------------------------------------------------
+# Specific parameters for DeepPhys parameters
+# -----------------------------------------------------------------------------
+_C.MODEL.DEEPPHYS = CN()
+_C.MODEL.DEEPPHYS.USE_FUSION_STEM = False
+
+# -----------------------------------------------------------------------------
+# Specific parameters for RhythmFormer parameters
+# -----------------------------------------------------------------------------
+_C.MODEL.RHYTHMFORMER = CN()
+_C.MODEL.RHYTHMFORMER.USE_FUSION_STEM = True
 
 # -----------------------------------------------------------------------------
 # Specific parameters for iBVPNet parameters
@@ -332,6 +354,7 @@ _C.MODEL.FactorizePhys.MD_RESIDUAL = True
 # -----------------------------------------------------------------------------
 _C.MODEL.TSCAN = CN()
 _C.MODEL.TSCAN.FRAME_DEPTH = 10
+_C.MODEL.TSCAN.USE_FUSION_STEM = False
 
 # -----------------------------------------------------------------------------
 # Model Settings for EfficientPhys
@@ -355,6 +378,7 @@ _C.MODEL.PHYSFORMER.FF_DIM = 144
 _C.MODEL.PHYSFORMER.NUM_HEADS = 4
 _C.MODEL.PHYSFORMER.NUM_LAYERS = 12
 _C.MODEL.PHYSFORMER.THETA = 0.7
+_C.MODEL.PHYSFORMER.USE_FUSION_STEM = False
 
 # -----------------------------------------------------------------------------
 # Model Settings for SpikingPhysFormer
@@ -368,6 +392,7 @@ _C.MODEL.SPIKINGPHYSFORMER.NUM_LAYERS = 4
 _C.MODEL.SPIKINGPHYSFORMER.THETA = 0.7
 _C.MODEL.SPIKINGPHYSFORMER.T_S = 4
 _C.MODEL.SPIKINGPHYSFORMER.PRETRAINED_PE_PATH = ""
+_C.MODEL.SPIKINGPHYSFORMER.USE_FUSION_STEM = False
 
 # -----------------------------------------------------------------------------
 # Model Settings for Contrast-Phys+
@@ -376,6 +401,7 @@ _C.MODEL.CONTRAST_PHYS = CN()
 _C.MODEL.CONTRAST_PHYS.DELTA_T = 128
 _C.MODEL.CONTRAST_PHYS.K = 10
 _C.MODEL.CONTRAST_PHYS.WEAK_SUPERVISION = True
+_C.MODEL.CONTRAST_PHYS.USE_FUSION_STEM = False
 
 # -----------------------------------------------------------------------------
 # Inference settings

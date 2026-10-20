@@ -37,3 +37,6 @@ pretrained_models/
 *.pdf
 pdf_preview/
 *.qlpreview/
+.venv_kaggle/
+kaggle_name_that_llm/
+*.parquet

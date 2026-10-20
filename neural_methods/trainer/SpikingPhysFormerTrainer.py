@@ -41,11 +41,17 @@ class SpikingPhysFormerTrainer(BaseTrainer):
         self.min_valid_loss = None
         self.best_epoch = 0
 
+        use_fusion_stem = getattr(config.MODEL, "USE_FUSION_STEM", False) or \
+            (hasattr(config.MODEL, "SPIKINGPHYSFORMER") and getattr(config.MODEL.SPIKINGPHYSFORMER, "USE_FUSION_STEM", False))
+        alpha = getattr(getattr(config.MODEL, "FUSION_STEM", None), "ALPHA", 0.5)
+        beta = getattr(getattr(config.MODEL, "FUSION_STEM", None), "BETA", 0.5)
+
         if config.TOOLBOX_MODE == "train_and_test":
             self.chunk_len = config.TRAIN.DATA.PREPROCESS.CHUNK_LENGTH
             self.model = SpikingPhysFormer(
                 num_layers=self.num_layers, dim=self.dim, num_heads=self.num_heads, 
-                ff_dim=self.ff_dim, theta=self.theta, T_s=self.T_s, frame=self.chunk_len
+                ff_dim=self.ff_dim, theta=self.theta, T_s=self.T_s, frame=self.chunk_len,
+                use_fusion_stem=use_fusion_stem, fusion_stem_alpha=alpha, fusion_stem_beta=beta
             ).to(self.device)
             self.model = torch.nn.DataParallel(self.model, device_ids=list(range(config.NUM_OF_GPU_TRAIN)))
 
@@ -57,7 +63,7 @@ class SpikingPhysFormerTrainer(BaseTrainer):
                 pe_dict = {}
                 for k, v in state_dict.items():
                     clean_k = k.replace('module.', '')
-                    if any(prefix in clean_k for prefix in ['Stem0', 'Stem1', 'Stem2', 'patch_embedding']):
+                    if any(prefix in clean_k for prefix in ['Stem0', 'Stem1', 'Stem2', 'fusion_stem', 'patch_embedding']):
                         pe_dict[clean_k] = v
                 m = self.model.module if hasattr(self.model, 'module') else self.model
                 m.load_state_dict(pe_dict, strict=False)
@@ -74,7 +80,8 @@ class SpikingPhysFormerTrainer(BaseTrainer):
             self.chunk_len = config.TEST.DATA.PREPROCESS.CHUNK_LENGTH
             self.model = SpikingPhysFormer(
                 num_layers=self.num_layers, dim=self.dim, num_heads=self.num_heads, 
-                ff_dim=self.ff_dim, theta=self.theta, T_s=self.T_s, frame=self.chunk_len
+                ff_dim=self.ff_dim, theta=self.theta, T_s=self.T_s, frame=self.chunk_len,
+                use_fusion_stem=use_fusion_stem, fusion_stem_alpha=alpha, fusion_stem_beta=beta
             ).to(self.device)
             self.model = torch.nn.DataParallel(self.model, device_ids=list(range(config.NUM_OF_GPU_TRAIN)))
         else:

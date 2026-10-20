@@ -13,6 +13,7 @@ from torch import nn
 from torch import Tensor 
 from torch.nn import functional as F
 import math
+from neural_methods.model.FusionStem import FusionStem
 
 def as_tuple(x):
     return x if isinstance(x, tuple) else (x, x)
@@ -202,6 +203,9 @@ class ViT_ST_ST_Compact3_TDC_gra_sharp(nn.Module):
         frame: int = 160,
         theta: float = 0.2,
         image_size: Optional[int] = None,
+        use_fusion_stem: bool = False,
+        fusion_stem_alpha: float = 0.5,
+        fusion_stem_beta: float = 0.5,
     ):
         super().__init__()
 
@@ -209,6 +213,7 @@ class ViT_ST_ST_Compact3_TDC_gra_sharp(nn.Module):
         self.image_size = image_size  
         self.frame = frame  
         self.dim = dim              
+        self.use_fusion_stem = use_fusion_stem
 
         # Image and patch sizes
         t, h, w = as_tuple(image_size)  # tube sizes
@@ -229,27 +234,37 @@ class ViT_ST_ST_Compact3_TDC_gra_sharp(nn.Module):
         self.transformer3 = Transformer_ST_TDC_gra_sharp(num_layers=num_layers//3, dim=dim, num_heads=num_heads, 
                                        ff_dim=ff_dim, dropout=dropout_rate, theta=theta)
         
-        
-        
-        self.Stem0 = nn.Sequential(
-            nn.Conv3d(3, dim//4, [1, 5, 5], stride=1, padding=[0,2,2]),
-            nn.BatchNorm3d(dim//4),
-            nn.ReLU(inplace=True),
-            nn.MaxPool3d((1, 2, 2), stride=(1, 2, 2)),
-        )
-        
-        self.Stem1 = nn.Sequential(
-            nn.Conv3d(dim//4, dim//2, [3, 3, 3], stride=1, padding=1),
-            nn.BatchNorm3d(dim//2),
-            nn.ReLU(inplace=True),
-            nn.MaxPool3d((1, 2, 2), stride=(1, 2, 2)),
-        )
-        self.Stem2 = nn.Sequential(
-            nn.Conv3d(dim//2, dim, [3, 3, 3], stride=1, padding=1),
-            nn.BatchNorm3d(dim),
-            nn.ReLU(inplace=True),
-            nn.MaxPool3d((1, 2, 2), stride=(1, 2, 2)),
-        )
+        if self.use_fusion_stem:
+            self.fusion_stem = FusionStem(
+                in_channels=in_channels,
+                out_channels=dim,
+                alpha=fusion_stem_alpha,
+                beta=fusion_stem_beta,
+                output_format="NCDHW"
+            )
+            # FusionStem gives 4x downsampling (128 -> 32).
+            # MaxPool by (1, 2, 2) achieves total 8x downsampling (128 -> 16), exactly matching Stem2.
+            self.fusion_pool = nn.MaxPool3d((1, 2, 2), stride=(1, 2, 2))
+        else:
+            self.Stem0 = nn.Sequential(
+                nn.Conv3d(3, dim//4, [1, 5, 5], stride=1, padding=[0,2,2]),
+                nn.BatchNorm3d(dim//4),
+                nn.ReLU(inplace=True),
+                nn.MaxPool3d((1, 2, 2), stride=(1, 2, 2)),
+            )
+            
+            self.Stem1 = nn.Sequential(
+                nn.Conv3d(dim//4, dim//2, [3, 3, 3], stride=1, padding=1),
+                nn.BatchNorm3d(dim//2),
+                nn.ReLU(inplace=True),
+                nn.MaxPool3d((1, 2, 2), stride=(1, 2, 2)),
+            )
+            self.Stem2 = nn.Sequential(
+                nn.Conv3d(dim//2, dim, [3, 3, 3], stride=1, padding=1),
+                nn.BatchNorm3d(dim),
+                nn.ReLU(inplace=True),
+                nn.MaxPool3d((1, 2, 2), stride=(1, 2, 2)),
+            )
            
         self.upsample = nn.Sequential(
             nn.Upsample(scale_factor=(2,1,1)),
@@ -285,9 +300,13 @@ class ViT_ST_ST_Compact3_TDC_gra_sharp(nn.Module):
         # b is batch number, c channels, t frame, fh frame height, and fw frame width
         b, c, t, fh, fw = x.shape
         
-        x = self.Stem0(x)
-        x = self.Stem1(x)
-        x = self.Stem2(x)  # [B, 64, 160, 64, 64]
+        if self.use_fusion_stem:
+            x = self.fusion_stem(x)  # [B, dim, T, H/4, W/4]
+            x = self.fusion_pool(x)  # [B, dim, T, H/8, W/8]
+        else:
+            x = self.Stem0(x)
+            x = self.Stem1(x)
+            x = self.Stem2(x)  # [B, dim, T, H/8, W/8]
         
         x = self.patch_embedding(x)  # [B, 64, 40, 4, 4]
         x = x.flatten(2).transpose(1, 2)  # [B, 40*4*4, 64]

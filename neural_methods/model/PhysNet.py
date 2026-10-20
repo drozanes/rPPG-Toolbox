@@ -15,28 +15,41 @@ import pdb
 import torch
 import torch.nn as nn
 from torch.nn.modules.utils import _triple
+from neural_methods.model.FusionStem import FusionStem
 
 
 class PhysNet_padding_Encoder_Decoder_MAX(nn.Module):
-    def __init__(self, frames=128):
+    def __init__(self, frames=128, use_fusion_stem: bool = False, fusion_stem_alpha: float = 0.5, fusion_stem_beta: float = 0.5):
         super(PhysNet_padding_Encoder_Decoder_MAX, self).__init__()
+        self.use_fusion_stem = use_fusion_stem
 
-        self.ConvBlock1 = nn.Sequential(
-            nn.Conv3d(3, 16, [1, 5, 5], stride=1, padding=[0, 2, 2]),
-            nn.BatchNorm3d(16),
-            nn.ReLU(inplace=True),
-        )
+        if self.use_fusion_stem:
+            self.fusion_stem = FusionStem(
+                in_channels=3,
+                out_channels=64,
+                alpha=fusion_stem_alpha,
+                beta=fusion_stem_beta,
+                output_format="NCDHW"
+            )
+            # Downsamples temporal dimension by 2 (T -> T/2) to match ConvBlock4 input
+            self.temporal_pool = nn.MaxPool3d((2, 1, 1), stride=(2, 1, 1))
+        else:
+            self.ConvBlock1 = nn.Sequential(
+                nn.Conv3d(3, 16, [1, 5, 5], stride=1, padding=[0, 2, 2]),
+                nn.BatchNorm3d(16),
+                nn.ReLU(inplace=True),
+            )
 
-        self.ConvBlock2 = nn.Sequential(
-            nn.Conv3d(16, 32, [3, 3, 3], stride=1, padding=1),
-            nn.BatchNorm3d(32),
-            nn.ReLU(inplace=True),
-        )
-        self.ConvBlock3 = nn.Sequential(
-            nn.Conv3d(32, 64, [3, 3, 3], stride=1, padding=1),
-            nn.BatchNorm3d(64),
-            nn.ReLU(inplace=True),
-        )
+            self.ConvBlock2 = nn.Sequential(
+                nn.Conv3d(16, 32, [3, 3, 3], stride=1, padding=1),
+                nn.BatchNorm3d(32),
+                nn.ReLU(inplace=True),
+            )
+            self.ConvBlock3 = nn.Sequential(
+                nn.Conv3d(32, 64, [3, 3, 3], stride=1, padding=1),
+                nn.BatchNorm3d(64),
+                nn.ReLU(inplace=True),
+            )
 
         self.ConvBlock4 = nn.Sequential(
             nn.Conv3d(64, 64, [3, 3, 3], stride=1, padding=1),
@@ -94,13 +107,19 @@ class PhysNet_padding_Encoder_Decoder_MAX(nn.Module):
         x_visual = x
         [batch, channel, length, width, height] = x.shape
 
-        x = self.ConvBlock1(x)  # x [3, T, 128,128]
-        x = self.MaxpoolSpa(x)  # x [16, T, 64,64]
+        if self.use_fusion_stem:
+            x_fused = self.fusion_stem(x)       # [batch, 64, T, width/4, height/4]
+            x = self.temporal_pool(x_fused)     # [batch, 64, T/2, width/4, height/4]
+            x_visual3232 = x
+        else:
+            x = self.ConvBlock1(x)  # x [16, T, 128,128]
+            x = self.MaxpoolSpa(x)  # x [16, T, 64,64]
 
-        x = self.ConvBlock2(x)  # x [32, T, 64,64]
-        x_visual6464 = self.ConvBlock3(x)  # x [32, T, 64,64]
-        # x [32, T/2, 32,32]    Temporal halve
-        x = self.MaxpoolSpaTem(x_visual6464)
+            x = self.ConvBlock2(x)  # x [32, T, 64,64]
+            x_visual6464 = self.ConvBlock3(x)  # x [32, T, 64,64]
+            # x [32, T/2, 32,32]    Temporal halve
+            x = self.MaxpoolSpaTem(x_visual6464)
+            x_visual3232 = x
 
         x = self.ConvBlock4(x)  # x [64, T/2, 32,32]
         x_visual3232 = self.ConvBlock5(x)  # x [64, T/2, 32,32]

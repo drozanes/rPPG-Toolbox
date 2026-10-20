@@ -32,8 +32,19 @@ class RhythmFormerTrainer(BaseTrainer):
         self.diff_flag = 0
         if config.TRAIN.DATA.PREPROCESS.LABEL_TYPE == "DiffNormalized":
             self.diff_flag = 1
+
+        use_fusion_stem = getattr(config.MODEL, "USE_FUSION_STEM", True)
+        if hasattr(config.MODEL, "RHYTHMFORMER") and hasattr(config.MODEL.RHYTHMFORMER, "USE_FUSION_STEM"):
+            use_fusion_stem = config.MODEL.RHYTHMFORMER.USE_FUSION_STEM
+        alpha = getattr(getattr(config.MODEL, "FUSION_STEM", None), "ALPHA", 0.5)
+        beta = getattr(getattr(config.MODEL, "FUSION_STEM", None), "BETA", 0.5)
+
         if config.TOOLBOX_MODE == "train_and_test":
-            self.model = RhythmFormer().to(self.device)
+            self.model = RhythmFormer(
+                use_fusion_stem=use_fusion_stem,
+                fusion_stem_alpha=alpha,
+                fusion_stem_beta=beta
+            ).to(self.device)
             self.model = torch.nn.DataParallel(self.model, device_ids=list(range(config.NUM_OF_GPU_TRAIN)))
             self.num_train_batches = len(data_loader["train"])
             self.criterion = RhythmFormer_Loss()
@@ -43,7 +54,11 @@ class RhythmFormerTrainer(BaseTrainer):
             self.scheduler = torch.optim.lr_scheduler.OneCycleLR(
                 self.optimizer, max_lr=config.TRAIN.LR, epochs=config.TRAIN.EPOCHS, steps_per_epoch=self.num_train_batches)
         elif config.TOOLBOX_MODE == "only_test":
-            self.model = RhythmFormer().to(self.device)
+            self.model = RhythmFormer(
+                use_fusion_stem=use_fusion_stem,
+                fusion_stem_alpha=alpha,
+                fusion_stem_beta=beta
+            ).to(self.device)
             self.model = torch.nn.DataParallel(self.model, device_ids=list(range(config.NUM_OF_GPU_TRAIN)))
         else:
             raise ValueError("EfficientPhys trainer initialized in incorrect toolbox mode!")
