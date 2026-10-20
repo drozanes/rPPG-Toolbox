@@ -73,7 +73,7 @@ class MMPDLoader(BaseLoader):
             assert (config_data.END <= 1)
 
             self.setup_online_loader(config_data.BEGIN, config_data.END)
-            print(f" {self.dataset_name} (ONLINE MODE) Dataset Length: {self.preprocessed_data_len}", end='\n\n')
+            print(f" {self.dataset_name} (ONLINE MODE) Dataset Length: {self.preprocessed_data_len} | In-Memory Cache Size: {getattr(self.config_data, 'CACHE_SIZE', 8)} videos", end='\n\n')
         else:
             super().__init__(name, data_path, config_data, device)
 
