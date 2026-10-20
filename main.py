@@ -47,6 +47,7 @@ def add_args(parser):
     parser.add_argument('--model_path', required=False, default=None, type=str, help="Path to checkpoint for testing/evaluation.")
     parser.add_argument('--resume', required=False, default=None, type=str, help="Path to checkpoint to resume training from.")
     parser.add_argument('--backup_dir', required=False, default=None, type=str, help="Directory (e.g. Google Drive) to mirror saved checkpoints in real-time.")
+    parser.add_argument('--batch_size', required=False, default=None, type=int, help="Batch size for training and testing.")
     '''Neural Method Sample YAML LIST:
       SCAMPS_SCAMPS_UBFC-rPPG_TSCAN_BASIC.yaml
       SCAMPS_SCAMPS_UBFC-rPPG_DEEPPHYS_BASIC.yaml
@@ -184,7 +185,13 @@ if __name__ == "__main__":
         config.MODEL.RESUME = args.resume
     if args.backup_dir:
         config.MODEL.BACKUP_DIR = args.backup_dir
+    if args.batch_size:
+        config.TRAIN.BATCH_SIZE = args.batch_size
+        config.INFERENCE.BATCH_SIZE = args.batch_size
     config.freeze()
+    
+    if config.DEVICE == 'cuda' and torch.cuda.is_available():
+        torch.backends.cudnn.benchmark = True
     
     print('Configuration:')
     print(config, end='\n\n')
@@ -282,6 +289,8 @@ if __name__ == "__main__":
                     batch_size=config.TRAIN.BATCH_SIZE,
                     sampler=train_sampler,
                     worker_init_fn=seed_worker,
+                    pin_memory=(config.DEVICE == 'cuda'),
+                    persistent_workers=(args.num_workers > 0)
                 )
             else:
                 data_loader_dict['train'] = DataLoader(
@@ -290,7 +299,9 @@ if __name__ == "__main__":
                     batch_size=config.TRAIN.BATCH_SIZE,
                     shuffle=True,
                     worker_init_fn=seed_worker,
-                    generator=train_generator
+                    generator=train_generator,
+                    pin_memory=(config.DEVICE == 'cuda'),
+                    persistent_workers=(args.num_workers > 0)
                 )
         else:
             data_loader_dict['train'] = None
@@ -342,7 +353,9 @@ if __name__ == "__main__":
                 batch_size=config.TRAIN.BATCH_SIZE,  # batch size for val is the same as train
                 shuffle=False,
                 worker_init_fn=seed_worker,
-                generator=general_generator
+                generator=general_generator,
+                pin_memory=(config.DEVICE == 'cuda'),
+                persistent_workers=(args.num_workers > 0)
             )
         else:
             data_loader_dict['valid'] = None
@@ -396,7 +409,9 @@ if __name__ == "__main__":
                 batch_size=config.INFERENCE.BATCH_SIZE,
                 shuffle=False,
                 worker_init_fn=seed_worker,
-                generator=general_generator
+                generator=general_generator,
+                pin_memory=(config.DEVICE == 'cuda'),
+                persistent_workers=(args.num_workers > 0)
             )
         else:
             data_loader_dict['test'] = None
