@@ -204,7 +204,7 @@ class MMPDLoader(BaseLoader):
     def get_online_clips(self, mat_path):
         if not hasattr(self, '_online_cache'):
             self._online_cache = collections.OrderedDict()
-            self._online_cache_size = getattr(self.config_data, 'CACHE_SIZE', 4)
+            self._online_cache_size = getattr(self.config_data, 'CACHE_SIZE', 8)
 
         if mat_path in self._online_cache:
             self._online_cache.move_to_end(mat_path)
