@@ -1,0 +1,33 @@
+Model,Dataset,Protocol,MAE_bpm,RMSE_bpm,Pearson_r,SNR_dB,Notes
+POS,UBFC-rPPG,Intra-Dataset (Corrected Pipeline),1.549,3.996,0.975,0.995,Strict HSV skin-mask + 60s full-video FFT (NDHWC Raw)
+POS,PURE,Intra-Dataset (Corrected Pipeline),3.423,10.25,0.906,-1.223,HSV skin-mask on 6s chunks
+CHROM,UBFC-rPPG,Intra-Dataset (Corrected Pipeline),1.569,3.401,0.982,-0.098,Strict HSV skin-mask + 60s full-video FFT (NDHWC Raw)
+CHROM,UBFC-rPPG,Intra-Dataset (Toolbox Baseline),3.306,7.283,0.916,-1.548,Default rPPG-Toolbox implementation
+CHROM,PURE,Intra-Dataset (Corrected Pipeline),5.64,15.522,0.789,-1.674,HSV skin-mask on 6s chunks
+CHROM,PURE,Intra-Dataset (Toolbox Baseline),7.238,16.864,0.751,-2.312,Default rPPG-Toolbox baseline without skin mask
+ICA,UBFC-rPPG,Intra-Dataset (Corrected Pipeline),16.187,28.02,0.449,-4.788,JADE ICA with Welch spectral peak selection on full video (NDHWC Raw)
+ICA,UBFC-rPPG,Intra-Dataset (Toolbox Paper Baseline),14.7,,0.44,-9.91,Reported in rPPG-Toolbox paper
+ICA,PURE,Intra-Dataset (Corrected Pipeline),6.662,17.375,0.669,-2.762,Classical ICA on 6s chunks with Welch spectral peak selection
+PBV,UBFC-rPPG,Intra-Dataset (Corrected Pipeline),7.67,18.592,0.721,-2.459,Requires exact BVP signature vector; evaluated on full video (NDHWC Raw)
+PBV,PURE,Intra-Dataset (Corrected Pipeline),5.369,15.455,0.765,-2.114,Classical PBV with HSV skin-mask on 6s chunks
+DeepPhys,UBFC-rPPG,Intra-Dataset (Local Benchmark),1.946,4.861,0.962,0.494,Evaluated on 6s chunks
+DeepPhys,PURE,Intra-Dataset (Local Benchmark),1.728,9.481,0.917,4.975,Standard 2D-CNN evaluated on 6s chunks
+PhysFormer,UBFC-rPPG,Intra-Dataset (Paper Aligned),1.639,4.464,0.966,-2.176,Restored official F.cross_entropy + sum-reduction kl_loss on F.log_softmax(ca)
+PhysFormer,UBFC-rPPG,Intra-Dataset (Baseline),1.946,4.906,0.961,1.454,Standard Transformer evaluated on 6s chunks
+PhysFormer,UBFC-rPPG,Intra-Dataset (Post-Fix Degradation),29.001,35.171,-0.093,-9.687,Filtered get_hr + fixed loss schedule corruption
+PhysFormer,PURE,"Intra-Dataset (Paper Aligned, 10s)",6.795,18.418,0.701,2.543,Restored official F.cross_entropy + sum kl_loss; evaluated on 10s windows
+PhysFormer,PURE,Intra-Dataset (Epoch 3 pre-corrupt),6.827,18.488,0.679,,Standard Transformer on 10s windows before harmonic loss bug
+PhysFormer,PURE,Intra-Dataset (Corrupted Baseline Ep 26),23.142,38.711,0.276,0.421,Degraded by 2nd harmonic frequency loss corruption
+SpikingPhysFormer,UBFC-rPPG,Intra-Dataset (Pretrained PE Transfer),1.967,4.419,0.968,0.893,SNN+Transformer evaluated on 6s chunks; highly robust against outliers
+SpikingPhysFormer,UBFC-rPPG,Intra-Dataset (Paper 2025 Vanilla),25.153,29.773,-0.034,-8.729,"Neural Networks 2025 setup (128x128, 160 frames, 96 dim, LR 3e-3, 10 ep)"
+SpikingPhysFormer,UBFC-rPPG,Intra-Dataset (PE Transfer Ep 29),20.759,26.535,-0.032,-8.691,Fine-tuned with pretrained PhysFormer stem Epoch 29
+SpikingPhysFormer,UBFC-rPPG,Intra-Dataset (PE Transfer Ep 10),34.487,41.207,-0.171,-9.751,Fine-tuned with pretrained PhysFormer stem Epoch 10
+SpikingPhysFormer,PURE,Intra-Dataset (Pretrained PE Transfer),2.1,10.119,0.917,3.674,SNN+Transformer evaluated on 6s chunks; highly robust against outliers
+SpikingPhysFormer,PURE,Intra-Dataset (Paper 2025 Vanilla),24.639,31.47,0.092,-7.87,"Neural Networks 2025 setup (128x128, 160 frames, 96 dim, LR 3e-3, 10 ep)"
+SpikingPhysFormer,PURE,Intra-Dataset (PE Transfer Ep 29),23.76,28.028,0.085,-7.433,Fine-tuned with pretrained PhysFormer stem Epoch 29
+SpikingPhysFormer,PURE,Intra-Dataset (PE Transfer Ep 10),23.537,27.855,0.037,-7.505,Fine-tuned with pretrained PhysFormer stem Epoch 10
+ContrastPhys+,UBFC-rPPG,Intra-Dataset (Corrected Pipeline),1.422,3.226,0.984,2.222,3D-CNN; math corrected to match 2024 paper perfectly
+ContrastPhys+,UBFC-rPPG,Intra-Dataset (TPAMI 2024 2x2 ST-rPPG),15.632,29.614,0.289,-1.88,"DiffNormalized RGB, 2x2 ST-rPPG pooling, active PSD [40, 250], pairwise MSE"
+ContrastPhys+,UBFC-rPPG,"Intra-Dataset (Paper Aligned, pad=3)",15.13,29.53,0.304,-1.286,"Official setup with zero_pad=3 (512-pt FFT, 3.5 BPM resolution) and delta_t<=T chunk sampling"
+ContrastPhys,PURE,Intra-Dataset (Epoch 4 best val loss),15.813,25.695,0.137,-6.839,3D-CNN evaluated on 6s chunks
+ContrastPhys+,PURE,Intra-Dataset (TPAMI 2024 2x2 ST-rPPG),34.717,45.642,0.092,-4.229,"TPAMI 2024 setup: DiffNormalized RGB, 2x2 ST-rPPG pooling"

@@ -1,17 +1,17 @@
 BASE: ['']
 TOOLBOX_MODE: "train_and_test"
 TRAIN:
-  BATCH_SIZE: 4
+  BATCH_SIZE: 2  # 2 videos per batch matching official paper pairing
   EPOCHS: 30
-  LR: 1e-4
+  LR: 1e-5       # AdamW lr=1e-5 from official Contrast-Phys+ (TPAMI 2024)
   MODEL_FILE_NAME: UBFC-rPPG_ContrastPhys
   PLOT_LOSSES_AND_LR: True
   DATA:
     FS: 30  # UBFC-rPPG is 30 fps
     DATASET: UBFC-rPPG
-    DO_PREPROCESS: False # Set to True if running preprocessing for the first time
+    DO_PREPROCESS: False
     DATA_FORMAT: NCDHW
-    DATA_PATH: "/Users/drozanes/Downloads/UBFC-rPPG_Raw/DATASET_2" # Update this to your raw data path
+    DATA_PATH: "/Users/drozanes/Downloads/UBFC-rPPG_Raw/DATASET_2"
     CACHED_PATH: "PreprocessedData"
     EXP_DATA_NAME: "UBFC-rPPG_8ac63bff29"
     BEGIN: 0.0
@@ -58,7 +58,7 @@ VALID:
         LARGE_BOX_COEF: 1.5
         DETECTION:
           DO_DYNAMIC_DETECTION: False
-          DYNAMIC_DETECTION_FREQUENCY : 30
+          DYNAMIC_DETECTION_FREQUENCY: 30
           USE_MEDIAN_FACE_BOX: False
       RESIZE:
         H: 128
@@ -103,13 +103,18 @@ MODEL:
   PHYSNET:
     FRAME_NUM: 128
   CONTRAST_PHYS:
-    DELTA_T: 128
-    K: 4
-    WEAK_SUPERVISION: True
+    S: 2                   # 2x2 spatial quadrants (4 facial areas, Sec 4.2 & 5.1.2)
+    DELTA_T: 64            # 64 frames (half of 128) activates random temporal sampling
+    K: 4                   # 4 temporal clips per quadrant -> 16 samples per video
+    HIGH_PASS: 40.0        # physiological 40 bpm cutoff
+    LOW_PASS: 250.0        # physiological 250 bpm cutoff
+    ZERO_PAD: 2            # zero-padding factor for high-resolution PSD peak detection
+    WEAK_SUPERVISION: True # Contrast-Phys+ weakly-supervised with GT signals
+    MODEL_SELECTION: "IPR" # Model checkpoint selection by lowest Irrelevant Power Ratio
 INFERENCE:
   BATCH_SIZE: 4
   EVALUATION_METHOD: "FFT"
   EVALUATION_WINDOW:
-    USE_SMALLER_WINDOW: False
-    WINDOW_SIZE: 10
+    USE_SMALLER_WINDOW: False  # Full video evaluation for UBFC provides maximal FFT frequency resolution
+    WINDOW_SIZE: 30
   MODEL_PATH: ""

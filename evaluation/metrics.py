@@ -72,7 +72,8 @@ def calculate_metrics(predictions, labels, config):
                 continue
 
             if config.TEST.DATA.PREPROCESS.LABEL_TYPE == "Standardized" or \
-                    config.TEST.DATA.PREPROCESS.LABEL_TYPE == "Raw":
+                    config.TEST.DATA.PREPROCESS.LABEL_TYPE == "Raw" or \
+                    getattr(config.MODEL, "NAME", "") == "ContrastPhys":
                 diff_flag_test = False
             elif config.TEST.DATA.PREPROCESS.LABEL_TYPE == "DiffNormalized":
                 diff_flag_test = True

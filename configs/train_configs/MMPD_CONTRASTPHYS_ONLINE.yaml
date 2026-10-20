@@ -1,9 +1,9 @@
 BASE: ['']
 TOOLBOX_MODE: "train_and_test"
 TRAIN:
-  BATCH_SIZE: 4
+  BATCH_SIZE: 2  # 2 videos per batch matching official paper pairing
   EPOCHS: 30
-  LR: 9e-3
+  LR: 1e-5       # AdamW lr=1e-5 from official Contrast-Phys+ (TPAMI 2024)
   MODEL_FILE_NAME: MMPD_ContrastPhys_Online
   PLOT_LOSSES_AND_LR: True
   DATA:
@@ -85,7 +85,7 @@ VALID:
         W: 128
 TEST:
   METRICS: ['MAE', 'RMSE', 'MAPE', 'Pearson', 'SNR', 'BA']
-  USE_LAST_EPOCH: True
+  USE_LAST_EPOCH: False
   DATA:
     INFO:
       LIGHT: [1, 2, 3, 4]
@@ -133,6 +133,15 @@ MODEL:
   NAME: ContrastPhys
   PHYSNET:
     FRAME_NUM: 128
+  CONTRAST_PHYS:
+    S: 2                   # 2x2 spatial quadrants (4 facial areas, Sec 4.2 & 5.1.2)
+    DELTA_T: 64            # 64 frames (half of 128) activates random temporal sampling
+    K: 4                   # 4 temporal clips per quadrant -> 16 samples per video
+    HIGH_PASS: 40.0        # physiological 40 bpm cutoff
+    LOW_PASS: 250.0        # physiological 250 bpm cutoff
+    ZERO_PAD: 2            # zero-padding factor for high-resolution PSD peak detection
+    WEAK_SUPERVISION: True # Contrast-Phys+ weakly-supervised with GT signals
+    MODEL_SELECTION: "IPR" # Model checkpoint selection by lowest Irrelevant Power Ratio
 INFERENCE:
   BATCH_SIZE: 4
   EVALUATION_METHOD: "FFT"
