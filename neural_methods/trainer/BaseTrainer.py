@@ -58,6 +58,18 @@ class BaseTrainer:
 
         print('Saving outputs to:', output_path)
 
+        # Automatic mirroring of test output pickle to Google Drive or custom backup directory
+        backup_dir = getattr(config.MODEL, 'BACKUP_DIR', '') or (
+            '/content/drive/MyDrive/rPPG_Checkpoints' if os.path.exists('/content/drive/MyDrive') else ''
+        )
+        if backup_dir and os.path.exists(backup_dir):
+            try:
+                import shutil
+                shutil.copy2(output_path, os.path.join(backup_dir, os.path.basename(output_path)))
+                print(f"--> [Google Drive / Backup Sync] Mirrored test predictions pickle to: {backup_dir}")
+            except Exception as e:
+                print(f"Note: Could not mirror test outputs pickle to {backup_dir}: {e}")
+
     def plot_losses_and_lrs(self, train_loss, valid_loss, lrs, config):
 
         output_dir = os.path.join(config.LOG.PATH, config.TRAIN.DATA.EXP_DATA_NAME, 'plots')
