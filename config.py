@@ -295,6 +295,8 @@ _C.MODEL = CN()
 _C.MODEL.NAME = ''
 # Checkpoint to resume, could be overwritten by command line argument
 _C.MODEL.RESUME = ''
+# Backup directory (e.g. Google Drive) for saved checkpoints in real-time
+_C.MODEL.BACKUP_DIR = ''
 # Dropout rate
 _C.MODEL.DROP_RATE = 0.0
 _C.MODEL.MODEL_DIR = 'PreTrainedModels'

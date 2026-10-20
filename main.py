@@ -46,6 +46,7 @@ def add_args(parser):
     parser.add_argument('--device', required=False, default=None, type=str, help="The device to run on (cuda, mps, cpu).")
     parser.add_argument('--model_path', required=False, default=None, type=str, help="Path to checkpoint for testing/evaluation.")
     parser.add_argument('--resume', required=False, default=None, type=str, help="Path to checkpoint to resume training from.")
+    parser.add_argument('--backup_dir', required=False, default=None, type=str, help="Directory (e.g. Google Drive) to mirror saved checkpoints in real-time.")
     '''Neural Method Sample YAML LIST:
       SCAMPS_SCAMPS_UBFC-rPPG_TSCAN_BASIC.yaml
       SCAMPS_SCAMPS_UBFC-rPPG_DEEPPHYS_BASIC.yaml
@@ -181,6 +182,8 @@ if __name__ == "__main__":
         config.INFERENCE.MODEL_PATH = args.model_path
     if args.resume:
         config.MODEL.RESUME = args.resume
+    if args.backup_dir:
+        config.MODEL.BACKUP_DIR = args.backup_dir
     config.freeze()
     
     print('Configuration:')

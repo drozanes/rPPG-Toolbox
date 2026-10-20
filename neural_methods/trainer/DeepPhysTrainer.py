@@ -283,6 +283,13 @@ class DeepPhysTrainer(BaseTrainer):
                         f"Online training with Early Stopping (best epoch {self.best_epoch}, val loss {self.min_valid_loss:.4f})."
                     ])
                 print("Appended DeepPhys benchmark results to rPPG_results_database.csv!")
+                backup_dir = getattr(self.config.MODEL, 'BACKUP_DIR', '') or (
+                    '/content/drive/MyDrive/rPPG_Checkpoints' if os.path.exists('/content/drive/MyDrive') else ''
+                )
+                if backup_dir and os.path.exists(backup_dir):
+                    import shutil
+                    shutil.copy2("rPPG_results_database.csv", os.path.join(backup_dir, "rPPG_results_database.csv"))
+                    print(f"--> [Google Drive / Backup Sync] Mirrored rPPG_results_database.csv to {backup_dir}")
             except Exception as e:
                 print(f"Note: Could not auto-append to database CSV: {e}")
 
@@ -306,4 +313,19 @@ class DeepPhysTrainer(BaseTrainer):
         model_path = os.path.join(
             self.model_dir, self.model_file_name + '_Epoch' + str(index) + '.pth')
         torch.save(self.model.state_dict(), model_path)
+
+        # Automatic real-time mirroring to Google Drive or custom backup directory
+        backup_dir = getattr(self.config.MODEL, 'BACKUP_DIR', '') or (
+            '/content/drive/MyDrive/rPPG_Checkpoints' if os.path.exists('/content/drive/MyDrive') else ''
+        )
+        if backup_dir:
+            try:
+                import shutil
+                os.makedirs(backup_dir, exist_ok=True)
+                backup_file = os.path.join(backup_dir, self.model_file_name + f'_Epoch{index}.pth')
+                shutil.copy2(model_path, backup_file)
+                print(f"--> [Google Drive / Backup Sync] Successfully mirrored checkpoint: {backup_file}")
+            except Exception as e:
+                print(f"Warning: Could not mirror checkpoint to backup dir {backup_dir}: {e}")
+
  
