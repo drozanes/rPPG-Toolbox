@@ -105,7 +105,10 @@ class DeepPhys(nn.Module):
         if self.use_fusion_stem:
             x_fused = self.fusion_stem(inputs)
             H_in, W_in = inputs.shape[-2], inputs.shape[-1]
-            x_fused = F.adaptive_avg_pool2d(x_fused, (H_in - 2, W_in - 2))
+            if x_fused.shape[-2] == H_in and x_fused.shape[-1] == W_in:
+                x_fused = x_fused[:, :, 1:-1, 1:-1]
+            elif (x_fused.shape[-2], x_fused.shape[-1]) != (H_in - 2, W_in - 2):
+                x_fused = F.interpolate(x_fused, size=(H_in - 2, W_in - 2), mode='bilinear', align_corners=False)
             d3 = self.avg_pooling_1(x_fused)
             d4 = self.dropout_1(d3)
 
