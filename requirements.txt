@@ -5,7 +5,7 @@ pandas
 scikit-image
 numpy
 matplotlib
-opencv-python
+opencv-python<5.0.0
 PyYAML
 scikit-learn
 tensorboardX
