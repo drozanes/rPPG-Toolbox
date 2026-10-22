@@ -1,0 +1,153 @@
+BASE: ['']
+TOOLBOX_MODE: "train_and_test"
+TRAIN:
+  BATCH_SIZE: 4
+  EPOCHS: 30
+  PATIENCE: 3
+  LR: 1e-4
+  MODEL_FILE_NAME: MMPD_PhysFormer_FusionStem_Online
+  PLOT_LOSSES_AND_LR: True
+  DATA:
+    INFO:
+      LIGHT: [1, 2, 3, 4]
+      MOTION: [1, 2, 3, 4]
+      EXERCISE: [1, 2]
+      SKIN_COLOR: [1, 2, 3, 4, 5, 6]
+      GENDER: [1, 2]
+      GLASSER: [1, 2]
+      HAIR_COVER: [1, 2]
+      MAKEUP: [1, 2]
+    FS: 30
+    DATASET: MMPD
+    DO_PREPROCESS: False
+    ONLINE: True
+    DATA_FORMAT: NCDHW
+    DATA_PATH: "./MMPD_dataset"
+    CACHED_PATH: "PreprocessedData"
+    EXP_DATA_NAME: ""
+    BEGIN: 0.0
+    END: 0.8
+    PREPROCESS:
+      DATA_TYPE: ['Standardized']
+      DATA_AUG: ['None']
+      LABEL_TYPE: DiffNormalized
+      DO_CHUNK: True
+      CHUNK_LENGTH: 160
+      CROP_FACE:
+        DO_CROP_FACE: True
+        BACKEND: 'HC'
+        USE_LARGE_FACE_BOX: True
+        LARGE_BOX_COEF: 1.5
+        DETECTION:
+          DO_DYNAMIC_DETECTION: False
+          DYNAMIC_DETECTION_FREQUENCY: 30
+          USE_MEDIAN_FACE_BOX: False
+      RESIZE:
+        H: 128
+        W: 128
+VALID:
+  DATA:
+    INFO:
+      LIGHT: [1, 2, 3, 4]
+      MOTION: [1, 2, 3, 4]
+      EXERCISE: [1, 2]
+      SKIN_COLOR: [1, 2, 3, 4, 5, 6]
+      GENDER: [1, 2]
+      GLASSER: [1, 2]
+      HAIR_COVER: [1, 2]
+      MAKEUP: [1, 2]
+    FS: 30
+    DATASET: MMPD
+    DO_PREPROCESS: False
+    ONLINE: True
+    DATA_FORMAT: NCDHW
+    DATA_PATH: "./MMPD_dataset"
+    CACHED_PATH: "PreprocessedData"
+    EXP_DATA_NAME: ""
+    BEGIN: 0.8
+    END: 0.9
+    PREPROCESS:
+      DATA_TYPE: ['Standardized']
+      DATA_AUG: ['None']
+      LABEL_TYPE: DiffNormalized
+      DO_CHUNK: True
+      CHUNK_LENGTH: 160
+      CROP_FACE:
+        DO_CROP_FACE: True
+        BACKEND: 'HC'
+        USE_LARGE_FACE_BOX: True
+        LARGE_BOX_COEF: 1.5
+        DETECTION:
+          DO_DYNAMIC_DETECTION: False
+          DYNAMIC_DETECTION_FREQUENCY: 30
+          USE_MEDIAN_FACE_BOX: False
+      RESIZE:
+        H: 128
+        W: 128
+TEST:
+  METRICS: ['MAE', 'RMSE', 'MAPE', 'Pearson', 'SNR', 'BA']
+  USE_LAST_EPOCH: False
+  DATA:
+    INFO:
+      LIGHT: [1, 2, 3, 4]
+      MOTION: [1, 2, 3, 4]
+      EXERCISE: [1, 2]
+      SKIN_COLOR: [1, 2, 3, 4, 5, 6]
+      GENDER: [1, 2]
+      GLASSER: [1, 2]
+      HAIR_COVER: [1, 2]
+      MAKEUP: [1, 2]
+    FS: 30
+    DATASET: MMPD
+    DO_PREPROCESS: False
+    ONLINE: True
+    DATA_FORMAT: NCDHW
+    DATA_PATH: "./MMPD_dataset"
+    CACHED_PATH: "PreprocessedData"
+    EXP_DATA_NAME: ""
+    BEGIN: 0.9
+    END: 1.0
+    PREPROCESS:
+      DATA_TYPE: ['Standardized']
+      DATA_AUG: ['None']
+      LABEL_TYPE: DiffNormalized
+      DO_CHUNK: True
+      CHUNK_LENGTH: 160
+      CROP_FACE:
+        DO_CROP_FACE: True
+        BACKEND: 'HC'
+        USE_LARGE_FACE_BOX: True
+        LARGE_BOX_COEF: 1.5
+        DETECTION:
+          DO_DYNAMIC_DETECTION: False
+          DYNAMIC_DETECTION_FREQUENCY: 30
+          USE_MEDIAN_FACE_BOX: False
+      RESIZE:
+        H: 128
+        W: 128
+DEVICE: mps
+NUM_OF_GPU_TRAIN: 1
+LOG:
+  PATH: runs/exp
+MODEL:
+  DROP_RATE: 0.2
+  NAME: PhysFormer
+  USE_FUSION_STEM: True
+  FUSION_STEM:
+    ALPHA: 0.5
+    BETA: 0.5
+  PHYSFORMER:
+    PATCH_SIZE: 4
+    DIM: 96
+    FF_DIM: 144
+    NUM_HEADS: 4
+    NUM_LAYERS: 12
+    THETA: 0.7
+    USE_FUSION_STEM: True
+INFERENCE:
+  BATCH_SIZE: 4
+  EVALUATION_METHOD: "FFT"
+  EVALUATION_WINDOW:
+    USE_SMALLER_WINDOW: False
+    WINDOW_SIZE: 10
+  MODEL_PATH: ""
