@@ -70,7 +70,7 @@ class DeepPhysTrainer(BaseTrainer):
                     self.best_epoch = resumed_epoch
                     print(f"Resuming training starting from Epoch {self.start_epoch} (previous checkpoint was Epoch {self.best_epoch})")
 
-            self.num_train_batches = len(data_loader["train"])
+            self.num_train_batches = len(data_loader["train"]) if (data_loader is not None and data_loader.get("train") is not None) else 0
             self.criterion = torch.nn.MSELoss()
             self.optimizer = optim.AdamW(
                 self.model.parameters(), lr=config.TRAIN.LR, weight_decay=0)

@@ -88,7 +88,7 @@ def main():
         batch_size=config.TRAIN.BATCH_SIZE,
         shuffle=False
     )
-    data_loader_dict = {"train": None, "valid": valid_dataloader, "test": None}
+    data_loader_dict = {"train": [], "valid": valid_dataloader, "test": None}
 
     # Initialize Trainer
     if config.MODEL.NAME == "PhysFormer":

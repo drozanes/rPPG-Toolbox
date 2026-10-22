@@ -88,7 +88,7 @@ class PhysFormerTrainer(BaseTrainer):
                     self.best_epoch = resumed_epoch
                     print(f"Resuming PhysFormer starting from Epoch {self.start_epoch} (previous checkpoint was Epoch {self.best_epoch})")
 
-            self.num_train_batches = len(data_loader["train"])
+            self.num_train_batches = len(data_loader["train"]) if (data_loader is not None and data_loader.get("train") is not None) else 0
             self.criterion_reg = torch.nn.MSELoss()
             self.criterion_L1loss = torch.nn.L1Loss()
             self.criterion_class = torch.nn.CrossEntropyLoss()
@@ -235,7 +235,8 @@ class PhysFormerTrainer(BaseTrainer):
 
         print('')
         print(" ====Validating===")
-        self.optimizer.zero_grad()
+        if hasattr(self, 'optimizer') and self.optimizer is not None:
+            self.optimizer.zero_grad()
         with torch.no_grad():
             hrs = []
             vbar = tqdm(data_loader["valid"], ncols=80)
