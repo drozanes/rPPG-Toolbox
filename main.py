@@ -227,6 +227,8 @@ if __name__ == "__main__":
         model_name = config.MODEL.NAME if config.TOOLBOX_MODE != "unsupervised_method" else config.UNSUPERVISED.METHOD
         if isinstance(model_name, list) and len(model_name) > 0:
             model_name = model_name[0]
+        if getattr(config.MODEL, "USE_FUSION_STEM", False):
+            model_name = f"{model_name}_FusionStem"
         lr = config.TRAIN.LR if hasattr(config.TRAIN, "LR") else "N/A"
         bs = config.TRAIN.BATCH_SIZE if hasattr(config.TRAIN, "BATCH_SIZE") else "N/A"
         epochs = config.TRAIN.EPOCHS if hasattr(config.TRAIN, "EPOCHS") else "N/A"
@@ -234,8 +236,9 @@ if __name__ == "__main__":
         
         # We save config as a dict to wandb
         wandb.init(project="rPPG-Master-Thesis", name=run_name, config=dict(config))
-    except Exception:
-        pass
+        print(f"✅ Connected to WandB! Project: rPPG-Master-Thesis | Run: {run_name}")
+    except Exception as e:
+        print(f"WandB init skipped/error: {e}")
 
 
     data_loader_dict = dict() # dictionary of data loaders 

@@ -146,6 +146,11 @@ class DeepPhysTrainer(BaseTrainer):
                     running_loss = 0.0
                 train_loss.append(loss.item())
                 tbar.set_postfix({"loss": loss.item(), "lr": self.optimizer.param_groups[0]["lr"]})
+                try:
+                    if 'wandb' in sys.modules and idx % 20 == 0:
+                        wandb.log({'Batch Loss': loss.item(), 'lr': self.optimizer.param_groups[0]["lr"]})
+                except Exception:
+                    pass
 
             # Append the mean training loss for the epoch
             mean_training_losses.append(np.mean(train_loss))
