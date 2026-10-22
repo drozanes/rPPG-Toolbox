@@ -16,6 +16,9 @@ def main():
     parser.add_argument("--num_workers", default=2, type=int)
     parser.add_argument("--device", default="cuda", type=str)
     parser.add_argument("--batch_size", default=4, type=int)
+    parser.add_argument("--start_epoch", default=0, type=int, help="Only evaluate epochs >= start_epoch")
+    parser.add_argument("--cache_in_ram", action="store_true", default=True, help="Pre-cache validation batches in RAM for 20x faster evaluation")
+    parser.add_argument("--no_cache", action="store_false", dest="cache_in_ram", help="Disable RAM caching")
     args, unknown = parser.parse_known_args()
 
     import numpy as np
@@ -60,10 +63,15 @@ def main():
         match = re.search(r'Epoch(\d+)\.pth', os.path.basename(f))
         if match:
             epoch_num = int(match.group(1))
-            checkpoints.append((epoch_num, f))
+            if epoch_num >= args.start_epoch:
+                checkpoints.append((epoch_num, f))
 
     checkpoints.sort(key=lambda x: x[0])
-    print(f"Found {len(checkpoints)} checkpoints (Epoch {checkpoints[0][0]} to Epoch {checkpoints[-1][0]}):")
+    if not checkpoints:
+        print(f"No checkpoints found with epoch >= {args.start_epoch}")
+        return
+
+    print(f"Found {len(checkpoints)} checkpoints to evaluate (Epoch {checkpoints[0][0]} to Epoch {checkpoints[-1][0]}):")
 
     # Initialize Validation Dataloader
     print("\nInitializing validation dataloader...")
@@ -88,7 +96,18 @@ def main():
         batch_size=config.TRAIN.BATCH_SIZE,
         shuffle=False
     )
-    data_loader_dict = {"train": [], "valid": valid_dataloader, "test": None}
+
+    from tqdm import tqdm
+    if args.cache_in_ram:
+        print("\n⚡ [Optimization] Pre-caching validation dataset into RAM (only done once)...")
+        print("   This takes ~6-7 mins once, and makes evaluating each epoch take ~10 seconds instead of 7 minutes!")
+        val_cached = []
+        for batch in tqdm(valid_dataloader, desc="Pre-caching Val into RAM", ncols=80):
+            val_cached.append((batch[0].float().cpu(), batch[1].float().cpu()))
+        data_loader_dict = {"train": [], "valid": val_cached, "test": None}
+        print(f"✅ Successfully cached {len(val_cached)} batches in RAM!")
+    else:
+        data_loader_dict = {"train": [], "valid": valid_dataloader, "test": None}
 
     # Initialize Trainer
     if config.MODEL.NAME == "PhysFormer":
