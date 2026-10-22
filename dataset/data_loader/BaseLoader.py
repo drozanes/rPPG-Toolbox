@@ -19,6 +19,8 @@ import multiprocessing as mp
 import gc
 
 import cv2
+cv2.ocl.setUseOpenCL(False)
+cv2.setNumThreads(0)
 import numpy as np
 import pandas as pd
 import torch
@@ -282,14 +284,19 @@ class BaseLoader(Dataset):
         """
         if backend == "HC":
             # Use OpenCV's Haar Cascade algorithm implementation for face detection
-            # This should only utilize the CPU
+            # Explicitly disable OpenCL in worker processes to avoid GPU allocation failures
+            cv2.ocl.setUseOpenCL(False)
             detector = cv2.CascadeClassifier(
             './dataset/haarcascade_frontalface_default.xml')
 
             # Computed face_zone(s) are in the form [x_coord, y_coord, width, height]
             # (x,y) corresponds to the top-left corner of the zone to define using
             # the computed width and height.
-            face_zone = detector.detectMultiScale(frame[:, :, :3].astype(np.uint8))
+            try:
+                face_zone = detector.detectMultiScale(frame[:, :, :3].astype(np.uint8))
+            except cv2.error as e:
+                print(f"Warning: OpenCV detectMultiScale error: {e}. Falling back to full frame.")
+                face_zone = []
 
             if len(face_zone) < 1:
                 print("ERROR: No Face Detected")

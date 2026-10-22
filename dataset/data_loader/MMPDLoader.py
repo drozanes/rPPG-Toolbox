@@ -4,6 +4,8 @@
 
 import os
 import cv2
+cv2.ocl.setUseOpenCL(False)
+cv2.setNumThreads(0)
 import glob
 import numpy as np
 import re

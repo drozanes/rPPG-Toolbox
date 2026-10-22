@@ -1,8 +1,12 @@
 """ The main function of rPPG deep learning pipeline."""
 
 import os
+os.environ["OPENCV_OPENCL_RUNTIME"] = "disabled"
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+import cv2
+cv2.ocl.setUseOpenCL(False)
+cv2.setNumThreads(0)
 import argparse
 import random
 import time
@@ -36,6 +40,9 @@ def seed_worker(worker_id):
     worker_seed = torch.initial_seed() % 2 ** 32
     np.random.seed(worker_seed)
     random.seed(worker_seed)
+    import cv2
+    cv2.ocl.setUseOpenCL(False)
+    cv2.setNumThreads(0)
 
 
 def add_args(parser):
