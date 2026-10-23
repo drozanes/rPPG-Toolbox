@@ -54,7 +54,14 @@ class ContrastPhysNet(PhysNet_padding_Encoder_Decoder_MAX):
 
         # Contrast-Phys+ Spatiotemporal rPPG Block:
         # Pool spatially to S x S quadrants (e.g. 2x2 = 4 quadrants: forehead, cheeks, chin)
-        x_st = self.poolspa_contrast(x)  # [B, 64, T, S, S]
+        if x.shape[-2] % self.S == 0 and x.shape[-1] % self.S == 0:
+            k_h = x.shape[-2] // self.S
+            k_w = x.shape[-1] // self.S
+            x_st = nn.functional.avg_pool3d(x, kernel_size=(1, k_h, k_w), stride=(1, k_h, k_w))
+        else:
+            B_curr, C_curr, T_curr, H_curr, W_curr = x.shape
+            x_2d = x.permute(0, 2, 1, 3, 4).reshape(B_curr * T_curr, C_curr, H_curr, W_curr)
+            x_st = nn.functional.adaptive_avg_pool2d(x_2d, (self.S, self.S)).view(B_curr, T_curr, C_curr, self.S, self.S).permute(0, 2, 1, 3, 4)
         st_block = self.ConvBlock10(x_st)  # [B, 1, T, S, S]
 
         # Extract spatial quadrant signals

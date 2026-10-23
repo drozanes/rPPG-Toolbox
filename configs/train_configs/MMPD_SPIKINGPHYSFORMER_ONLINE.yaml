@@ -1,8 +1,9 @@
 BASE: ['']
 TOOLBOX_MODE: "train_and_test"
 TRAIN:
-  BATCH_SIZE: 2
-  EPOCHS: 10
+  BATCH_SIZE: 4
+  EPOCHS: 25
+  PATIENCE: 4
   LR: 3e-3
   MODEL_FILE_NAME: MMPD_SpikingPhysFormer_Online
   PLOT_LOSSES_AND_LR: True
@@ -85,7 +86,7 @@ VALID:
         W: 128
 TEST:
   METRICS: ['MAE', 'RMSE', 'MAPE', 'Pearson', 'SNR', 'BA']
-  USE_LAST_EPOCH: True
+  USE_LAST_EPOCH: False
   DATA:
     INFO:
       LIGHT: [1, 2, 3, 4]
@@ -140,7 +141,7 @@ MODEL:
     THETA: 0.7
     T_S: 4
 INFERENCE:
-  BATCH_SIZE: 2
+  BATCH_SIZE: 4
   EVALUATION_METHOD: "FFT"
   EVALUATION_WINDOW:
     USE_SMALLER_WINDOW: False

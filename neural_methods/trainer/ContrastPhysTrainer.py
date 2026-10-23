@@ -25,6 +25,8 @@ class ContrastPhysTrainer(BaseTrainer):
         self.min_valid_loss = None
         self.min_valid_ipr = None
         self.best_epoch = 0
+        self.patience = getattr(config.TRAIN, 'PATIENCE', 4)
+        self.patience_counter = 0
 
         frames = config.MODEL.PHYSNET.FRAME_NUM
         contrast_cfg = getattr(config.MODEL, 'CONTRAST_PHYS', None)
@@ -44,7 +46,7 @@ class ContrastPhysTrainer(BaseTrainer):
             Fs=config.TRAIN.DATA.FS, high_pass=40, low_pass=250)
 
         if config.TOOLBOX_MODE == "train_and_test":
-            self.num_train_batches = len(data_loader["train"])
+            self.num_train_batches = len(data_loader["train"]) if (data_loader is not None and data_loader.get("train") is not None) else 0
             self.loss_model = ContrastPhysLoss(config)
             self.optimizer = optim.AdamW(
                 self.model.parameters(), lr=config.TRAIN.LR, weight_decay=5e-5)
@@ -110,18 +112,30 @@ class ContrastPhysTrainer(BaseTrainer):
                 contrast_cfg = getattr(self.config.MODEL, 'CONTRAST_PHYS', None)
                 selection_metric = getattr(contrast_cfg, 'MODEL_SELECTION', 'IPR') if contrast_cfg else 'IPR'
                 
+                improved = False
                 if selection_metric == 'IPR':
                     if self.min_valid_ipr is None or valid_ipr < self.min_valid_ipr:
                         self.min_valid_ipr = valid_ipr
                         self.min_valid_loss = valid_loss
                         self.best_epoch = epoch
+                        self.patience_counter = 0
+                        improved = True
                         print(f"Update best model! Best epoch: {self.best_epoch} (IPR: {valid_ipr:.4f}, Loss: {valid_loss:.6f})")
                 else:
                     if self.min_valid_loss is None or valid_loss < self.min_valid_loss:
                         self.min_valid_loss = valid_loss
                         self.min_valid_ipr = valid_ipr
                         self.best_epoch = epoch
+                        self.patience_counter = 0
+                        improved = True
                         print(f"Update best model! Best epoch: {self.best_epoch} (Loss: {valid_loss:.6f}, IPR: {valid_ipr:.4f})")
+                
+                if not improved:
+                    self.patience_counter += 1
+                    print(f"Validation did not improve. Early stopping patience: {self.patience_counter}/{self.patience}")
+                    if self.patience_counter >= self.patience:
+                        print(f"Early stopping triggered at epoch {epoch}! Best epoch was {self.best_epoch}")
+                        break
                     
         if self.config.TRAIN.PLOT_LOSSES_AND_LR:
             self.plot_losses_and_lrs(mean_training_losses, mean_valid_losses, lrs, self.config)

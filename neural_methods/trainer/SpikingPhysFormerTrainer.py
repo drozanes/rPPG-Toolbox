@@ -40,6 +40,8 @@ class SpikingPhysFormerTrainer(BaseTrainer):
         self.config = config 
         self.min_valid_loss = None
         self.best_epoch = 0
+        self.patience = getattr(config.TRAIN, 'PATIENCE', 4)
+        self.patience_counter = 0
 
         use_fusion_stem = getattr(config.MODEL, "USE_FUSION_STEM", False) or \
             (hasattr(config.MODEL, "SPIKINGPHYSFORMER") and getattr(config.MODEL.SPIKINGPHYSFORMER, "USE_FUSION_STEM", False))
@@ -69,7 +71,7 @@ class SpikingPhysFormerTrainer(BaseTrainer):
                 m.load_state_dict(pe_dict, strict=False)
                 print(f"Successfully transferred {len(pe_dict)} pre-trained PE parameters to SpikingPhysFormer!")
 
-            self.num_train_batches = len(data_loader["train"])
+            self.num_train_batches = len(data_loader["train"]) if (data_loader is not None and data_loader.get("train") is not None) else 0
             self.criterion_reg = torch.nn.MSELoss()
             self.criterion_L1loss = torch.nn.L1Loss()
             self.criterion_class = torch.nn.CrossEntropyLoss()
@@ -187,7 +189,14 @@ class SpikingPhysFormerTrainer(BaseTrainer):
                 if self.min_valid_loss is None or (valid_loss < self.min_valid_loss):
                     self.min_valid_loss = valid_loss
                     self.best_epoch = epoch
-                    print("Update best model! Best epoch: {}".format(self.best_epoch))
+                    self.patience_counter = 0
+                    print(f"Update best model! Best epoch: {self.best_epoch}, min_val_loss: {self.min_valid_loss:.4f}")
+                else:
+                    self.patience_counter += 1
+                    print(f"Validation loss did not improve ({valid_loss:.4f} >= {self.min_valid_loss:.4f}). Early stopping patience: {self.patience_counter}/{self.patience}")
+                    if self.patience_counter >= self.patience:
+                        print(f"Early stopping triggered at epoch {epoch}! Best epoch was {self.best_epoch} with val loss {self.min_valid_loss:.4f}")
+                        break
         
         if self.config.TRAIN.PLOT_LOSSES_AND_LR:
             self.plot_losses_and_lrs(mean_training_losses, mean_valid_losses, lrs, self.config)
