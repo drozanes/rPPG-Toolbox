@@ -1,11 +1,11 @@
 BASE: ['']
 TOOLBOX_MODE: "train_and_test"
 TRAIN:
-  BATCH_SIZE: 4  # 4 videos per batch gives 6 negative video pairs
+  BATCH_SIZE: 8  # 8 videos per batch gives 28 negative video pairs
   EPOCHS: 30
   PATIENCE: 15
-  LR: 1e-4       # Calibrated lr=1e-4 from 1.42 MAE milestone
-  MODEL_FILE_NAME: PURE_ContrastPhys
+  LR: 1e-5       # Paper specification (ECCV 2022): AdamW 1e-5 prevents latent collapse
+  MODEL_FILE_NAME: PURE_ContrastPhys_Colab_Calibrated
   PLOT_LOSSES_AND_LR: True
   DATA:
     FS: 30
@@ -14,13 +14,13 @@ TRAIN:
     DATA_FORMAT: NCDHW
     DATA_PATH: "./PURE_dataset"
     CACHED_PATH: "PreprocessedData"
-    EXP_DATA_NAME: "PURE_608f362849"
+    EXP_DATA_NAME: "PURE_954977d7f0"
     BEGIN: 0.0
     END: 0.8
     PREPROCESS:
-      DATA_TYPE: ['DiffNormalized']
+      DATA_TYPE: ['Standardized']
       DATA_AUG: ['None']
-      LABEL_TYPE: DiffNormalized
+      LABEL_TYPE: Raw
       DO_CHUNK: True
       CHUNK_LENGTH: 128
       CROP_FACE:
@@ -43,13 +43,13 @@ VALID:
     DATA_FORMAT: NCDHW
     DATA_PATH: "./PURE_dataset"
     CACHED_PATH: "PreprocessedData"
-    EXP_DATA_NAME: "PURE_608f362849"
+    EXP_DATA_NAME: "PURE_954977d7f0"
     BEGIN: 0.8
     END: 1.0
     PREPROCESS:
-      DATA_TYPE: ['DiffNormalized']
+      DATA_TYPE: ['Standardized']
       DATA_AUG: ['None']
-      LABEL_TYPE: DiffNormalized
+      LABEL_TYPE: Raw
       DO_CHUNK: True
       CHUNK_LENGTH: 128
       CROP_FACE:
@@ -74,12 +74,12 @@ TEST:
     DATA_FORMAT: NCDHW
     DATA_PATH: "./PURE_dataset"
     CACHED_PATH: "PreprocessedData"
-    EXP_DATA_NAME: "PURE_608f362849"
+    EXP_DATA_NAME: "PURE_954977d7f0"
     BEGIN: 0.8
     END: 1.0
     PREPROCESS:
-      DATA_TYPE: ['DiffNormalized']
-      LABEL_TYPE: DiffNormalized
+      DATA_TYPE: ['Standardized']
+      LABEL_TYPE: Raw
       DO_CHUNK: True
       CHUNK_LENGTH: 128
       CROP_FACE:
@@ -94,7 +94,7 @@ TEST:
       RESIZE:
         H: 128
         W: 128
-DEVICE: mps
+DEVICE: cuda:0
 NUM_OF_GPU_TRAIN: 1
 LOG:
   PATH: runs/exp
@@ -104,18 +104,18 @@ MODEL:
   PHYSNET:
     FRAME_NUM: 128
   CONTRAST_PHYS:
-    S: 8                   # 8x8 spatial grid (64 sub-regions from 1.42 MAE milestone)
-    DELTA_T: 128           # 128 frames for sub-1.5 BPM spectral resolution
+    S: 2                   # 2x2 spatial quadrants (paper specification)
+    DELTA_T: 128           # Temporal window
     K: 4                   # 4 temporal clips per sub-region
     HIGH_PASS: 40.0        # physiological 40 bpm cutoff
     LOW_PASS: 250.0        # physiological 250 bpm cutoff
     ZERO_PAD: 2            # zero-padding factor for high-resolution PSD peak detection
     WEAK_SUPERVISION: True # Contrast-Phys+ weakly-supervised with GT signals
-    MODEL_SELECTION: "loss" # Model checkpoint selection by lowest validation loss
+    MODEL_SELECTION: "IPR" # Model checkpoint selection by lowest Irrelevant Power Ratio (TPAMI 2024)
 INFERENCE:
-  BATCH_SIZE: 4
+  BATCH_SIZE: 8
   EVALUATION_METHOD: "FFT"
   EVALUATION_WINDOW:
-    USE_SMALLER_WINDOW: False  # Full video evaluation on PURE provides high spectral resolution
+    USE_SMALLER_WINDOW: True  # 30-second sliding evaluation window (ECCV 2022 paper protocol)
     WINDOW_SIZE: 30
   MODEL_PATH: ""

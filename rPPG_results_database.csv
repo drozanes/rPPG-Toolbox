@@ -42,3 +42,6 @@ MMPD,Unsupervised,ICA,21.163,26.818,23.778,0.019,-7.664,0.0,1.61,Yes,"Online eva
 MMPD,Unsupervised,PBV,22.504,29.226,25.162,0.007,-7.769,0.0,2.26,Yes,"Online evaluation across all 33 subjects (660 videos). PBV blood volume pulse signature on full video."
 MMPD,Supervised,DeepPhys,27.927,34.781,30.543,0.096,-7.553,0.0,Fast,Yes,"Online training with Early Stopping (best epoch 9, val loss 0.9786)."
 MMPD,Supervised,PhysFormer,9.141,16.904,9.878,0.305,-1.222,0.0,Moderate,Yes,"Spatiotemporal Vision Transformer (12 layers, 160 frames, theta=0.7)."
+MMPD,Supervised,SpikingPhysFormer,22.522,26.148,28.859,-0.173,-7.778,11.3,4.5,Yes,"Neural Networks 2025 SNN architecture on 160-frame clips. Standardized RGB without FusionStem."
+MMPD,Supervised,SpikingPhysFormer (FusionStem),12.151,20.865,12.754,0.254,-3.860,13.2,4.4,Yes,"SNN architecture with Multi-Temporal FusionStem. Dramatic gain: MAE dropped from 22.52 to 12.15 BPM, Pearson rose from -0.17 to +0.25."
+MMPD,Weakly-Supervised,ContrastPhys+,32.432,41.681,31.752,0.135,-10.899,0.0,3.1,Yes,"Contrast-Phys+ TPAMI 2024 setup: 2x2 ST-rPPG pooling, active PSD [40, 250], pairwise MSE loss."
