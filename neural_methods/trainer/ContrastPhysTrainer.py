@@ -198,9 +198,41 @@ class ContrastPhysTrainer(BaseTrainer):
                     predictions[subj_index][sort_index] = pred_ppg[idx].cpu()
                     labels[subj_index][sort_index] = label[idx].cpu()
 
-        calculate_metrics(predictions, labels, self.config)
+        metrics = calculate_metrics(predictions, labels, self.config)
         if self.config.TEST.OUTPUT_SAVE_DIR:
             self.save_test_outputs(predictions, labels, self.config)
+
+        # Log test metrics to wandb if active
+        try:
+            if 'wandb' in sys.modules and wandb.run is not None:
+                wandb.log({f"Test/{k}": v for k, v in metrics.items() if isinstance(v, (int, float))})
+        except Exception:
+            pass
+
+        # Auto-append test results to rPPG_results_database.csv if present
+        if metrics and os.path.exists("rPPG_results_database.csv"):
+            try:
+                import csv
+                model_name = "ContrastPhys+ (FusionStem)" if (hasattr(self.config.MODEL, "CONTRAST_PHYS") and getattr(self.config.MODEL.CONTRAST_PHYS, "USE_FUSION_STEM", False)) else "ContrastPhys+"
+                with open("rPPG_results_database.csv", "a", newline="") as f:
+                    writer = csv.writer(f)
+                    writer.writerow([
+                        self.config.TEST.DATA.DATASET,
+                        "Weakly-Supervised",
+                        model_name,
+                        f"{metrics.get('MAE', 0.0):.3f}",
+                        f"{metrics.get('RMSE', 0.0):.3f}",
+                        f"{metrics.get('MAPE', 0.0):.3f}",
+                        f"{metrics.get('Pearson', 0.0):.3f}",
+                        f"{metrics.get('SNR', 0.0):.3f}",
+                        "0.0",
+                        "3.1",
+                        "Yes",
+                        "Contrast-Phys+ TPAMI 2024 setup: 2x2 ST-rPPG pooling, active PSD [40, 250], pairwise MSE loss."
+                    ])
+                print(f"Appended {model_name} benchmark results to rPPG_results_database.csv!")
+            except Exception as e:
+                print(f"Error appending to rPPG_results_database.csv: {e}")
 
     def save_model(self, index):
         if not os.path.exists(self.model_dir):

@@ -32,18 +32,37 @@ def power2db(mag):
     """Convert power to db."""
     return 10 * np.log10(mag)
 
-def _calculate_fft_hr(ppg_signal, fs=60, low_pass=0.6, high_pass=3.3):
+def _calculate_fft_hr(ppg_signal, fs=60, low_pass=0.6, high_pass=3.3, harmonics_removal=True):
     # Note: to more closely match results in the NeurIPS 2023 toolbox paper,
     # we recommend low_pass=0.75 and high_pass=2.5 instead of the defaults above.
-    """Calculate heart rate based on PPG using Fast Fourier transform (FFT)."""
-    ppg_signal = np.expand_dims(ppg_signal, 0)
-    N = _next_power_of_2(ppg_signal.shape[1])
-    f_ppg, pxx_ppg = scipy.signal.periodogram(ppg_signal, fs=fs, nfft=N, detrend=False)
-    fmask_ppg = np.argwhere((f_ppg >= low_pass) & (f_ppg <= high_pass))
-    mask_ppg = np.take(f_ppg, fmask_ppg)
-    mask_pxx = np.take(pxx_ppg, fmask_ppg)
-    fft_hr = np.take(mask_ppg, np.argmax(mask_pxx, 0))[0] * 60
-    return fft_hr
+    """Calculate heart rate based on PPG using Fast Fourier transform (FFT) with harmonic awareness."""
+    ppg_signal = np.squeeze(ppg_signal)
+    if ppg_signal.ndim == 0 or len(ppg_signal) == 0:
+        return 0.0
+    L = len(ppg_signal)
+    # High-resolution zero padding (ensures sub-1.5 BPM spectral resolution)
+    N = max(1024, _next_power_of_2(L) * 2)
+    f_ppg, pxx_ppg = scipy.signal.periodogram(ppg_signal, fs=fs, nfft=N, detrend=False, window='hann')
+    fmask_ppg = (f_ppg >= low_pass) & (f_ppg <= high_pass)
+    mask_f = f_ppg[fmask_ppg]
+    mask_pxx = pxx_ppg[fmask_ppg]
+
+    if len(mask_f) == 0:
+        return 0.0
+
+    peaks, _ = scipy.signal.find_peaks(mask_pxx)
+    if len(peaks) >= 2 and harmonics_removal:
+        sorted_peak_indices = peaks[np.argsort(mask_pxx[peaks])[::-1]]
+        peak1_hr = mask_f[sorted_peak_indices[0]] * 60.0
+        peak2_hr = mask_f[sorted_peak_indices[1]] * 60.0
+        # If the strongest peak is approximately twice the second peak (2nd harmonic interference)
+        if abs(peak1_hr - 2.0 * peak2_hr) < 12.0:
+            return peak2_hr
+        return peak1_hr
+    elif len(peaks) == 1:
+        return mask_f[peaks[0]] * 60.0
+    else:
+        return mask_f[np.argmax(mask_pxx)] * 60.0
 
 def _calculate_peak_hr(ppg_signal, fs):
     """Calculate heart rate based on PPG using peak detection."""

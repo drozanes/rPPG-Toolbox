@@ -53,18 +53,28 @@ class DeepPhys(nn.Module):
         if self.use_fusion_stem:
             self.fusion_stem = FusionStem(
                 in_channels=self.in_channels,
-                out_channels=self.nb_filters1,
+                out_channels=64,
                 alpha=fusion_stem_alpha,
                 beta=fusion_stem_beta,
-                downsample_stride=1,
-                output_format="flattened"
+                downsample_stride=2,
+                output_format="deepphys"
             )
+            # Motion branch takes 32 feature channels from FusionStem upsampling
+            self.motion_conv1 = nn.Conv2d(32, self.nb_filters1, kernel_size=self.kernel_size, padding=(1, 1),
+                                          bias=True)
+            self.motion_conv2 = nn.Conv2d(self.nb_filters1, self.nb_filters1, kernel_size=self.kernel_size, bias=True)
+            # Appearance branch takes 3 raw RGB channels to generate skin attention mask
+            self.apperance_conv1 = nn.Conv2d(self.in_channels, self.nb_filters1, kernel_size=self.kernel_size,
+                                             padding=(1, 1), bias=True)
+            self.apperance_conv2 = nn.Conv2d(self.nb_filters1, self.nb_filters1, kernel_size=self.kernel_size, bias=True)
+            self.apperance_att_conv1 = nn.Conv2d(self.nb_filters1, 1, kernel_size=1, padding=(0, 0), bias=True)
+            self.attn_mask_1 = Attention_mask()
         else:
             # Motion branch convs
             self.motion_conv1 = nn.Conv2d(self.in_channels, self.nb_filters1, kernel_size=self.kernel_size, padding=(1, 1),
                                           bias=True)
             self.motion_conv2 = nn.Conv2d(self.nb_filters1, self.nb_filters1, kernel_size=self.kernel_size, bias=True)
-            # Apperance branch convs
+            # Appearance branch convs
             self.apperance_conv1 = nn.Conv2d(self.in_channels, self.nb_filters1, kernel_size=self.kernel_size,
                                              padding=(1, 1), bias=True)
             self.apperance_conv2 = nn.Conv2d(self.nb_filters1, self.nb_filters1, kernel_size=self.kernel_size, bias=True)
@@ -96,6 +106,9 @@ class DeepPhys(nn.Module):
             self.final_dense_1 = nn.Linear(16384, self.nb_dense, bias=True)
         elif img_size == 96:
             self.final_dense_1 = nn.Linear(30976, self.nb_dense, bias=True)
+        elif img_size == 128:
+            self.avg_pooling_3 = nn.AvgPool2d((4, 4))
+            self.final_dense_1 = nn.Linear(14400, self.nb_dense, bias=True)
         else:
             raise Exception('Unsupported image size')
         self.final_dense_2 = nn.Linear(self.nb_dense, 1, bias=True)
@@ -103,36 +116,35 @@ class DeepPhys(nn.Module):
     def forward(self, inputs, params=None):
 
         if self.use_fusion_stem:
-            x_fused = self.fusion_stem(inputs)
-            H_in, W_in = inputs.shape[-2], inputs.shape[-1]
-            if x_fused.shape[-2] == H_in and x_fused.shape[-1] == W_in:
-                x_fused = x_fused[:, :, 1:-1, 1:-1]
-            elif (x_fused.shape[-2], x_fused.shape[-1]) != (H_in - 2, W_in - 2):
-                x_fused = F.interpolate(x_fused, size=(H_in - 2, W_in - 2), mode='bilinear', align_corners=False)
-            d3 = self.avg_pooling_1(x_fused)
-            d4 = self.dropout_1(d3)
-
-            r3 = self.avg_pooling_2(x_fused)
-            r4 = self.dropout_2(r3)
+            if inputs.ndim == 5:
+                N, D, C, H, W = inputs.shape
+                diff_input = self.fusion_stem(inputs) # [N*D, 32, H, W]
+                raw_input = inputs.contiguous().view(N * D, C, H, W) # [N*D, 3, H, W]
+            elif inputs.ndim == 4 and inputs.shape[1] == 6:
+                diff_input = self.fusion_stem(inputs) # [B, 32, H, W]
+                raw_input = inputs[:, 3:, :, :]       # [B, 3, H, W]
+            else:
+                diff_input = self.fusion_stem(inputs)
+                raw_input = inputs
         else:
             diff_input = inputs[:, :3, :, :]
             raw_input = inputs[:, 3:, :, :]
 
-            d1 = torch.tanh(self.motion_conv1(diff_input))
-            d2 = torch.tanh(self.motion_conv2(d1))
+        d1 = torch.tanh(self.motion_conv1(diff_input))
+        d2 = torch.tanh(self.motion_conv2(d1))
 
-            r1 = torch.tanh(self.apperance_conv1(raw_input))
-            r2 = torch.tanh(self.apperance_conv2(r1))
+        r1 = torch.tanh(self.apperance_conv1(raw_input))
+        r2 = torch.tanh(self.apperance_conv2(r1))
 
-            g1 = torch.sigmoid(self.apperance_att_conv1(r2))
-            g1 = self.attn_mask_1(g1)
-            gated1 = d2 * g1
+        g1 = torch.sigmoid(self.apperance_att_conv1(r2))
+        g1 = self.attn_mask_1(g1)
+        gated1 = d2 * g1
 
-            d3 = self.avg_pooling_1(gated1)
-            d4 = self.dropout_1(d3)
+        d3 = self.avg_pooling_1(gated1)
+        d4 = self.dropout_1(d3)
 
-            r3 = self.avg_pooling_2(r2)
-            r4 = self.dropout_2(r3)
+        r3 = self.avg_pooling_2(r2)
+        r4 = self.dropout_2(r3)
 
         d5 = torch.tanh(self.motion_conv3(d4))
         d6 = torch.tanh(self.motion_conv4(d5))

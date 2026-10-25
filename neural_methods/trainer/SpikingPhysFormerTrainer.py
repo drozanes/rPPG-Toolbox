@@ -264,9 +264,43 @@ class SpikingPhysFormerTrainer(BaseTrainer):
                     predictions[subj_index][sort_index] = pred_ppg_test[idx]
                     labels[subj_index][sort_index] = label[idx]
 
-        calculate_metrics(predictions, labels, self.config)
+        metrics = calculate_metrics(predictions, labels, self.config)
         if self.config.TEST.OUTPUT_SAVE_DIR:
             self.save_test_outputs(predictions, labels, self.config)
+
+        # Log test metrics to wandb if active
+        try:
+            if 'wandb' in sys.modules and wandb.run is not None:
+                wandb.log({f"Test/{k}": v for k, v in metrics.items() if isinstance(v, (int, float))})
+        except Exception:
+            pass
+
+        # Auto-append test results to rPPG_results_database.csv if present
+        if metrics and os.path.exists("rPPG_results_database.csv"):
+            try:
+                import csv
+                use_fusion = (hasattr(self.config.MODEL, "SPIKINGPHYSFORMER") and getattr(self.config.MODEL.SPIKINGPHYSFORMER, "USE_FUSION_STEM", False)) or getattr(self.config.MODEL, "USE_FUSION_STEM", False)
+                model_name = "SpikingPhysFormer (FusionStem)" if use_fusion else "SpikingPhysFormer"
+                notes = "SNN architecture with Multi-Temporal FusionStem." if use_fusion else "Neural Networks 2025 SNN architecture on 160-frame clips."
+                with open("rPPG_results_database.csv", "a", newline="") as f:
+                    writer = csv.writer(f)
+                    writer.writerow([
+                        self.config.TEST.DATA.DATASET,
+                        "Supervised",
+                        model_name,
+                        f"{metrics.get('MAE', 0.0):.3f}",
+                        f"{metrics.get('RMSE', 0.0):.3f}",
+                        f"{metrics.get('MAPE', 0.0):.3f}",
+                        f"{metrics.get('Pearson', 0.0):.3f}",
+                        f"{metrics.get('SNR', 0.0):.3f}",
+                        "0.0",
+                        "4.5",
+                        "Yes",
+                        notes
+                    ])
+                print(f"Appended {model_name} benchmark results to rPPG_results_database.csv!")
+            except Exception as e:
+                print(f"Error appending to rPPG_results_database.csv: {e}")
 
     def save_model(self, index):
         if not os.path.exists(self.model_dir):

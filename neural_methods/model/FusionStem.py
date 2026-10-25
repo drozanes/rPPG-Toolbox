@@ -58,6 +58,20 @@ class FusionStem(nn.Module):
         self.downsample_stride = downsample_stride
         self.output_format = output_format
 
+        # Upsampling layers to restore full (H, W) spatial resolution when requested (e.g. for DeepPhys/TS-CAN)
+        self.upsample1 = nn.Sequential(
+            nn.Upsample(scale_factor=(2, 2)),
+            nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1),
+            nn.BatchNorm2d(out_channels),
+            nn.ELU(),
+        )
+        self.upsample2 = nn.Sequential(
+            nn.Upsample(scale_factor=(2, 2)),
+            nn.Conv2d(out_channels, 32, kernel_size=3, padding=1),
+            nn.BatchNorm2d(32),
+            nn.ELU(),
+        )
+
         # Stem 11: Raw appearance branch (takes 3 channels)
         if downsample_stride == 2:
             self.stem11 = nn.Sequential(
@@ -162,6 +176,11 @@ class FusionStem(nn.Module):
         x_fused = self.alpha * x_path1 + self.beta * x_path2
 
         # Format output
+        if self.output_format in ("deepphys", "restored_32"):
+            x_fused = self.upsample1(x_fused)
+            x_fused = self.upsample2(x_fused)
+            return x_fused
+
         _, C_out, H_out, W_out = x_fused.shape
         if self.output_format == "NCDHW":
             return x_fused.view(N, D, C_out, H_out, W_out).permute(0, 2, 1, 3, 4)
@@ -196,6 +215,10 @@ class FusionStem(nn.Module):
         x_path1 = self.stem21(x_path1)
         x_path2 = self.stem22(x_diff)
         x_fused = self.alpha * x_path1 + self.beta * x_path2
+
+        if self.output_format in ("deepphys", "restored_32"):
+            x_fused = self.upsample1(x_fused)
+            x_fused = self.upsample2(x_fused)
 
         return x_fused
 

@@ -1,9 +1,9 @@
 BASE: ['']
 TOOLBOX_MODE: "train_and_test"
 TRAIN:
-  BATCH_SIZE: 2
+  BATCH_SIZE: 4
   EPOCHS: 30
-  PATIENCE: 4
+  PATIENCE: 12
   LR: 1e-5
   MODEL_FILE_NAME: MMPD_ContrastPhys_FusionStem_Online
   PLOT_LOSSES_AND_LR: True
@@ -32,7 +32,7 @@ TRAIN:
       DATA_AUG: ['None']
       LABEL_TYPE: Standardized
       DO_CHUNK: True
-      CHUNK_LENGTH: 128
+      CHUNK_LENGTH: 160
       CROP_FACE:
         DO_CROP_FACE: True
         BACKEND: 'HC'
@@ -71,7 +71,7 @@ VALID:
       DATA_AUG: ['None']
       LABEL_TYPE: Standardized
       DO_CHUNK: True
-      CHUNK_LENGTH: 128
+      CHUNK_LENGTH: 160
       CROP_FACE:
         DO_CROP_FACE: True
         BACKEND: 'HC'
@@ -112,7 +112,7 @@ TEST:
       DATA_AUG: ['None']
       LABEL_TYPE: Standardized
       DO_CHUNK: True
-      CHUNK_LENGTH: 128
+      CHUNK_LENGTH: 160
       CROP_FACE:
         DO_CROP_FACE: True
         BACKEND: 'HC'
@@ -137,11 +137,11 @@ MODEL:
     ALPHA: 0.5
     BETA: 0.5
   PHYSNET:
-    FRAME_NUM: 128
+    FRAME_NUM: 160
   CONTRAST_PHYS:
     USE_FUSION_STEM: True
     S: 2
-    DELTA_T: 64
+    DELTA_T: 80
     K: 4
     HIGH_PASS: 40.0
     LOW_PASS: 250.0

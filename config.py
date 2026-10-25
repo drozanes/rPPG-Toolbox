@@ -398,9 +398,14 @@ _C.MODEL.SPIKINGPHYSFORMER.USE_FUSION_STEM = False
 # Model Settings for Contrast-Phys+
 # -----------------------------------------------------------------------------
 _C.MODEL.CONTRAST_PHYS = CN()
+_C.MODEL.CONTRAST_PHYS.S = 2
 _C.MODEL.CONTRAST_PHYS.DELTA_T = 128
 _C.MODEL.CONTRAST_PHYS.K = 10
+_C.MODEL.CONTRAST_PHYS.HIGH_PASS = 40.0
+_C.MODEL.CONTRAST_PHYS.LOW_PASS = 250.0
+_C.MODEL.CONTRAST_PHYS.ZERO_PAD = 2
 _C.MODEL.CONTRAST_PHYS.WEAK_SUPERVISION = True
+_C.MODEL.CONTRAST_PHYS.MODEL_SELECTION = "IPR"
 _C.MODEL.CONTRAST_PHYS.USE_FUSION_STEM = False
 
 # -----------------------------------------------------------------------------

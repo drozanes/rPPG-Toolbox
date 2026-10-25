@@ -72,14 +72,15 @@ class IrrelevantPowerRatio(nn.Module):
 
 class ContrastPhysLoss(nn.Module):
     """
-    Official Contrast-Phys+ Spatio-Temporal Contrastive Loss (TPAMI 2024).
-    Supports both unsupervised and weakly-supervised learning.
+    Robust Spatio-Temporal Contrastive Loss for ContrastPhys / Contrast-Phys+ (TPAMI 2024 / ECCV 2022).
+    Uses centroid-anchored positive intra-video attraction and inter-video centroid repulsion.
+    Supports both unsupervised learning and weakly-supervised learning with contact PPG.
     """
     def __init__(self, config):
         super(ContrastPhysLoss, self).__init__()
         self.fs = config.TRAIN.DATA.FS
         contrast_cfg = getattr(config.MODEL, 'CONTRAST_PHYS', None)
-        self.delta_t = getattr(contrast_cfg, 'DELTA_T', 64) if contrast_cfg else 64
+        self.delta_t = getattr(contrast_cfg, 'DELTA_T', 128) if contrast_cfg else 128
         self.K = getattr(contrast_cfg, 'K', 4) if contrast_cfg else 4
         self.high_pass = getattr(contrast_cfg, 'HIGH_PASS', 40.0) if contrast_cfg else 40.0
         self.low_pass = getattr(contrast_cfg, 'LOW_PASS', 250.0) if contrast_cfg else 250.0
@@ -92,104 +93,59 @@ class ContrastPhysLoss(nn.Module):
             zero_pad=self.zero_pad
         )
 
-    def compare_samples(self, list_a, list_b, exclude_same=False):
-        """
-        Computes pairwise mean squared error between sample sets list_a and list_b.
-        Vectorized implementation of Eq. 5 and Eq. 7 of TPAMI 2024 paper.
-        """
-        # list_a: [N, F], list_b: [M, F]
-        N, F_dim = list_a.shape
-        M, _ = list_b.shape
-
-        diff = list_a.unsqueeze(1) - list_b.unsqueeze(0)  # [N, M, F]
-        sq_diff = torch.mean(diff ** 2, dim=-1)  # [N, M]
-
-        if exclude_same:
-            mask = ~torch.eye(N, dtype=torch.bool, device=list_a.device)
-            return torch.mean(sq_diff[mask])
-        else:
-            return torch.mean(sq_diff)
-
     def forward(self, st_block, labels=None):
-        # st_block: [B, N_spatial, T] (e.g. [B, 4, T])
+        # st_block: [B, N_spatial, T]
         if st_block.ndim == 2:
             st_block = st_block.unsqueeze(1)
 
         B, num_spatial, T = st_block.shape
+        actual_delta_t = self.delta_t if self.delta_t <= T else T
 
-        # Ensure temporal sampling is ALWAYS active
-        if self.delta_t >= T:
-            actual_delta_t = max(16, T // 2)
+        # Vectorized temporal sampling across all spatial regions
+        if actual_delta_t < T:
+            offsets = [torch.randint(0, T - actual_delta_t + 1, (1,), device=st_block.device).item() for _ in range(self.K)]
+            segments = torch.stack([st_block[:, :, o : o + actual_delta_t] for o in offsets], dim=2)  # [B, N, K, delta_t]
+            psds = self.norm_psd(segments)  # [B, N, K, F]
         else:
-            actual_delta_t = self.delta_t
+            psds = self.norm_psd(st_block).unsqueeze(2)  # [B, N, 1, F]
 
-        # 1. Spatiotemporal sampling on ST-rPPG block
-        all_samples = []
-        for b in range(B):
-            samples_per_video = []
-            for c in range(num_spatial):
-                for _ in range(self.K):
-                    if T > actual_delta_t:
-                        offset = torch.randint(0, T - actual_delta_t + 1, (1,), device=st_block.device).item()
-                        segment = st_block[b, c, offset : offset + actual_delta_t]
-                    else:
-                        segment = st_block[b, c, :]
-                    samples_per_video.append(self.norm_psd(segment))
-            all_samples.append(torch.stack(samples_per_video))  # [N, F_dim], N = num_spatial * K
+        B_c, N_c, K_c, F_c = psds.shape
+        psds_flat = psds.view(B_c, N_c * K_c, F_c)
+        mean_psd = torch.mean(psds_flat, dim=1, keepdim=True)  # [B, 1, F]
 
-        # 2. Positive rPPG-rPPG Loss (L_p^{RR})
-        # Samples from the same video must share identical heart rate PSD
-        pos_loss = sum(self.compare_samples(all_samples[b], all_samples[b], exclude_same=True) for b in range(B)) / B
+        # 1. Positive rPPG-rPPG Intra-video Loss (L_p^{RR}): Pull each patch PSD to video centroid
+        intra_loss = torch.mean((psds_flat - mean_psd) ** 2)
 
-        # 3. Negative rPPG-rPPG Loss (L_n^{RR})
-        # Samples from different videos must have distinct PSDs
-        if B >= 2:
-            neg_loss = 0.0
-            num_pairs = 0
-            for i in range(B):
-                for j in range(i + 1, B):
-                    neg_loss -= self.compare_samples(all_samples[i], all_samples[j], exclude_same=False)
-                    num_pairs += 1
-            neg_loss = neg_loss / num_pairs
-        else:
-            neg_loss = torch.tensor(0.0, device=st_block.device)
-
-        total_loss = pos_loss + neg_loss
-
-        # 4. Weak Supervision with Ground Truth (L_p^{GR} and L_n^{GR})
+        # 2. Weak Supervision: Positive GT-rPPG Intra-video Loss (L_p^{GR})
         if labels is not None:
-            if labels.ndim > 2:
-                labels = labels.squeeze(1)
-
-            gt_samples = []
-            for b in range(B):
-                gt_sig = labels[b]
-                samples_per_gt = []
-                for _ in range(num_spatial * self.K):
-                    if gt_sig.shape[-1] > actual_delta_t:
-                        offset = torch.randint(0, gt_sig.shape[-1] - actual_delta_t + 1, (1,), device=labels.device).item()
-                        gt_segment = gt_sig[offset : offset + actual_delta_t]
-                    else:
-                        gt_segment = gt_sig
-                    samples_per_gt.append(self.norm_psd(gt_segment))
-                gt_samples.append(torch.stack(samples_per_gt))
-
-            # GT-rPPG Positive Loss
-            pos_loss_gt = sum(self.compare_samples(all_samples[b], gt_samples[b], exclude_same=False) for b in range(B)) / B
-
-            # GT-rPPG Negative Loss
-            if B >= 2:
-                neg_loss_gt = 0.0
-                for i in range(B):
-                    for j in range(i + 1, B):
-                        neg_loss_gt -= 0.5 * (
-                            self.compare_samples(all_samples[i], gt_samples[j], exclude_same=False) +
-                            self.compare_samples(all_samples[j], gt_samples[i], exclude_same=False)
-                        )
-                neg_loss_gt = neg_loss_gt / num_pairs
+            labels_2d = labels.view(B_c, T)
+            if actual_delta_t < T:
+                gt_offsets = [torch.randint(0, T - actual_delta_t + 1, (1,), device=labels.device).item() for _ in range(self.K)]
+                gt_segments = torch.stack([labels_2d[:, o : o + actual_delta_t] for o in gt_offsets], dim=1)  # [B, K, delta_t]
+                gt_psd = self.norm_psd(gt_segments)  # [B, K, F]
             else:
-                neg_loss_gt = torch.tensor(0.0, device=st_block.device)
+                gt_psd = self.norm_psd(labels_2d).unsqueeze(1)  # [B, 1, F]
+            mean_gt_psd = torch.mean(gt_psd, dim=1, keepdim=True)  # [B, 1, F]
+            intra_loss = intra_loss + torch.mean((psds_flat - mean_gt_psd) ** 2)
 
-            total_loss = total_loss + pos_loss_gt + neg_loss_gt
+        # 3. Negative Inter-video Repulsion Loss (L_n^{RR} and L_n^{GR})
+        if B_c > 1:
+            v_means = mean_psd.squeeze(1)  # [B, F]
+            diff = v_means.unsqueeze(1) - v_means.unsqueeze(0)
+            sq_diff = torch.mean(diff ** 2, dim=-1)
+            mask = ~torch.eye(B_c, dtype=torch.bool, device=st_block.device)
+            neg_loss = - torch.mean(sq_diff[mask])
 
+            if labels is not None:
+                v_gt_means = mean_gt_psd.squeeze(1)
+                diff_gr = v_means.unsqueeze(1) - v_gt_means.unsqueeze(0)
+                sq_diff_gr = torch.mean(diff_gr ** 2, dim=-1)
+                neg_loss_gr = - torch.mean(sq_diff_gr[mask])
+                inter_loss = (neg_loss + 2.0 * neg_loss_gr) / 3.0
+            else:
+                inter_loss = neg_loss
+        else:
+            inter_loss = torch.tensor(0.0, device=st_block.device)
+
+        total_loss = intra_loss + inter_loss
         return total_loss

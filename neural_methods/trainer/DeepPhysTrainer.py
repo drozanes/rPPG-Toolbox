@@ -39,6 +39,7 @@ class DeepPhysTrainer(BaseTrainer):
         self.start_epoch = 0
         use_fusion_stem = getattr(config.MODEL, "USE_FUSION_STEM", False) or \
             (hasattr(config.MODEL, "DEEPPHYS") and getattr(config.MODEL.DEEPPHYS, "USE_FUSION_STEM", False))
+        self.use_fusion_stem = use_fusion_stem
         alpha = getattr(getattr(config.MODEL, "FUSION_STEM", None), "ALPHA", 0.5)
         beta = getattr(getattr(config.MODEL, "FUSION_STEM", None), "BETA", 0.5)
 
@@ -122,7 +123,8 @@ class DeepPhysTrainer(BaseTrainer):
                 data = batch[0].to(self.device).contiguous()
                 labels = batch[1].to(self.device).contiguous()
                 N, D, C, H, W = data.shape
-                data = data.view(N * D, C, H, W).contiguous()
+                if not self.use_fusion_stem:
+                    data = data.view(N * D, C, H, W).contiguous()
                 labels = labels.view(-1, 1).contiguous()
                 self.optimizer.zero_grad()
                 pred_ppg = self.model(data)
@@ -203,7 +205,8 @@ class DeepPhysTrainer(BaseTrainer):
                 data_valid = valid_batch[0].to(self.device).contiguous()
                 labels_valid = valid_batch[1].to(self.device).contiguous()
                 N, D, C, H, W = data_valid.shape
-                data_valid = data_valid.view(N * D, C, H, W).contiguous()
+                if not self.use_fusion_stem:
+                    data_valid = data_valid.view(N * D, C, H, W).contiguous()
                 labels_valid = labels_valid.view(-1, 1).contiguous()
                 pred_ppg_valid = self.model(data_valid)
                 loss = self.criterion(pred_ppg_valid, labels_valid)
@@ -263,7 +266,8 @@ class DeepPhysTrainer(BaseTrainer):
                 data_test = test_batch[0].to(self.config.DEVICE).contiguous()
                 labels_test = test_batch[1].to(self.config.DEVICE).contiguous()
                 N, D, C, H, W = data_test.shape
-                data_test = data_test.view(N * D, C, H, W).contiguous()
+                if not self.use_fusion_stem:
+                    data_test = data_test.view(N * D, C, H, W).contiguous()
                 labels_test = labels_test.view(-1, 1).contiguous()
                 pred_ppg_test = self.model(data_test)
 

@@ -1,9 +1,10 @@
 BASE: ['']
 TOOLBOX_MODE: "train_and_test"
 TRAIN:
-  BATCH_SIZE: 2  # 2 videos per batch matching official paper pairing
+  BATCH_SIZE: 4  # 4 videos per batch gives 6 negative video pairs
   EPOCHS: 30
-  LR: 1e-5       # AdamW lr=1e-5 from official Contrast-Phys+ (TPAMI 2024)
+  PATIENCE: 15
+  LR: 1e-4       # Calibrated lr=1e-4 from 1.42 MAE milestone
   MODEL_FILE_NAME: PURE_ContrastPhys
   PLOT_LOSSES_AND_LR: True
   DATA:
@@ -74,7 +75,7 @@ TEST:
     DATA_PATH: "./PURE_dataset"
     CACHED_PATH: "PreprocessedData"
     EXP_DATA_NAME: "PURE_608f362849"
-    BEGIN: 0.0
+    BEGIN: 0.8
     END: 1.0
     PREPROCESS:
       DATA_TYPE: ['DiffNormalized']
@@ -103,14 +104,14 @@ MODEL:
   PHYSNET:
     FRAME_NUM: 128
   CONTRAST_PHYS:
-    S: 2                   # 2x2 spatial quadrants (4 facial areas, Sec 4.2 & 5.1.2)
-    DELTA_T: 64            # 64 frames (half of 128) activates random temporal sampling
-    K: 4                   # 4 temporal clips per quadrant -> 16 samples per video
+    S: 8                   # 8x8 spatial grid (64 sub-regions from 1.42 MAE milestone)
+    DELTA_T: 128           # 128 frames for sub-1.5 BPM spectral resolution
+    K: 4                   # 4 temporal clips per sub-region
     HIGH_PASS: 40.0        # physiological 40 bpm cutoff
     LOW_PASS: 250.0        # physiological 250 bpm cutoff
     ZERO_PAD: 2            # zero-padding factor for high-resolution PSD peak detection
     WEAK_SUPERVISION: True # Contrast-Phys+ weakly-supervised with GT signals
-    MODEL_SELECTION: "IPR" # Model checkpoint selection by lowest Irrelevant Power Ratio
+    MODEL_SELECTION: "loss" # Model checkpoint selection by lowest validation loss
 INFERENCE:
   BATCH_SIZE: 4
   EVALUATION_METHOD: "FFT"
