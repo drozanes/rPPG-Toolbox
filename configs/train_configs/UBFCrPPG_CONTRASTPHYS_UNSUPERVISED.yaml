@@ -1,0 +1,122 @@
+BASE: ['']
+TOOLBOX_MODE: "train_and_test"
+TRAIN:
+  BATCH_SIZE: 4  # 4 videos per batch gives 6 negative video pairs for contrastive learning
+  EPOCHS: 30
+  PATIENCE: 30   # Train full 30 epochs without early stopping
+  LR: 1e-5       # AdamW 1e-5 (ECCV 2022 paper specification)
+  MODEL_FILE_NAME: UBFC-rPPG_ContrastPhys_Unsupervised
+  PLOT_LOSSES_AND_LR: True
+  DATA:
+    FS: 30
+    DATASET: UBFC-rPPG
+    DO_PREPROCESS: False
+    DATA_FORMAT: NCDHW
+    DATA_PATH: "/Users/drozanes/Downloads/UBFC-rPPG_Raw/DATASET_2"
+    CACHED_PATH: "PreprocessedData"
+    EXP_DATA_NAME: "UBFC-rPPG_8ac63bff29"
+    BEGIN: 0.0
+    END: 0.8
+    PREPROCESS:
+      DATA_TYPE: ['DiffNormalized']
+      DATA_AUG: ['None']
+      LABEL_TYPE: DiffNormalized
+      DO_CHUNK: True
+      CHUNK_LENGTH: 128
+      CROP_FACE:
+        DO_CROP_FACE: True
+        BACKEND: 'HC'
+        USE_LARGE_FACE_BOX: True
+        LARGE_BOX_COEF: 1.5
+        DETECTION:
+          DO_DYNAMIC_DETECTION: False
+          DYNAMIC_DETECTION_FREQUENCY: 30
+          USE_MEDIAN_FACE_BOX: False
+      RESIZE:
+        H: 128
+        W: 128
+VALID:
+  DATA:
+    FS: 30
+    DATASET: UBFC-rPPG
+    DO_PREPROCESS: False
+    DATA_FORMAT: NCDHW
+    DATA_PATH: "/Users/drozanes/Downloads/UBFC-rPPG_Raw/DATASET_2"
+    CACHED_PATH: "PreprocessedData"
+    EXP_DATA_NAME: "UBFC-rPPG_8ac63bff29"
+    BEGIN: 0.8
+    END: 1.0
+    PREPROCESS:
+      DATA_TYPE: ['DiffNormalized']
+      DATA_AUG: ['None']
+      LABEL_TYPE: DiffNormalized
+      DO_CHUNK: True
+      CHUNK_LENGTH: 128
+      CROP_FACE:
+        DO_CROP_FACE: True
+        BACKEND: 'HC'
+        USE_LARGE_FACE_BOX: True
+        LARGE_BOX_COEF: 1.5
+        DETECTION:
+          DO_DYNAMIC_DETECTION: False
+          DYNAMIC_DETECTION_FREQUENCY: 30
+          USE_MEDIAN_FACE_BOX: False
+      RESIZE:
+        H: 128
+        W: 128
+TEST:
+  METRICS: ['MAE', 'RMSE', 'MAPE', 'Pearson', 'SNR', 'BA']
+  USE_LAST_EPOCH: False
+  DATA:
+    FS: 30
+    DATASET: UBFC-rPPG
+    DO_PREPROCESS: False
+    DATA_FORMAT: NCDHW
+    DATA_PATH: "/Users/drozanes/Downloads/UBFC-rPPG_Raw/DATASET_2"
+    CACHED_PATH: "PreprocessedData"
+    EXP_DATA_NAME: "UBFC-rPPG_8ac63bff29"
+    BEGIN: 0.8
+    END: 1.0
+    PREPROCESS:
+      DATA_TYPE: ['DiffNormalized']
+      LABEL_TYPE: DiffNormalized
+      DO_CHUNK: True
+      CHUNK_LENGTH: 128
+      CROP_FACE:
+        DO_CROP_FACE: True
+        BACKEND: 'HC'
+        USE_LARGE_FACE_BOX: True
+        LARGE_BOX_COEF: 1.5
+        DETECTION:
+          DO_DYNAMIC_DETECTION: False
+          DYNAMIC_DETECTION_FREQUENCY: 30
+          USE_MEDIAN_FACE_BOX: False
+      RESIZE:
+        H: 128
+        W: 128
+DEVICE: mps
+NUM_OF_GPU_TRAIN: 1
+LOG:
+  PATH: runs/exp
+MODEL:
+  DROP_RATE: 0.2
+  NAME: ContrastPhys
+  PHYSNET:
+    FRAME_NUM: 128
+  CONTRAST_PHYS:
+    S: 2                   # 2x2 spatial quadrants
+    DELTA_T: 128           # 128 frames
+    K: 4                   # 4 temporal clips per quadrant
+    HIGH_PASS: 40.0        # physiological 40 bpm cutoff
+    LOW_PASS: 250.0        # physiological 250 bpm cutoff
+    ZERO_PAD: 2            # zero-padding factor
+    WEAK_SUPERVISION: False # PURE SELF-SUPERVISED CONTRASTIVE LEARNING (NO GT LABELS)
+    MODEL_SELECTION: "IPR" # Label-free selection by lowest Irrelevant Power Ratio (ECCV 2022)
+    USE_FUSION_STEM: False
+INFERENCE:
+  BATCH_SIZE: 4
+  EVALUATION_METHOD: "FFT"
+  EVALUATION_WINDOW:
+    USE_SMALLER_WINDOW: True
+    WINDOW_SIZE: 30
+  MODEL_PATH: ""
