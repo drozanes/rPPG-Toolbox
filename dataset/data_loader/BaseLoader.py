@@ -292,23 +292,33 @@ class BaseLoader(Dataset):
             # Computed face_zone(s) are in the form [x_coord, y_coord, width, height]
             # (x,y) corresponds to the top-left corner of the zone to define using
             # the computed width and height.
+            h_orig, w_orig = frame.shape[:2]
+            scale = 1
+            frame_input = frame[:, :, :3].astype(np.uint8)
+            # If input is low-resolution (e.g. MMPD 80x60), upscale for robust Haar Cascade feature response
+            if h_orig < 120 or w_orig < 120:
+                scale = 3
+                frame_input = cv2.resize(frame_input, (w_orig * scale, h_orig * scale))
+
             try:
-                face_zone = detector.detectMultiScale(frame[:, :, :3].astype(np.uint8))
+                face_zone = detector.detectMultiScale(frame_input)
             except cv2.error as e:
                 print(f"Warning: OpenCV detectMultiScale error: {e}. Falling back to full frame.")
                 face_zone = []
 
             if len(face_zone) < 1:
                 print("ERROR: No Face Detected")
-                face_box_coor = [0, 0, frame.shape[0], frame.shape[1]]
+                face_box_coor = [0, 0, frame.shape[1], frame.shape[0]]  # [x, y, w, h]
             elif len(face_zone) >= 2:
                 # Find the index of the largest face zone
                 # The face zones are boxes, so the width and height are the same
                 max_width_index = np.argmax(face_zone[:, 2])  # Index of maximum width
-                face_box_coor = face_zone[max_width_index]
+                raw_box = face_zone[max_width_index]
+                face_box_coor = [int(round(coord / scale)) for coord in raw_box]
                 print("Warning: More than one faces are detected. Only cropping the biggest one.")
             else:
-                face_box_coor = face_zone[0]     
+                raw_box = face_zone[0]
+                face_box_coor = [int(round(coord / scale)) for coord in raw_box]     
         elif "Y5F" in backend:
             # Use a YOLO5Face trained on WiderFace dataset
             # This utilizes both the CPU and GPU
@@ -339,7 +349,7 @@ class BaseLoader(Dataset):
 
             else:
                 print("ERROR: No Face Detected")
-                face_box_coor = [0, 0, frame.shape[0], frame.shape[1]]
+                face_box_coor = [0, 0, frame.shape[1], frame.shape[0]]
         else:
             raise ValueError("Unsupported face detection backend!")
 
@@ -378,9 +388,21 @@ class BaseLoader(Dataset):
         # Perform face detection by num_dynamic_det" times.
         for idx in range(num_dynamic_det):
             if use_face_detection:
-                face_region_all.append(self.face_detection(frames[detection_freq * idx], backend, use_larger_box, larger_box_coef))
+                det_box = self.face_detection(frames[detection_freq * idx], backend, use_larger_box, larger_box_coef)
+                # If face detection failed (fallback to full frame) but previous frame had a valid detection,
+                # reuse previous detection for temporal stability
+                is_full = (det_box[0] == 0 and det_box[1] == 0 and 
+                           det_box[2] == frames.shape[2] and det_box[3] == frames.shape[1])
+                if is_full and len(face_region_all) > 0:
+                    prev = face_region_all[-1]
+                    prev_is_full = (prev[0] == 0 and prev[1] == 0 and 
+                                    prev[2] == frames.shape[2] and prev[3] == frames.shape[1])
+                    if not prev_is_full:
+                        det_box = prev.copy()
+                face_region_all.append(det_box)
             else:
-                face_region_all.append([0, 0, frames.shape[1], frames.shape[2]])
+                # [x, y, width, height] for (N, H, W, C) frames
+                face_region_all.append([0, 0, frames.shape[2], frames.shape[1]])
         face_region_all = np.asarray(face_region_all, dtype='int')
         if use_median_box:
             # Generate a median bounding box based on all detected face regions
