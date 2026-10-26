@@ -239,3 +239,17 @@ class ContrastPhysTrainer(BaseTrainer):
             os.makedirs(self.model_dir)
         model_path = os.path.join(self.model_dir, self.model_file_name + '_Epoch' + str(index) + '.pth')
         torch.save(self.model.state_dict(), model_path)
+
+        # Automatic real-time mirroring to Google Drive or custom backup directory
+        backup_dir = getattr(self.config.MODEL, 'BACKUP_DIR', '') or (
+            '/content/drive/MyDrive/rPPG_Checkpoints' if os.path.exists('/content/drive/MyDrive') else ''
+        )
+        if backup_dir:
+            try:
+                import shutil
+                os.makedirs(backup_dir, exist_ok=True)
+                backup_file = os.path.join(backup_dir, self.model_file_name + f'_Epoch{index}.pth')
+                shutil.copy2(model_path, backup_file)
+                print(f"--> [Google Drive / Backup Sync] Successfully mirrored checkpoint: {backup_file}")
+            except Exception as e:
+                print(f"Warning: Could not mirror checkpoint to backup dir {backup_dir}: {e}")

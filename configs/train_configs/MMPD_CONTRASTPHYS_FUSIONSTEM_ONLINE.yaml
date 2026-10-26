@@ -3,7 +3,7 @@ TOOLBOX_MODE: "train_and_test"
 TRAIN:
   BATCH_SIZE: 4
   EPOCHS: 30
-  PATIENCE: 12
+  PATIENCE: 30
   LR: 1e-5
   MODEL_FILE_NAME: MMPD_ContrastPhys_FusionStem_Online
   PLOT_LOSSES_AND_LR: True

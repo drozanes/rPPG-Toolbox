@@ -3,7 +3,7 @@ TOOLBOX_MODE: "train_and_test"
 TRAIN:
   BATCH_SIZE: 4
   EPOCHS: 30
-  PATIENCE: 4
+  PATIENCE: 6
   LR: 1e-4
   MODEL_FILE_NAME: MMPD_DeepPhys_FusionStem_Online
   PLOT_LOSSES_AND_LR: True
@@ -28,11 +28,11 @@ TRAIN:
     BEGIN: 0.0
     END: 0.8
     PREPROCESS:
-      DATA_TYPE: ['Standardized']
+      DATA_TYPE: ['DiffNormalized', 'Raw']
       DATA_AUG: ['None']
-      LABEL_TYPE: Standardized
+      LABEL_TYPE: DiffNormalized
       DO_CHUNK: True
-      CHUNK_LENGTH: 160
+      CHUNK_LENGTH: 180
       CROP_FACE:
         DO_CROP_FACE: True
         BACKEND: 'HC'
@@ -43,8 +43,8 @@ TRAIN:
           DYNAMIC_DETECTION_FREQUENCY: 30
           USE_MEDIAN_FACE_BOX: False
       RESIZE:
-        H: 128
-        W: 128
+        H: 72
+        W: 72
 VALID:
   DATA:
     INFO:
@@ -67,11 +67,11 @@ VALID:
     BEGIN: 0.8
     END: 0.9
     PREPROCESS:
-      DATA_TYPE: ['Standardized']
+      DATA_TYPE: ['DiffNormalized', 'Raw']
       DATA_AUG: ['None']
-      LABEL_TYPE: Standardized
+      LABEL_TYPE: DiffNormalized
       DO_CHUNK: True
-      CHUNK_LENGTH: 160
+      CHUNK_LENGTH: 180
       CROP_FACE:
         DO_CROP_FACE: True
         BACKEND: 'HC'
@@ -82,8 +82,8 @@ VALID:
           DYNAMIC_DETECTION_FREQUENCY: 30
           USE_MEDIAN_FACE_BOX: False
       RESIZE:
-        H: 128
-        W: 128
+        H: 72
+        W: 72
 TEST:
   METRICS: ['MAE', 'RMSE', 'MAPE', 'Pearson', 'SNR', 'BA']
   USE_LAST_EPOCH: False
@@ -108,11 +108,10 @@ TEST:
     BEGIN: 0.9
     END: 1.0
     PREPROCESS:
-      DATA_TYPE: ['Standardized']
-      DATA_AUG: ['None']
-      LABEL_TYPE: Standardized
+      DATA_TYPE: ['DiffNormalized', 'Raw']
+      LABEL_TYPE: DiffNormalized
       DO_CHUNK: True
-      CHUNK_LENGTH: 160
+      CHUNK_LENGTH: 180
       CROP_FACE:
         DO_CROP_FACE: True
         BACKEND: 'HC'
@@ -123,8 +122,8 @@ TEST:
           DYNAMIC_DETECTION_FREQUENCY: 30
           USE_MEDIAN_FACE_BOX: False
       RESIZE:
-        H: 128
-        W: 128
+        H: 72
+        W: 72
 DEVICE: mps
 NUM_OF_GPU_TRAIN: 1
 LOG:

@@ -3,7 +3,7 @@ TOOLBOX_MODE: "train_and_test"
 TRAIN:
   BATCH_SIZE: 4  # 4 videos per batch gives 6 negative video pairs for contrastive learning
   EPOCHS: 30
-  PATIENCE: 12
+  PATIENCE: 30
   LR: 1e-5       # AdamW lr=1e-5 from official Contrast-Phys+ (TPAMI 2024)
   MODEL_FILE_NAME: MMPD_ContrastPhys_Online
   PLOT_LOSSES_AND_LR: True
