@@ -271,7 +271,7 @@ class BaseLoader(Dataset):
 
         return frames_clips, bvps_clips
 
-    def face_detection(self, frame, backend, use_larger_box=False, larger_box_coef=1.0):
+    def face_detection(self, frame, backend, use_larger_box=False, larger_box_coef=1.0, verbose=True):
         """Face detection on a single frame.
 
         Args:
@@ -279,6 +279,7 @@ class BaseLoader(Dataset):
             backend(str): backend to utilize for face detection.
             use_larger_box(bool): whether to use a larger bounding box on face detection.
             larger_box_coef(float): Coef. of larger box.
+            verbose(bool): whether to print detection messages.
         Returns:
             face_box_coor(List[int]): coordinates of face bouding box.
         """
@@ -303,11 +304,13 @@ class BaseLoader(Dataset):
             try:
                 face_zone = detector.detectMultiScale(frame_input)
             except cv2.error as e:
-                print(f"Warning: OpenCV detectMultiScale error: {e}. Falling back to full frame.")
+                if verbose:
+                    print(f"Warning: OpenCV detectMultiScale error: {e}. Falling back to full frame.")
                 face_zone = []
 
             if len(face_zone) < 1:
-                print("ERROR: No Face Detected")
+                if verbose:
+                    print("ERROR: No Face Detected")
                 face_box_coor = [0, 0, frame.shape[1], frame.shape[0]]  # [x, y, w, h]
             elif len(face_zone) >= 2:
                 # Find the index of the largest face zone
@@ -315,7 +318,8 @@ class BaseLoader(Dataset):
                 max_width_index = np.argmax(face_zone[:, 2])  # Index of maximum width
                 raw_box = face_zone[max_width_index]
                 face_box_coor = [int(round(coord / scale)) for coord in raw_box]
-                print("Warning: More than one faces are detected. Only cropping the biggest one.")
+                if verbose:
+                    print("Warning: More than one faces are detected. Only cropping the biggest one.")
             else:
                 raw_box = face_zone[0]
                 face_box_coor = [int(round(coord / scale)) for coord in raw_box]     
@@ -348,7 +352,8 @@ class BaseLoader(Dataset):
                 face_box_coor = [new_x, new_y, square_size, square_size]
 
             else:
-                print("ERROR: No Face Detected")
+                if verbose:
+                    print("ERROR: No Face Detected")
                 face_box_coor = [0, 0, frame.shape[1], frame.shape[0]]
         else:
             raise ValueError("Unsupported face detection backend!")
@@ -388,17 +393,38 @@ class BaseLoader(Dataset):
         # Perform face detection by num_dynamic_det" times.
         for idx in range(num_dynamic_det):
             if use_face_detection:
-                det_box = self.face_detection(frames[detection_freq * idx], backend, use_larger_box, larger_box_coef)
-                # If face detection failed (fallback to full frame) but previous frame had a valid detection,
-                # reuse previous detection for temporal stability
+                target_idx = detection_freq * idx
+                # Initial detection attempt on target frame
+                det_box = self.face_detection(frames[target_idx], backend, use_larger_box, larger_box_coef, verbose=False)
                 is_full = (det_box[0] == 0 and det_box[1] == 0 and 
                            det_box[2] == frames.shape[2] and det_box[3] == frames.shape[1])
+                
+                # If detection failed on target_idx (e.g. initial blink or exposure adjustment),
+                # scan forward up to 60 frames ahead to lock onto the subject's face
+                if is_full:
+                    scan_end = min(frames.shape[0], target_idx + 60)
+                    for offset in range(1, scan_end - target_idx, 2):
+                        alt_box = self.face_detection(frames[target_idx + offset], backend, use_larger_box, larger_box_coef, verbose=False)
+                        alt_is_full = (alt_box[0] == 0 and alt_box[1] == 0 and 
+                                       alt_box[2] == frames.shape[2] and alt_box[3] == frames.shape[1])
+                        if not alt_is_full:
+                            det_box = alt_box
+                            is_full = False
+                            break
+                
+                # If still full frame, reuse previous detection if available
                 if is_full and len(face_region_all) > 0:
                     prev = face_region_all[-1]
                     prev_is_full = (prev[0] == 0 and prev[1] == 0 and 
                                     prev[2] == frames.shape[2] and prev[3] == frames.shape[1])
                     if not prev_is_full:
                         det_box = prev.copy()
+                        is_full = False
+                
+                # If face detection genuinely failed across all scan attempts, notify once
+                if is_full:
+                    print("ERROR: No Face Detected")
+
                 face_region_all.append(det_box)
             else:
                 # [x, y, width, height] for (N, H, W, C) frames
