@@ -287,8 +287,27 @@ class BaseLoader(Dataset):
             # Use OpenCV's Haar Cascade algorithm implementation for face detection
             # Explicitly disable OpenCL in worker processes to avoid GPU allocation failures
             cv2.ocl.setUseOpenCL(False)
-            detector = cv2.CascadeClassifier(
-            './dataset/haarcascade_frontalface_default.xml')
+
+            # Resolve CascadeClassifier robustly across OpenCV builds and headless packages
+            detector_cls = getattr(cv2, 'CascadeClassifier', None)
+            if detector_cls is None and hasattr(cv2, 'objdetect'):
+                detector_cls = getattr(cv2.objdetect, 'CascadeClassifier', None)
+
+            if detector_cls is None:
+                if verbose:
+                    print("Warning: cv2.CascadeClassifier is unavailable in current OpenCV build. Falling back to full frame.")
+                return [0, 0, frame.shape[1], frame.shape[0]]
+
+            cascade_path = './dataset/haarcascade_frontalface_default.xml'
+            if not os.path.exists(cascade_path) and hasattr(cv2, 'data') and hasattr(cv2.data, 'haarcascades'):
+                cascade_path = os.path.join(cv2.data.haarcascades, 'haarcascade_frontalface_default.xml')
+
+            try:
+                detector = detector_cls(cascade_path)
+            except Exception as e:
+                if verbose:
+                    print(f"Warning: Failed to load CascadeClassifier: {e}. Falling back to full frame.")
+                return [0, 0, frame.shape[1], frame.shape[0]]
 
             # Computed face_zone(s) are in the form [x_coord, y_coord, width, height]
             # (x,y) corresponds to the top-left corner of the zone to define using
