@@ -130,7 +130,7 @@ NUM_OF_GPU_TRAIN: 1
 LOG:
   PATH: runs/exp
 MODEL:
-  RESUME: "auto"
+  RESUME: ""
   BACKUP_DIR: "/content/drive/MyDrive/rPPG_Checkpoints/MMPD_MediaPipe"
   DROP_RATE: 0.2
   NAME: ContrastPhys

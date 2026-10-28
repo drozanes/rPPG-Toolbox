@@ -47,29 +47,6 @@ class ContrastPhysTrainer(BaseTrainer):
         self.start_epoch = 0
 
         resume_path = getattr(config.MODEL, 'RESUME', '')
-        if resume_path == 'auto':
-            candidate_dirs = [
-                getattr(config.MODEL, 'BACKUP_DIR', ''),
-                '/content/drive/MyDrive/rPPG_Checkpoints/MMPD_MediaPipe',
-                '/content/drive/MyDrive/rPPG_Checkpoints/MMPD',
-                self.model_dir
-            ]
-            latest_ep = -1
-            best_file = None
-            for d in candidate_dirs:
-                if d and os.path.exists(d):
-                    import glob, re
-                    files = glob.glob(os.path.join(d, f"{self.model_file_name}_Epoch*.pth"))
-                    for f in files:
-                        m = re.search(r'Epoch(\d+)', f)
-                        if m:
-                            ep = int(m.group(1))
-                            if ep > latest_ep:
-                                latest_ep = ep
-                                best_file = f
-            if best_file:
-                resume_path = best_file
-
         if resume_path and os.path.exists(resume_path):
             print(f"Loading checkpoint to resume: {resume_path}")
             state_dict = torch.load(resume_path, map_location=self.device)
