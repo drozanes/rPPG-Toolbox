@@ -5,7 +5,7 @@ TRAIN:
   EPOCHS: 30
   PATIENCE: 30
   LR: 1e-5       # AdamW lr=1e-5 from official Contrast-Phys+ (TPAMI 2024)
-  MODEL_FILE_NAME: MMPD_ContrastPhys_Online
+  MODEL_FILE_NAME: MMPD_ContrastPhys_MediaPipe_Online
   PLOT_LOSSES_AND_LR: True
   DATA:
     INFO:
@@ -35,11 +35,11 @@ TRAIN:
       CHUNK_LENGTH: 160
       CROP_FACE:
         DO_CROP_FACE: True
-        BACKEND: 'HC'
+        BACKEND: 'MP'
         USE_LARGE_FACE_BOX: True
         LARGE_BOX_COEF: 1.5
         DETECTION:
-          DO_DYNAMIC_DETECTION: False
+          DO_DYNAMIC_DETECTION: True
           DYNAMIC_DETECTION_FREQUENCY: 30
           USE_MEDIAN_FACE_BOX: False
       RESIZE:
@@ -74,11 +74,11 @@ VALID:
       CHUNK_LENGTH: 160
       CROP_FACE:
         DO_CROP_FACE: True
-        BACKEND: 'HC'
+        BACKEND: 'MP'
         USE_LARGE_FACE_BOX: True
         LARGE_BOX_COEF: 1.5
         DETECTION:
-          DO_DYNAMIC_DETECTION: False
+          DO_DYNAMIC_DETECTION: True
           DYNAMIC_DETECTION_FREQUENCY: 30
           USE_MEDIAN_FACE_BOX: False
       RESIZE:
@@ -115,11 +115,11 @@ TEST:
       CHUNK_LENGTH: 160
       CROP_FACE:
         DO_CROP_FACE: True
-        BACKEND: 'HC'
+        BACKEND: 'MP'
         USE_LARGE_FACE_BOX: True
         LARGE_BOX_COEF: 1.5
         DETECTION:
-          DO_DYNAMIC_DETECTION: False
+          DO_DYNAMIC_DETECTION: True
           DYNAMIC_DETECTION_FREQUENCY: 30
           USE_MEDIAN_FACE_BOX: False
       RESIZE:
@@ -130,6 +130,7 @@ NUM_OF_GPU_TRAIN: 1
 LOG:
   PATH: runs/exp
 MODEL:
+  BACKUP_DIR: "/content/drive/MyDrive/rPPG_Checkpoints/MMPD_MediaPipe"
   DROP_RATE: 0.2
   NAME: ContrastPhys
   PHYSNET:
