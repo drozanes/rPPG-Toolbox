@@ -13,6 +13,11 @@ import time
 
 import numpy as np
 import torch
+import torch.multiprocessing
+try:
+    torch.multiprocessing.set_sharing_strategy('file_system')
+except Exception:
+    pass
 from config import get_config
 from dataset import data_loader
 from neural_methods.trainer.BaseTrainer import BaseTrainer

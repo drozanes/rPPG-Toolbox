@@ -47,9 +47,35 @@ class ContrastPhysTrainer(BaseTrainer):
         self.start_epoch = 0
 
         resume_path = getattr(config.MODEL, 'RESUME', '')
-        if resume_path and os.path.exists(resume_path):
-            print(f"Loading checkpoint to resume: {resume_path}")
-            state_dict = torch.load(resume_path, map_location=self.device)
+        if resume_path:
+            actual_path = None
+            if os.path.exists(resume_path):
+                actual_path = resume_path
+            else:
+                # Resolve possible subdirectories if path had missing subfolder
+                fname = os.path.basename(resume_path)
+                backup_dir = getattr(config.MODEL, 'BACKUP_DIR', '')
+                candidate_paths = [
+                    os.path.join(backup_dir, fname) if backup_dir else '',
+                    os.path.join('/content/drive/MyDrive/rPPG_Checkpoints/MMPD', fname),
+                    os.path.join('/content/drive/MyDrive/rPPG_Checkpoints/MMPD_MediaPipe', fname),
+                    os.path.join('/content/drive/MyDrive/rPPG_Checkpoints', fname),
+                    os.path.join(self.model_dir, fname),
+                ]
+                for cp in candidate_paths:
+                    if cp and os.path.exists(cp):
+                        actual_path = cp
+                        print(f"Located specified resume checkpoint at: {actual_path}")
+                        break
+
+            if actual_path is None:
+                raise FileNotFoundError(
+                    f"\n[ERROR] Specified resume checkpoint '{resume_path}' was not found on disk!\n"
+                    f"Please check your Google Drive folder or run '!ls /content/drive/MyDrive/rPPG_Checkpoints/'."
+                )
+
+            print(f"Loading checkpoint to resume: {actual_path}")
+            state_dict = torch.load(actual_path, map_location=self.device)
             if hasattr(self.model, 'module') and not any(k.startswith('module.') for k in state_dict.keys()):
                 state_dict = {'module.' + k: v for k, v in state_dict.items()}
             elif not hasattr(self.model, 'module') and any(k.startswith('module.') for k in state_dict.keys()):
@@ -57,7 +83,7 @@ class ContrastPhysTrainer(BaseTrainer):
             self.model.load_state_dict(state_dict)
 
             import re
-            match = re.search(r'Epoch(\d+)', resume_path)
+            match = re.search(r'Epoch(\d+)', actual_path)
             if match:
                 resumed_epoch = int(match.group(1))
                 self.start_epoch = resumed_epoch + 1
