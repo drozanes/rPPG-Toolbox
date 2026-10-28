@@ -374,6 +374,65 @@ class BaseLoader(Dataset):
                 if verbose:
                     print("ERROR: No Face Detected")
                 face_box_coor = [0, 0, frame.shape[1], frame.shape[0]]
+        elif "MP" in backend.upper() or "MEDIAPIPE" in backend.upper():
+            # MediaPipe BlazeFace detection (optimized for mobile & neural landmarks)
+            # Ensure multiprocessing safety across PyTorch DataLoader workers (each worker has its own instance)
+            curr_pid = os.getpid()
+            if getattr(self, '_mp_detector_pid', None) != curr_pid:
+                self._mp_detector = None
+                self._mp_detector_pid = curr_pid
+
+            if not hasattr(self, '_mp_detector') or self._mp_detector is None:
+                try:
+                    import mediapipe as mp
+                    from mediapipe.tasks import python as mp_python
+                    from mediapipe.tasks.python import vision as mp_vision
+                    model_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'blaze_face_short_range.tflite')
+                    if not os.path.exists(model_path):
+                        model_path = 'blaze_face_short_range.tflite'
+                    if not os.path.exists(model_path):
+                        # Auto-download from Google CDN if missing
+                        import urllib.request
+                        url = "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite"
+                        urllib.request.urlretrieve(url, model_path)
+                    base_options = mp_python.BaseOptions(model_asset_path=model_path)
+                    options = mp_vision.FaceDetectorOptions(base_options=base_options, min_detection_confidence=0.25)
+                    self._mp_detector = mp_vision.FaceDetector.create_from_options(options)
+                except Exception as e:
+                    if verbose:
+                        print(f"MediaPipe initialization failed: {e}")
+                    self._mp_detector = None
+
+            face_box_coor = None
+            if hasattr(self, '_mp_detector') and self._mp_detector is not None:
+                try:
+                    import mediapipe as mp
+                    u_frame = (frame * 255).astype(np.uint8) if frame.max() <= 1.0 else frame.astype(np.uint8)
+                    u_frame_rgb = cv2.cvtColor(u_frame[:, :, :3], cv2.COLOR_BGR2RGB)
+                    mp_img = mp.Image(image_format=mp.ImageFormat.SRGB, data=u_frame_rgb)
+                    det_res = self._mp_detector.detect(mp_img)
+
+                    if det_res.detections:
+                        d = det_res.detections[0]
+                        bb = d.bounding_box
+                        # MediaPipe bounding box is tightly framed around inner facial keypoints (eyes to mouth).
+                        # ContrastPhys uses 1.2x vertical span + forehead/cheek margin.
+                        # Scaling the raw keypoint box by 1.25x matches the full facial bounding box.
+                        sq = max(bb.width, bb.height) * 1.25
+                        cx = bb.origin_x + bb.width / 2.0
+                        # Shift center slightly upward (~8% of face size) towards the eye/forehead line
+                        # to balance upper hairline and lower chin in the crop
+                        cy = (bb.origin_y + bb.height / 2.0) - 0.08 * sq
+                        face_box_coor = [int(round(cx - sq / 2.0)), int(round(cy - sq / 2.0)), int(round(sq)), int(round(sq))]
+                except Exception as e:
+                    if verbose:
+                        print(f"MediaPipe inference error: {e}")
+                    face_box_coor = None
+
+            if face_box_coor is None:
+                if verbose:
+                    print("ERROR: No Face Detected")
+                face_box_coor = [0, 0, frame.shape[1], frame.shape[0]]
         else:
             raise ValueError("Unsupported face detection backend!")
 
@@ -456,20 +515,63 @@ class BaseLoader(Dataset):
         # Frame Resizing
         total_frames, _, _, channels = frames.shape
         resized_frames = np.zeros((total_frames, height, width, channels))
-        for i in range(0, total_frames):
-            frame = frames[i]
-            if use_dynamic_detection:  # use the (i // detection_freq)-th facial region.
-                reference_index = i // detection_freq
-            else:  # use the first region obtrained from the first frame.
-                reference_index = 0
-            if use_face_detection:
-                if use_median_box:
-                    face_region = face_region_median
+
+        if use_dynamic_detection and num_dynamic_det > 1 and use_face_detection and not use_median_box:
+            # ContrastPhys smooth dynamic tracking:
+            # 1. Fixed box dimensions (median width & height) to eliminate scale breathing / zoom jitter
+            valid_dets = [b for b in face_region_all if not (b[0] == 0 and b[1] == 0 and b[2] == frames.shape[2] and b[3] == frames.shape[1])]
+            if len(valid_dets) == 0:
+                valid_dets = face_region_all
+            valid_dets = np.array(valid_dets)
+            fixed_w = int(np.median(valid_dets[:, 2]))
+            fixed_h = int(np.median(valid_dets[:, 3]))
+
+            # 2. Continuous center trajectory via interpolation
+            sample_frames = np.array([min(total_frames - 1, detection_freq * idx) for idx in range(num_dynamic_det)])
+            raw_cx = face_region_all[:, 0] + face_region_all[:, 2] / 2.0
+            raw_cy = face_region_all[:, 1] + face_region_all[:, 3] / 2.0
+
+            frame_indices = np.arange(total_frames)
+            interp_cx = np.interp(frame_indices, sample_frames, raw_cx)
+            interp_cy = np.interp(frame_indices, sample_frames, raw_cy)
+
+            # 3. Exponential Moving Average (EMA) to eliminate high-frequency detector jitter
+            # alpha=0.15 gives a smooth ~0.3s response time, following real head motion without discrete jumps
+            alpha = 0.15
+            smooth_cx = np.zeros(total_frames)
+            smooth_cy = np.zeros(total_frames)
+            smooth_cx[0] = interp_cx[0]
+            smooth_cy[0] = interp_cy[0]
+            for t in range(1, total_frames):
+                smooth_cx[t] = alpha * interp_cx[t] + (1.0 - alpha) * smooth_cx[t - 1]
+                smooth_cy[t] = alpha * interp_cy[t] + (1.0 - alpha) * smooth_cy[t - 1]
+
+            for i in range(total_frames):
+                frame = frames[i]
+                bx = int(round(smooth_cx[i] - fixed_w / 2.0))
+                by = int(round(smooth_cy[i] - fixed_h / 2.0))
+                bx = max(0, min(frame.shape[1] - fixed_w, bx))
+                by = max(0, min(frame.shape[0] - fixed_h, by))
+                cropped = frame[by:by + fixed_h, bx:bx + fixed_w]
+                if cropped.size > 0:
+                    resized_frames[i] = cv2.resize(cropped, (width, height), interpolation=cv2.INTER_AREA)
                 else:
-                    face_region = face_region_all[reference_index]
-                frame = frame[max(face_region[1], 0):min(face_region[1] + face_region[3], frame.shape[0]),
-                        max(face_region[0], 0):min(face_region[0] + face_region[2], frame.shape[1])]
-            resized_frames[i] = cv2.resize(frame, (width, height), interpolation=cv2.INTER_AREA)
+                    resized_frames[i] = cv2.resize(frame, (width, height), interpolation=cv2.INTER_AREA)
+        else:
+            for i in range(0, total_frames):
+                frame = frames[i]
+                if use_dynamic_detection:  # use the (i // detection_freq)-th facial region.
+                    reference_index = i // detection_freq
+                else:  # use the first region obtrained from the first frame.
+                    reference_index = 0
+                if use_face_detection:
+                    if use_median_box:
+                        face_region = face_region_median
+                    else:
+                        face_region = face_region_all[reference_index]
+                    frame = frame[max(face_region[1], 0):min(face_region[1] + face_region[3], frame.shape[0]),
+                            max(face_region[0], 0):min(face_region[0] + face_region[2], frame.shape[1])]
+                resized_frames[i] = cv2.resize(frame, (width, height), interpolation=cv2.INTER_AREA)
         return resized_frames
 
     def chunk(self, frames, bvps, chunk_length):
