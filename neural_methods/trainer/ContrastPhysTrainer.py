@@ -44,14 +44,57 @@ class ContrastPhysTrainer(BaseTrainer):
         ).to(self.device)
         self.ipr_eval = IrrelevantPowerRatio(
             Fs=config.TRAIN.DATA.FS, high_pass=40, low_pass=250)
+        self.start_epoch = 0
+
+        resume_path = getattr(config.MODEL, 'RESUME', '')
+        if resume_path == 'auto':
+            candidate_dirs = [
+                getattr(config.MODEL, 'BACKUP_DIR', ''),
+                '/content/drive/MyDrive/rPPG_Checkpoints/MMPD_MediaPipe',
+                '/content/drive/MyDrive/rPPG_Checkpoints/MMPD',
+                self.model_dir
+            ]
+            latest_ep = -1
+            best_file = None
+            for d in candidate_dirs:
+                if d and os.path.exists(d):
+                    import glob, re
+                    files = glob.glob(os.path.join(d, f"{self.model_file_name}_Epoch*.pth"))
+                    for f in files:
+                        m = re.search(r'Epoch(\d+)', f)
+                        if m:
+                            ep = int(m.group(1))
+                            if ep > latest_ep:
+                                latest_ep = ep
+                                best_file = f
+            if best_file:
+                resume_path = best_file
+
+        if resume_path and os.path.exists(resume_path):
+            print(f"Loading checkpoint to resume: {resume_path}")
+            state_dict = torch.load(resume_path, map_location=self.device)
+            if hasattr(self.model, 'module') and not any(k.startswith('module.') for k in state_dict.keys()):
+                state_dict = {'module.' + k: v for k, v in state_dict.items()}
+            elif not hasattr(self.model, 'module') and any(k.startswith('module.') for k in state_dict.keys()):
+                state_dict = {k.replace('module.', ''): v for k, v in state_dict.items()}
+            self.model.load_state_dict(state_dict)
+
+            import re
+            match = re.search(r'Epoch(\d+)', resume_path)
+            if match:
+                resumed_epoch = int(match.group(1))
+                self.start_epoch = resumed_epoch + 1
+                self.best_epoch = resumed_epoch
+                print(f"Resuming ContrastPhys starting from Epoch {self.start_epoch} (previous checkpoint was Epoch {self.best_epoch})")
 
         if config.TOOLBOX_MODE == "train_and_test":
             self.num_train_batches = len(data_loader["train"]) if (data_loader is not None and data_loader.get("train") is not None) else 0
             self.loss_model = ContrastPhysLoss(config)
             self.optimizer = optim.AdamW(
                 self.model.parameters(), lr=config.TRAIN.LR, weight_decay=5e-5)
+            steps = max(1, self.num_train_batches)
             self.scheduler = torch.optim.lr_scheduler.OneCycleLR(
-                self.optimizer, max_lr=config.TRAIN.LR, epochs=config.TRAIN.EPOCHS, steps_per_epoch=self.num_train_batches)
+                self.optimizer, max_lr=config.TRAIN.LR, epochs=config.TRAIN.EPOCHS, steps_per_epoch=steps)
         elif config.TOOLBOX_MODE == "only_test":
             pass
 
@@ -59,10 +102,22 @@ class ContrastPhysTrainer(BaseTrainer):
         if data_loader["train"] is None:
             raise ValueError("No data for train")
 
+        # Align learning rate scheduler and compute initial baseline validation metrics if resuming
+        if self.start_epoch > 0:
+            print(f"Advancing OneCycleLR scheduler for {self.start_epoch} epochs ({self.start_epoch * self.num_train_batches} steps)...")
+            import warnings
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                for _ in range(self.start_epoch * self.num_train_batches):
+                    self.scheduler.step()
+            print("Evaluating initial validation metrics of resumed model...")
+            self.min_valid_loss, self.min_valid_ipr = self.valid(data_loader)
+            print(f"Resumed baseline: Val Loss = {self.min_valid_loss:.6f}, Val IPR = {self.min_valid_ipr:.4f}")
+
         mean_training_losses = []
         mean_valid_losses = []
         lrs = []
-        for epoch in range(self.max_epoch_num):
+        for epoch in range(self.start_epoch, self.max_epoch_num):
             print(f"====Training Epoch: {epoch}====")
             train_loss = []
             self.model.train()
