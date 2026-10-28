@@ -388,13 +388,16 @@ class BaseLoader(Dataset):
                     from mediapipe.tasks import python as mp_python
                     from mediapipe.tasks.python import vision as mp_vision
                     model_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'blaze_face_short_range.tflite')
-                    if not os.path.exists(model_path):
+                    if not os.path.exists(model_path) or os.path.getsize(model_path) < 100000:
                         model_path = 'blaze_face_short_range.tflite'
-                    if not os.path.exists(model_path):
-                        # Auto-download from Google CDN if missing
-                        import urllib.request
+                    if not os.path.exists(model_path) or os.path.getsize(model_path) < 100000:
+                        # Auto-download from Google CDN atomically to prevent partial-file race conditions
+                        import urllib.request, tempfile
                         url = "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite"
-                        urllib.request.urlretrieve(url, model_path)
+                        fd, tmp_file = tempfile.mkstemp(suffix='.tflite', dir='.')
+                        os.close(fd)
+                        urllib.request.urlretrieve(url, tmp_file)
+                        os.replace(tmp_file, model_path)
                     base_options = mp_python.BaseOptions(model_asset_path=model_path)
                     options = mp_vision.FaceDetectorOptions(base_options=base_options, min_detection_confidence=0.25)
                     self._mp_detector = mp_vision.FaceDetector.create_from_options(options)
