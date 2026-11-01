@@ -31,3 +31,27 @@ ContrastPhys+,UBFC-rPPG,Intra-Dataset (TPAMI 2024 2x2 ST-rPPG),15.632,29.614,0.2
 ContrastPhys+,UBFC-rPPG,"Intra-Dataset (Paper Aligned, pad=3)",15.13,29.53,0.304,-1.286,"Official setup with zero_pad=3 (512-pt FFT, 3.5 BPM resolution) and delta_t<=T chunk sampling"
 ContrastPhys,PURE,Intra-Dataset (Epoch 4 best val loss),15.813,25.695,0.137,-6.839,3D-CNN evaluated on 6s chunks
 ContrastPhys+,PURE,Intra-Dataset (TPAMI 2024 2x2 ST-rPPG),34.717,45.642,0.092,-4.229,"TPAMI 2024 setup: DiffNormalized RGB, 2x2 ST-rPPG pooling"
+DeepPhys,UBFC-rPPG,Intra-Dataset (FusionStem),1.367,3.066,0.990,-1.006,Multi-Temporal FusionStem (Best epoch 5)
+DeepPhys,PURE,Intra-Dataset (FusionStem),0.128,0.229,1.000,5.793,Multi-Temporal FusionStem (Best epoch 11)
+POS,MMPD,Intra-Dataset (Toolbox Corrected),11.472,18.339,0.247,-5.290,All 33 subjects online full-video evaluation
+CHROM,MMPD,Intra-Dataset (Toolbox Corrected),11.455,18.124,0.263,-5.486,All 33 subjects online full-video evaluation
+ICA,MMPD,Intra-Dataset (Toolbox Corrected),21.163,26.818,0.019,-7.664,JADE ICA on full video
+PBV,MMPD,Intra-Dataset (Toolbox Corrected),22.504,29.226,0.007,-7.769,PBV blood volume signature
+DeepPhys,MMPD,Intra-Dataset (Online Baseline),27.927,34.781,0.096,-7.553,Standard 2D-CNN
+PhysFormer,MMPD,Intra-Dataset (Baseline),9.141,16.904,0.305,-1.222,Spatiotemporal ViT (12 layers 160 frames)
+PhysFormer,MMPD,Intra-Dataset (FusionStem),7.806,15.199,0.431,-0.910,ViT with Multi-Temporal FusionStem (Beats baseline)
+SpikingPhysFormer,MMPD,Intra-Dataset (Baseline),22.522,26.148,-0.173,-7.778,Neural Networks 2025 SNN architecture
+SpikingPhysFormer,MMPD,Intra-Dataset (FusionStem),12.151,20.865,0.254,-3.860,SNN with Multi-Temporal FusionStem (MAE 12.15 vs 22.52 BPM)
+ContrastPhys,UBFC-rPPG,Intra-Dataset (Protocol A - Label-Free IPR),5.882,14.401,0.601,-0.278,Selected purely label-free via min IPR (Epoch 13)
+ContrastPhys,UBFC-rPPG,Intra-Dataset (Protocol B - Labeled Val MAE),4.597,13.365,0.597,0.493,Selected via calibration on labeled validation set (Epoch 8)
+ContrastPhys,PURE,Intra-Dataset (Protocol A - Label-Free IPR),15.625,20.128,0.162,-7.196,Selected purely label-free via min IPR (Epoch 0 - failure under motion)
+ContrastPhys,PURE,Intra-Dataset (Protocol B - Labeled Val MAE),8.862,17.071,0.577,-0.796,Selected via calibration on labeled validation set (Epoch 9)
+ContrastPhys,MMPD,Intra-Dataset (Protocol A - Label-Free IPR),31.018,34.204,0.049,-9.052,Selected via min IPR on validation set (Epoch 3)
+ContrastPhys,MMPD,Intra-Dataset (Protocol B - Labeled Val MAE),15.095,22.630,0.121,-5.361,Selected via calibration on labeled validation set (Epoch 7)
+ContrastPhys,MMPD,Intra-Dataset (Official Test Split / Ep 7),17.298,28.487,0.293,-5.704,Unseen test subjects 30-33 (80 videos); forward-scan dynamic crop; IPR 0.3263
+ContrastPhys,MMPD,Intra-Dataset (Smooth Dynamic Tracking Val / Ep 7),15.000,24.717,0.136,-4.990,Fixed scale + sub-pixel EMA center tracking; improves SNR by +0.37 dB over static crop
+ContrastPhys,MMPD,Intra-Dataset (Step Dynamic Crop Val / Ep 7),17.292,26.067,0.107,-5.374,Toolbox legacy 1.0 Hz jumping box detection without temporal smoothing
+ContrastPhys,MMPD,Intra-Dataset (MediaPipe Dynamic Tracking Val Ep 16),7.295,13.919,0.543,-3.017,MediaPipe BlazeFace dynamic tracking full 30 epochs; cuts MAE by more than half (15.0 -> 7.295 BPM)
+ContrastPhys,MMPD,Intra-Dataset (MediaPipe Dynamic Tracking Test Ep 16),19.347,29.332,0.350,-5.385,"MediaPipe BlazeFace dynamic tracking evaluated on official unseen test split (Subj 30-33, 80 videos); best Val MAE winner (Epoch 16)"
+ContrastPhys,MMPD,Intra-Dataset (MediaPipe Dynamic Tracking Test Ep 3),21.456,24.902,0.083,-7.770,"MediaPipe BlazeFace dynamic tracking evaluated on official unseen test split (Subj 30-33, 80 videos); 100% label-free min IPR winner (Epoch 3)"
+DeepPhys,MMPD,Intra-Dataset (FusionStem + MediaPipe),19.539,29.910,-0.051,-4.421,"2D-CNN with Multi-Temporal FusionStem and MediaPipe BlazeFace dynamic tracking (Best epoch 13). Cuts MAE by 8.4 BPM vs baseline."

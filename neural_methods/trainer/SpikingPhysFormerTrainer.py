@@ -299,6 +299,13 @@ class SpikingPhysFormerTrainer(BaseTrainer):
                         notes
                     ])
                 print(f"Appended {model_name} benchmark results to rPPG_results_database.csv!")
+                backup_dir = getattr(self.config.MODEL, 'BACKUP_DIR', '') or (
+                    self.config.BACKUP_DIR if hasattr(self.config, 'BACKUP_DIR') else ''
+                )
+                if backup_dir and os.path.exists(backup_dir):
+                    import shutil
+                    shutil.copy2("rPPG_results_database.csv", os.path.join(backup_dir, "rPPG_results_database.csv"))
+                    print(f"--> [Google Drive / Backup Sync] Mirrored rPPG_results_database.csv to {backup_dir}")
             except Exception as e:
                 print(f"Error appending to rPPG_results_database.csv: {e}")
 
@@ -307,6 +314,19 @@ class SpikingPhysFormerTrainer(BaseTrainer):
             os.makedirs(self.model_dir)
         model_path = os.path.join(self.model_dir, self.model_file_name + '_Epoch' + str(index) + '.pth')
         torch.save(self.model.state_dict(), model_path)
+        print(f"Saved checkpoint: {model_path}")
+        backup_dir = getattr(self.config.MODEL, 'BACKUP_DIR', '') or (
+            self.config.BACKUP_DIR if hasattr(self.config, 'BACKUP_DIR') else ''
+        )
+        if backup_dir:
+            try:
+                import shutil
+                os.makedirs(backup_dir, exist_ok=True)
+                backup_file = os.path.join(backup_dir, self.model_file_name + f'_Epoch{index}.pth')
+                shutil.copy2(model_path, backup_file)
+                print(f"--> [Google Drive / Backup Sync] Mirrored checkpoint to {backup_file}")
+            except Exception as e:
+                print(f"Warning: Could not mirror checkpoint to backup dir {backup_dir}: {e}")
 
     def get_hr(self, y, sr=30, min_bpm=40, max_bpm=180):
         if isinstance(y, torch.Tensor):
