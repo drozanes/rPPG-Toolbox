@@ -40,6 +40,7 @@ class SpikingPhysFormerTrainer(BaseTrainer):
         self.config = config 
         self.min_valid_loss = None
         self.best_epoch = 0
+        self.start_epoch = 0
         self.patience = getattr(config.TRAIN, 'PATIENCE', 4)
         self.patience_counter = 0
 
@@ -56,6 +57,25 @@ class SpikingPhysFormerTrainer(BaseTrainer):
                 use_fusion_stem=use_fusion_stem, fusion_stem_alpha=alpha, fusion_stem_beta=beta
             ).to(self.device)
             self.model = torch.nn.DataParallel(self.model, device_ids=list(range(config.NUM_OF_GPU_TRAIN)))
+
+            # Resume support
+            resume_path = getattr(config.MODEL, 'RESUME', '')
+            if resume_path and os.path.exists(resume_path):
+                print(f"Loading checkpoint to resume: {resume_path}")
+                state_dict = torch.load(resume_path, map_location=self.device)
+                if hasattr(self.model, 'module') and not any(k.startswith('module.') for k in state_dict.keys()):
+                    state_dict = {'module.' + k: v for k, v in state_dict.items()}
+                elif not hasattr(self.model, 'module') and any(k.startswith('module.') for k in state_dict.keys()):
+                    state_dict = {k.replace('module.', ''): v for k, v in state_dict.items()}
+                self.model.load_state_dict(state_dict)
+
+                import re
+                match = re.search(r'Epoch(\d+)', resume_path)
+                if match:
+                    resumed_epoch = int(match.group(1))
+                    self.start_epoch = resumed_epoch + 1
+                    self.best_epoch = resumed_epoch
+                    print(f"Resuming SpikingPhysFormer starting from Epoch {self.start_epoch} (previous checkpoint was Epoch {self.best_epoch})")
 
             # Load pre-trained PhysFormer patch embedding if specified (Two-Phase Training, arXiv:2402.04798)
             pe_path = getattr(config.MODEL.SPIKINGPHYSFORMER, "PRETRAINED_PE_PATH", "")
@@ -102,7 +122,7 @@ class SpikingPhysFormerTrainer(BaseTrainer):
         mean_valid_losses = []
         lrs = []
 
-        for epoch in range(self.max_epoch_num):
+        for epoch in range(self.start_epoch, self.max_epoch_num):
             print('')
             print(f"====Training Epoch: {epoch}====")
             loss_rPPG_avg = []
