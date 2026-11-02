@@ -110,7 +110,14 @@ def train_and_test(config, data_loader_dict):
     elif config.MODEL.NAME == 'RhythmFormer':
         model_trainer = trainer.RhythmFormerTrainer.RhythmFormerTrainer(config, data_loader_dict)
     elif config.MODEL.NAME == 'SpikingPhysFormer':
-        model_trainer = trainer.SpikingPhysFormerTrainer.SpikingPhysFormerTrainer(config, data_loader_dict)
+        try:
+            from neural_methods.trainer.SpikingPhysFormerTrainer import SpikingPhysFormerTrainer
+            model_trainer = SpikingPhysFormerTrainer(config, data_loader_dict)
+        except ImportError as e:
+            raise ImportError(
+                f"Failed to initialize SpikingPhysFormerTrainer: {e}. "
+                "Please install required dependencies: pip install spikingjelly"
+            )
     elif config.MODEL.NAME == 'ContrastPhys':
         model_trainer = trainer.ContrastPhysTrainer.ContrastPhysTrainer(config, data_loader_dict)
     else:
@@ -143,7 +150,14 @@ def test(config, data_loader_dict):
     elif config.MODEL.NAME == 'RhythmFormer':
         model_trainer = trainer.RhythmFormerTrainer.RhythmFormerTrainer(config, data_loader_dict)
     elif config.MODEL.NAME == 'SpikingPhysFormer':
-        model_trainer = trainer.SpikingPhysFormerTrainer.SpikingPhysFormerTrainer(config, data_loader_dict)
+        try:
+            from neural_methods.trainer.SpikingPhysFormerTrainer import SpikingPhysFormerTrainer
+            model_trainer = SpikingPhysFormerTrainer(config, data_loader_dict)
+        except ImportError as e:
+            raise ImportError(
+                f"Failed to initialize SpikingPhysFormerTrainer: {e}. "
+                "Please install required dependencies: pip install spikingjelly"
+            )
     elif config.MODEL.NAME == 'ContrastPhys':
         model_trainer = trainer.ContrastPhysTrainer.ContrastPhysTrainer(config, data_loader_dict)
     else:
