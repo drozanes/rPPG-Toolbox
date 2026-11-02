@@ -94,10 +94,14 @@ class PhysFormerTrainer(BaseTrainer):
             self.criterion_class = torch.nn.CrossEntropyLoss()
             self.criterion_Pearson = Neg_Pearson()
             self.optimizer = optim.Adam(self.model.parameters(), lr=config.TRAIN.LR, weight_decay=0.00005)
-            # TODO: In both the PhysFormer repo's training example and other implementations of a PhysFormer trainer, 
-            # a step_size that doesn't end up changing the LR always seems to be used. This seems to defeat the point
-            # of using StepLR in the first place. Consider investigating and using another approach (e.g., OneCycleLR).
-            self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=50, gamma=0.5)
+            # Smooth cosine annealing scheduler from initial LR down to 1e-5 across all epochs
+            self.scheduler = optim.lr_scheduler.CosineAnnealingLR(
+                self.optimizer, T_max=config.TRAIN.EPOCHS, eta_min=1e-5
+            )
+            if self.start_epoch > 0:
+                print(f"Advancing CosineAnnealing scheduler for {self.start_epoch} epochs...")
+                for _ in range(self.start_epoch):
+                    self.scheduler.step()
         elif config.TOOLBOX_MODE == "only_test":
             self.chunk_len = config.TEST.DATA.PREPROCESS.CHUNK_LENGTH
             self.model = ViT_ST_ST_Compact3_TDC_gra_sharp(

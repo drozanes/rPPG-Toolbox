@@ -97,7 +97,14 @@ class SpikingPhysFormerTrainer(BaseTrainer):
             self.criterion_class = torch.nn.CrossEntropyLoss()
             self.criterion_Pearson = Neg_Pearson()
             self.optimizer = optim.Adam(self.model.parameters(), lr=config.TRAIN.LR, weight_decay=0.00005)
-            self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=50, gamma=0.5)
+            # Smooth cosine annealing scheduler from initial LR down to 1e-5 across all epochs
+            self.scheduler = optim.lr_scheduler.CosineAnnealingLR(
+                self.optimizer, T_max=config.TRAIN.EPOCHS, eta_min=1e-5
+            )
+            if self.start_epoch > 0:
+                print(f"Advancing CosineAnnealing scheduler for {self.start_epoch} epochs...")
+                for _ in range(self.start_epoch):
+                    self.scheduler.step()
         elif config.TOOLBOX_MODE == "only_test":
             self.chunk_len = config.TEST.DATA.PREPROCESS.CHUNK_LENGTH
             self.model = SpikingPhysFormer(
