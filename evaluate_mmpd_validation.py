@@ -6,6 +6,7 @@ import gc
 import io
 import time
 import resource
+import subprocess
 import torch
 import numpy as np
 from tqdm import tqdm
@@ -26,11 +27,22 @@ def get_ram_mb():
     return raw / 1024
 
 def main():
+    # Prevent Mac from sleeping during evaluation
+    try:
+        caffeinate_proc = subprocess.Popen(["caffeinate", "-d", "-i", "-m", "-u"])
+        print("☕ Caffeinate active: Mac will stay awake throughout evaluation.")
+    except Exception:
+        caffeinate_proc = None
+
     print("=" * 80)
-    print("  Memory-Safe Fast Evaluation of MMPD Validation Checkpoints (Epoch 0-16)")
+    print("  Memory-Safe Fast Evaluation of MMPD Validation Checkpoints (All 30 Epochs)")
     print("=" * 80, flush=True)
 
-    ckpt_dir = "/Users/drozanes/Downloads/exp/MMPD_cf0dc246c7/PreTrainedModels"
+    ckpt_dir = os.environ.get("MMPD_CKPT_DIR") or (
+        "runs/exp/MMPD_cf0dc246c7/PreTrainedModels" if os.path.exists("runs/exp/MMPD_cf0dc246c7/PreTrainedModels") else (
+            "PreTrainedModels" if os.path.exists("PreTrainedModels") else "/Users/drozanes/Downloads/exp/MMPD_cf0dc246c7/PreTrainedModels"
+        )
+    )
     ckpt_files = sorted(glob.glob(os.path.join(ckpt_dir, "MMPD_ContrastPhys_Online_Epoch*.pth")),
                         key=lambda x: int(re.search(r'Epoch(\d+)', x).group(1)))
 
@@ -38,7 +50,9 @@ def main():
         print(f"❌ Error: No checkpoints found in {ckpt_dir}!")
         return
 
-    print(f"🔍 Found {len(ckpt_files)} checkpoints to evaluate.", flush=True)
+    first_ep = re.search(r'Epoch(\d+)', ckpt_files[0]).group(1)
+    last_ep = re.search(r'Epoch(\d+)', ckpt_files[-1]).group(1)
+    print(f"🔍 Found {len(ckpt_files)} checkpoints to evaluate (Epoch {first_ep} to Epoch {last_ep}).", flush=True)
 
     # 1. Load configuration
     cfg = get_config(Args())
@@ -50,9 +64,14 @@ def main():
     device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
     print(f"Using Compute Device: {device}", flush=True)
 
-    # 2. Pre-load all 17 checkpoint state dictionaries onto CPU (only ~220 MB RAM total)
-    print("Loading 17 checkpoint weights into CPU RAM...", flush=True)
+    # 2. Pre-load all checkpoint state dictionaries onto CPU
+    print(f"Loading {len(ckpt_files)} checkpoint weights into CPU RAM...", flush=True)
     state_dicts = {}
+    for f in ckpt_files:
+        ep = int(re.search(r'Epoch(\d+)', f).group(1))
+        state_dicts[ep] = torch.load(f, map_location='cpu')
+    
+    print(f"✅ Loaded {len(state_dicts)} model state dicts. Current Peak RAM: {get_ram_mb():.1f} MB", flush=True)
     for f in ckpt_files:
         ep = int(re.search(r'Epoch(\d+)', f).group(1))
         state_dicts[ep] = torch.load(f, map_location='cpu')
@@ -174,6 +193,7 @@ def main():
         mae = metrics.get('MAE', float('nan'))
         rmse = metrics.get('RMSE', float('nan'))
         pearson = metrics.get('Pearson', float('nan'))
+        snr = metrics.get('SNR', float('nan'))
 
         star = ""
         if mae < best_mae:
@@ -190,24 +210,45 @@ def main():
             'mae': mae,
             'rmse': rmse,
             'pearson': pearson,
+            'snr': snr,
             'val_ipr': mean_ipr
         })
 
+    # Find best by IPR
+    best_by_ipr = min(results, key=lambda x: x['val_ipr'])
+    best_by_pearson = max(results, key=lambda x: x['pearson'])
+
     print("=" * 80)
-    print(f"🏆 BEST VALIDATION CHECKPOINT: Epoch {best_epoch}")
+    print(f"🏆 BEST VALIDATION CHECKPOINT (Protocol B - Supervised Calibration / MAE): Epoch {best_epoch}")
     print(f"   Validation MAE:     {best_metrics.get('MAE', 0.0):.3f} BPM")
     print(f"   Validation RMSE:    {best_metrics.get('RMSE', 0.0):.3f} BPM")
     print(f"   Validation Pearson: {best_metrics.get('Pearson', 0.0):.3f}")
     print(f"   Validation SNR:     {best_metrics.get('SNR', 0.0):.3f} dB")
+    print(f"   Validation IPR:     {np.mean(iprs_per_epoch[best_epoch]):.4f}")
+    print("-" * 80)
+    print(f"🎯 BEST VALIDATION CHECKPOINT (Protocol A - Label-Free / IPR): Epoch {best_by_ipr['epoch']}")
+    print(f"   Validation IPR:     {best_by_ipr['val_ipr']:.4f}")
+    print(f"   Validation MAE:     {best_by_ipr['mae']:.3f} BPM")
+    print(f"   Validation Pearson: {best_by_ipr['pearson']:.3f}")
+    print("-" * 80)
+    print(f"📈 BEST VALIDATION CHECKPOINT (Pulse Shape Correlation / Pearson): Epoch {best_by_pearson['epoch']}")
+    print(f"   Validation Pearson: {best_by_pearson['pearson']:.3f}")
+    print(f"   Validation MAE:     {best_by_pearson['mae']:.3f} BPM")
     print("=" * 80, flush=True)
 
     # Save results to CSV
     csv_path = "mmpd_validation_results.csv"
     with open(csv_path, "w") as f:
-        f.write("epoch,mae,rmse,pearson,val_ipr\n")
+        f.write("epoch,mae,rmse,pearson,snr,val_ipr\n")
         for r in results:
-            f.write(f"{r['epoch']},{r['mae']:.4f},{r['rmse']:.4f},{r['pearson']:.4f},{r['val_ipr']:.6f}\n")
+            f.write(f"{r['epoch']},{r['mae']:.4f},{r['rmse']:.4f},{r['pearson']:.4f},{r['snr']:.4f},{r['val_ipr']:.6f}\n")
     print(f"📁 Results saved to {csv_path}", flush=True)
+
+    if caffeinate_proc:
+        try:
+            caffeinate_proc.terminate()
+        except Exception:
+            pass
 
 if __name__ == "__main__":
     main()

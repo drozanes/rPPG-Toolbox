@@ -1,0 +1,86 @@
+Model,Dataset,Reports_Count,Unique_Sources,MAE_Range_BPM,RMSE_Range_BPM,Pearson_r_Range,SNR_Range_dB
+CHROM,117 Static Subjects Lab,1,1,N/A,"0.40 - 0.40 (mean 0.40, med 0.40)","1.000 - 1.000 (mean 1.000, med 1.000)",3.86 - 3.86 dB
+CHROM,BUAA-MIHR,1,1,"6.09 - 6.09 (mean 6.09, med 6.09)","8.29 - 8.29 (mean 8.29, med 8.29)","0.510 - 0.510 (mean 0.510, med 0.510)",N/A
+CHROM,COHFACE,2,2,"7.80 - 11.22 (mean 9.51, med 9.51)","12.45 - 15.83 (mean 14.14, med 14.14)","0.260 - 0.310 (mean 0.285, med 0.285)",N/A
+CHROM,Field-Clinic (India/Sierra Leone),1,1,N/A,N/A,N/A,N/A
+CHROM,MAHNOB-HCI,9,9,"5.09 - 13.49 (mean 12.44, med 13.49)","22.36 - 22.36 (mean 22.36, med 22.36)","0.200 - 0.210 (mean 0.209, med 0.210)",-9.12 - -9.12 dB
+CHROM,MMPD,3,3,"13.63 - 13.66 (mean 13.65, med 13.66)","18.75 - 18.76 (mean 18.76, med 18.76)","0.080 - 0.080 (mean 0.080, med 0.080)",-11.74 - -11.74 dB
+CHROM,MMSE-HR,6,5,"12.20 - 12.20 (mean 12.20, med 12.20)","13.97 - 13.97 (mean 13.97, med 13.97)","0.550 - 0.550 (mean 0.550, med 0.550)",N/A
+CHROM,OBF,5,5,N/A,"2.73 - 2.73 (mean 2.73, med 2.73)","0.980 - 0.980 (mean 0.980, med 0.980)",N/A
+CHROM,PURE,15,12,"2.07 - 11.17 (mean 5.43, med 5.64)","2.50 - 16.86 (mean 12.61, med 14.93)","0.370 - 0.990 (mean 0.755, med 0.800)",-2.31 - 5.35 dB
+CHROM,RGB Video II,1,1,"0.30 - 0.30 (mean 0.30, med 0.30)",N/A,N/A,-2.30 - -2.30 dB
+CHROM,UBFC-Phys,1,1,"4.49 - 4.49 (mean 4.49, med 4.49)","7.56 - 7.56 (mean 7.56, med 7.56)","0.800 - 0.800 (mean 0.800, med 0.800)",-1.92 - -1.92 dB
+CHROM,UBFC-rPPG,17,13,"1.57 - 22.94 (mean 6.05, med 3.98)","3.40 - 28.26 (mean 10.91, med 8.83)","0.042 - 0.982 (mean 0.791, med 0.890)",-12.85 - 4.92 dB
+CHROM,V4V,1,1,"14.92 - 14.92 (mean 14.92, med 14.92)","19.22 - 19.22 (mean 19.22, med 19.22)","0.080 - 0.080 (mean 0.080, med 0.080)",N/A
+CHROM,VIPL-HR,9,9,"11.07 - 11.44 (mean 11.37, med 11.40)","16.90 - 17.99 (mean 17.03, med 16.90)","0.270 - 0.280 (mean 0.279, med 0.280)",N/A
+ContrastPhys,MMSE-HR,1,1,"2.43 - 2.43 (mean 2.43, med 2.43)","7.34 - 7.34 (mean 7.34, med 7.34)","0.860 - 0.860 (mean 0.860, med 0.860)",N/A
+ContrastPhys,PURE,3,3,"1.00 - 19.61 (mean 12.14, med 15.81)","1.40 - 25.70 (mean 13.55, med 13.55)","0.137 - 0.990 (mean 0.486, med 0.330)",-6.84 - -6.84 dB
+ContrastPhys,UBFC-rPPG,2,2,"0.64 - 10.22 (mean 5.43, med 5.43)","1.00 - 1.00 (mean 1.00, med 1.00)","0.450 - 0.990 (mean 0.720, med 0.720)",N/A
+ContrastPhys,VIPL-HR,1,1,"7.49 - 7.49 (mean 7.49, med 7.49)","14.40 - 14.40 (mean 14.40, med 14.40)","0.490 - 0.490 (mean 0.490, med 0.490)",N/A
+ContrastPhys+,EquiPleth,3,1,N/A,"4.40 - 5.16 (mean 4.84, med 4.97)",N/A,N/A
+ContrastPhys+,MMSE-HR,11,2,"1.11 - 2.43 (mean 1.71, med 1.76)","3.71 - 7.34 (mean 5.24, med 5.34)","0.860 - 0.960 (mean 0.919, med 0.920)",1.09 - 3.72 dB
+ContrastPhys+,MR-NIRP (NIR),4,1,"1.96 - 2.68 (mean 2.45, med 2.58)","3.02 - 4.77 (mean 3.86, med 3.83)","0.850 - 0.930 (mean 0.888, med 0.885)",N/A
+ContrastPhys+,OBF,4,1,"0.34 - 0.51 (mean 0.39, med 0.36)","0.75 - 1.39 (mean 0.94, med 0.81)","0.994 - 0.998 (mean 0.996, med 0.997)",N/A
+ContrastPhys+,PURE,8,5,"0.48 - 34.72 (mean 4.85, med 0.50)","0.98 - 45.64 (mean 6.65, med 1.00)","0.092 - 0.990 (mean 0.878, med 0.990)",-4.23 - -4.23 dB
+ContrastPhys+,UBFC-rPPG,15,5,"0.21 - 15.63 (mean 2.53, med 0.60)","0.80 - 29.61 (mean 5.38, med 2.07)","0.289 - 0.990 (mean 0.896, med 0.990)",-1.88 - 2.22 dB
+DeepPhys,BUAA-MIHR,1,1,"4.78 - 4.78 (mean 4.78, med 4.78)","6.74 - 6.74 (mean 6.74, med 6.74)","0.690 - 0.690 (mean 0.690, med 0.690)",N/A
+DeepPhys,COHFACE,2,2,"6.79 - 6.89 (mean 6.84, med 6.84)","12.34 - 13.89 (mean 13.12, med 13.12)","0.310 - 0.340 (mean 0.325, med 0.325)",N/A
+DeepPhys,Field-Clinic (India/Sierra Leone),1,1,N/A,N/A,N/A,N/A
+DeepPhys,MAHNOB-HCI,8,8,"4.57 - 4.57 (mean 4.57, med 4.57)","6.44 - 6.44 (mean 6.44, med 6.44)","0.840 - 0.840 (mean 0.840, med 0.840)",-8.98 - -8.98 dB
+DeepPhys,MMPD,13,5,"15.22 - 22.27 (mean 17.83, med 17.49)","23.17 - 28.92 (mean 25.40, med 25.00)","-0.030 - 0.090 (mean 0.043, med 0.050)",-11.72 - -10.23 dB
+DeepPhys,MMSE-HR,1,1,"4.72 - 4.72 (mean 4.72, med 4.72)","8.68 - 8.68 (mean 8.68, med 8.68)","0.820 - 0.820 (mean 0.820, med 0.820)",N/A
+DeepPhys,PURE,15,10,"0.83 - 9.34 (mean 4.53, med 5.54)","1.54 - 18.51 (mean 12.43, med 12.95)","0.550 - 0.990 (mean 0.755, med 0.660)",4.35 - 6.32 dB
+DeepPhys,RGB Video I,1,1,"2.45 - 2.45 (mean 2.45, med 2.45)",N/A,N/A,4.65 - 4.65 dB
+DeepPhys,RGB Video II,1,1,"0.14 - 0.14 (mean 0.14, med 0.14)",N/A,N/A,0.03 - 0.03 dB
+DeepPhys,UBFC-Phys,5,2,"4.75 - 8.42 (mean 6.97, med 6.62)","7.50 - 13.80 (mean 10.66, med 10.69)","0.440 - 0.820 (mean 0.604, med 0.660)",-4.41 - -2.04 dB
+DeepPhys,UBFC-rPPG,15,10,"1.21 - 7.82 (mean 3.24, med 1.95)","2.90 - 10.82 (mean 6.20, med 4.56)","0.540 - 0.990 (mean 0.859, med 0.980)",-0.79 - 6.31 dB
+DeepPhys,V4V,1,1,"14.52 - 14.52 (mean 14.52, med 14.52)","19.11 - 19.11 (mean 19.11, med 19.11)","0.140 - 0.140 (mean 0.140, med 0.140)",N/A
+DeepPhys,VIPL-HR,10,10,"11.00 - 12.56 (mean 11.16, med 11.00)","13.80 - 19.13 (mean 14.33, med 13.80)","0.110 - 0.140 (mean 0.113, med 0.110)",N/A
+ICA,COHFACE,1,1,"7.77 - 7.77 (mean 7.77, med 7.77)","11.27 - 11.27 (mean 11.27, med 11.27)","0.640 - 0.640 (mean 0.640, med 0.640)",N/A
+ICA,MAHNOB-HCI,8,8,"10.50 - 13.20 (mean 11.85, med 11.85)","13.60 - 13.60 (mean 13.60, med 13.60)","0.080 - 0.360 (mean 0.320, med 0.360)",-10.40 - -10.40 dB
+ICA,MMPD,3,3,"18.57 - 18.60 (mean 18.59, med 18.60)","24.28 - 24.30 (mean 24.29, med 24.30)","0.000 - 0.010 (mean 0.007, med 0.010)",-13.84 - -13.84 dB
+ICA,Multi-Challenge Gym/Tone,1,1,N/A,N/A,N/A,1.92 - 1.92 dB
+ICA,PURE,5,5,"4.77 - 16.18 (mean 7.43, med 4.77)","16.07 - 20.98 (mean 17.31, med 16.07)","0.410 - 0.720 (mean 0.648, med 0.720)",-2.76 - 5.24 dB
+ICA,UBFC-Phys,1,1,"10.04 - 10.04 (mean 10.04, med 10.04)","15.73 - 15.73 (mean 15.73, med 15.73)","0.360 - 0.360 (mean 0.360, med 0.360)",-5.28 - -5.28 dB
+ICA,UBFC-rPPG,14,11,"3.51 - 33.06 (mean 11.63, med 8.51)","8.63 - 38.95 (mean 19.85, med 18.80)","0.032 - 0.908 (mean 0.516, med 0.445)",-13.69 - -4.79 dB
+ICA,VIPL-HR,1,1,"10.47 - 10.47 (mean 10.47, med 10.47)","15.26 - 15.26 (mean 15.26, med 15.26)","0.600 - 0.600 (mean 0.600, med 0.600)",N/A
+ICA,VicarPPG,1,1,"24.10 - 24.10 (mean 24.10, med 24.10)",N/A,N/A,N/A
+PBV,GRGB Motion Dataset,1,1,"16.23 - 16.23 (mean 16.23, med 16.23)",N/A,N/A,N/A
+PBV,Gym Exercising Subjects,1,1,N/A,N/A,N/A,7.60 - 7.60 dB
+PBV,MMPD,3,3,"17.88 - 17.95 (mean 17.93, med 17.95)","23.53 - 23.58 (mean 23.56, med 23.58)","0.090 - 0.090 (mean 0.090, med 0.090)",-13.88 - -13.88 dB
+PBV,Multi-Challenge Gym/Tone,1,1,N/A,N/A,N/A,3.56 - 3.56 dB
+PBV,PURE,4,4,"3.91 - 5.37 (mean 4.28, med 3.92)","12.99 - 15.46 (mean 13.61, med 12.99)","0.765 - 0.840 (mean 0.821, med 0.840)",-2.11 - 2.30 dB
+PBV,UBFC-Phys,1,1,"12.34 - 12.34 (mean 12.34, med 12.34)","17.43 - 17.43 (mean 17.43, med 17.43)","0.330 - 0.330 (mean 0.330, med 0.330)",-9.33 - -9.33 dB
+PBV,UBFC-rPPG,5,4,"7.67 - 31.33 (mean 17.34, med 15.90)","18.59 - 36.95 (mean 26.95, med 26.40)","0.003 - 0.721 (mean 0.433, med 0.480)",-12.60 - -2.46 dB
+POS,BUAA-MIHR,1,1,"5.04 - 5.04 (mean 5.04, med 5.04)","7.12 - 7.12 (mean 7.12, med 7.12)","0.630 - 0.630 (mean 0.630, med 0.630)",N/A
+POS,COHFACE,1,1,"11.65 - 11.65 (mean 11.65, med 11.65)","15.14 - 15.14 (mean 15.14, med 15.14)","0.350 - 0.350 (mean 0.350, med 0.350)",N/A
+POS,Field-Clinic (India/Sierra Leone),1,1,N/A,N/A,N/A,N/A
+POS,MAHNOB-HCI,1,1,"12.80 - 12.80 (mean 12.80, med 12.80)",N/A,N/A,N/A
+POS,MMPD,3,3,"12.34 - 12.36 (mean 12.35, med 12.36)","17.70 - 17.71 (mean 17.71, med 17.71)","0.170 - 0.180 (mean 0.177, med 0.180)",-11.53 - -11.53 dB
+POS,MMSE-HR,1,1,"5.77 - 5.77 (mean 5.77, med 5.77)",N/A,"0.820 - 0.820 (mean 0.820, med 0.820)",N/A
+POS,Multi-Challenge Gym/Tone,1,1,N/A,N/A,N/A,5.16 - 5.16 dB
+POS,OBF,4,4,N/A,"1.91 - 1.91 (mean 1.91, med 1.91)","0.991 - 0.991 (mean 0.991, med 0.991)",N/A
+POS,PURE,9,8,"0.30 - 10.96 (mean 5.45, med 3.67)","4.26 - 13.44 (mean 11.29, med 11.82)","0.340 - 0.907 (mean 0.720, med 0.880)",-1.22 - 6.87 dB
+POS,UBFC-Phys,1,1,"4.51 - 4.51 (mean 4.51, med 4.51)","8.16 - 8.16 (mean 8.16, med 8.16)","0.770 - 0.770 (mean 0.770, med 0.770)",-1.28 - -1.28 dB
+POS,UBFC-rPPG,15,13,"1.55 - 21.69 (mean 5.34, med 4.08)","4.00 - 26.90 (mean 9.77, med 8.75)","0.087 - 0.975 (mean 0.743, med 0.850)",-12.19 - 0.99 dB
+POS,V4V,1,1,"17.65 - 17.65 (mean 17.65, med 17.65)","23.22 - 23.22 (mean 23.22, med 23.22)","0.040 - 0.040 (mean 0.040, med 0.040)",N/A
+POS,VIPL-HR,8,8,"11.50 - 14.59 (mean 11.89, med 11.50)","17.20 - 21.26 (mean 17.71, med 17.20)","0.190 - 0.300 (mean 0.286, med 0.300)",N/A
+POS,VicarPPG,1,1,"2.64 - 2.64 (mean 2.64, med 2.64)",N/A,N/A,N/A
+PhysFormer,COHFACE,2,1,"0.84 - 30.11 (mean 15.47, med 15.47)","2.81 - 34.05 (mean 18.43, med 18.43)","-0.010 - 0.990 (mean 0.490, med 0.490)",-19.09 - 8.86 dB
+PhysFormer,MAHNOB-HCI,3,3,"3.25 - 3.25 (mean 3.25, med 3.25)","3.97 - 3.97 (mean 3.97, med 3.97)","0.870 - 0.870 (mean 0.870, med 0.870)",N/A
+PhysFormer,MMPD,13,5,"11.99 - 22.69 (mean 13.85, med 12.10)","17.79 - 26.94 (mean 19.80, med 18.41)","0.150 - 0.180 (mean 0.162, med 0.170)",-18.83 - -10.53 dB
+PhysFormer,MMSE-HR,6,5,"1.48 - 2.84 (mean 2.56, med 2.76)","4.22 - 7.01 (mean 5.72, med 5.36)","0.860 - 0.950 (mean 0.905, med 0.920)",1.20 - 2.55 dB
+PhysFormer,OBF,4,4,N/A,"0.80 - 0.80 (mean 0.80, med 0.80)","0.998 - 0.998 (mean 0.998, med 0.998)",N/A
+PhysFormer,PURE,21,9,"0.68 - 26.58 (mean 10.68, med 9.90)","1.31 - 38.71 (mean 18.31, med 18.77)","0.276 - 1.000 (mean 0.656, med 0.679)",0.42 - 19.05 dB
+PhysFormer,UBFC-Phys,5,2,"6.04 - 11.91 (mean 7.45, med 6.63)","9.77 - 16.42 (mean 12.14, med 10.22)","0.270 - 0.690 (mean 0.590, med 0.650)",-10.38 - -2.16 dB
+PhysFormer,UBFC-rPPG,18,8,"0.50 - 29.00 (mean 3.97, med 1.54)","0.71 - 35.17 (mean 7.55, med 3.77)","-0.093 - 0.990 (mean 0.849, med 0.973)",-9.69 - 8.42 dB
+PhysFormer,VIPL-HR,7,7,"4.97 - 4.97 (mean 4.97, med 4.97)","7.79 - 7.79 (mean 7.79, med 7.79)","0.780 - 0.780 (mean 0.780, med 0.780)",N/A
+PhysFormer,iBVP,1,1,"1.96 - 1.96 (mean 1.96, med 1.96)","4.22 - 4.22 (mean 4.22, med 4.22)","0.910 - 0.910 (mean 0.910, med 0.910)",10.72 - 10.72 dB
+PhysFormer++,MAHNOB-HCI,3,3,"3.23 - 3.23 (mean 3.23, med 3.23)","3.88 - 3.88 (mean 3.88, med 3.88)","0.870 - 0.870 (mean 0.870, med 0.870)",N/A
+PhysFormer++,MMSE-HR,2,2,"2.71 - 2.71 (mean 2.71, med 2.71)","5.15 - 5.15 (mean 5.15, med 5.15)","0.930 - 0.930 (mean 0.930, med 0.930)",N/A
+PhysFormer++,OBF,2,2,N/A,"0.77 - 0.77 (mean 0.77, med 0.77)","0.998 - 0.998 (mean 0.998, med 0.998)",N/A
+PhysFormer++,VIPL-HR,4,4,"4.88 - 4.88 (mean 4.88, med 4.88)","7.62 - 7.62 (mean 7.62, med 7.62)","0.800 - 0.800 (mean 0.800, med 0.800)",N/A
+SpikingPhysFormer,MMPD,8,4,"12.76 - 14.57 (mean 14.04, med 14.15)",N/A,"0.140 - 0.230 (mean 0.163, med 0.150)",N/A
+SpikingPhysFormer,PURE,11,5,"2.10 - 24.64 (mean 8.74, med 3.83)","10.12 - 31.47 (mean 24.37, med 27.94)","0.037 - 0.920 (mean 0.662, med 0.830)",-7.87 - 3.67 dB
+SpikingPhysFormer,UBFC-Phys,2,1,"5.72 - 6.68 (mean 6.20, med 6.20)",N/A,"0.600 - 0.680 (mean 0.640, med 0.640)",N/A
+SpikingPhysFormer,UBFC-rPPG,8,5,"1.97 - 34.49 (mean 12.00, med 4.03)","4.42 - 41.21 (mean 25.48, med 28.15)","-0.171 - 0.968 (mean 0.551, med 0.890)",-9.75 - 0.89 dB

@@ -57,6 +57,7 @@ def process_video(frames, use_skin_mask=True):
     RGB = []
     for frame in frames:
         if use_skin_mask:
+            # Dual-range HSV skin color mask to isolate skin pixels and filter background/hair noise
             f_uint8 = np.clip(frame, 0, 255).astype(np.uint8)
             hsv = cv2.cvtColor(f_uint8, cv2.COLOR_RGB2HSV)
             lower_skin1 = np.array([0, 20, 50], dtype=np.uint8)

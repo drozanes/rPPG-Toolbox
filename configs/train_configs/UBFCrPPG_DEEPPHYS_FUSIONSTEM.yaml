@@ -11,7 +11,7 @@ TRAIN:
     DATASET: UBFC-rPPG
     DO_PREPROCESS: False
     DATA_FORMAT: NDCHW
-    DATA_PATH: "/Users/drozanes/Downloads/UBFC-rPPG_Raw/DATASET_2"
+    DATA_PATH: "./UBFC-rPPG_Raw/DATASET_2"
     CACHED_PATH: "PreprocessedData"
     EXP_DATA_NAME: ""
     BEGIN: 0.0
@@ -40,7 +40,7 @@ VALID:
     DATASET: UBFC-rPPG
     DO_PREPROCESS: False
     DATA_FORMAT: NDCHW
-    DATA_PATH: "/Users/drozanes/Downloads/UBFC-rPPG_Raw/DATASET_2"
+    DATA_PATH: "./UBFC-rPPG_Raw/DATASET_2"
     CACHED_PATH: "PreprocessedData"
     EXP_DATA_NAME: ""
     BEGIN: 0.8
@@ -71,7 +71,7 @@ TEST:
     DATASET: UBFC-rPPG
     DO_PREPROCESS: False
     DATA_FORMAT: NDCHW
-    DATA_PATH: "/Users/drozanes/Downloads/UBFC-rPPG_Raw/DATASET_2"
+    DATA_PATH: "./UBFC-rPPG_Raw/DATASET_2"
     CACHED_PATH: "PreprocessedData"
     EXP_DATA_NAME: ""
     BEGIN: 0.8

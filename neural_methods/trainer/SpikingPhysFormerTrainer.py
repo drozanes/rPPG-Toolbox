@@ -303,13 +303,14 @@ class SpikingPhysFormerTrainer(BaseTrainer):
             pass
 
         # Auto-append test results to rPPG_results_database.csv if present
-        if metrics and os.path.exists("rPPG_results_database.csv"):
+        db_path = "csvs/rPPG_results_database.csv" if os.path.exists("csvs/rPPG_results_database.csv") else "rPPG_results_database.csv"
+        if metrics and os.path.exists(db_path):
             try:
                 import csv
                 use_fusion = (hasattr(self.config.MODEL, "SPIKINGPHYSFORMER") and getattr(self.config.MODEL.SPIKINGPHYSFORMER, "USE_FUSION_STEM", False)) or getattr(self.config.MODEL, "USE_FUSION_STEM", False)
                 model_name = "SpikingPhysFormer (FusionStem)" if use_fusion else "SpikingPhysFormer"
                 notes = "SNN architecture with Multi-Temporal FusionStem." if use_fusion else "Neural Networks 2025 SNN architecture on 160-frame clips."
-                with open("rPPG_results_database.csv", "a", newline="") as f:
+                with open(db_path, "a", newline="") as f:
                     writer = csv.writer(f)
                     writer.writerow([
                         self.config.TEST.DATA.DATASET,
@@ -325,16 +326,16 @@ class SpikingPhysFormerTrainer(BaseTrainer):
                         "Yes",
                         notes
                     ])
-                print(f"Appended {model_name} benchmark results to rPPG_results_database.csv!")
+                print(f"Appended {model_name} benchmark results to {db_path}!")
                 backup_dir = getattr(self.config.MODEL, 'BACKUP_DIR', '') or (
                     self.config.BACKUP_DIR if hasattr(self.config, 'BACKUP_DIR') else ''
                 )
                 if backup_dir and os.path.exists(backup_dir):
                     import shutil
-                    shutil.copy2("rPPG_results_database.csv", os.path.join(backup_dir, "rPPG_results_database.csv"))
-                    print(f"--> [Google Drive / Backup Sync] Mirrored rPPG_results_database.csv to {backup_dir}")
+                    shutil.copy2(db_path, os.path.join(backup_dir, "rPPG_results_database.csv"))
+                    print(f"--> [Google Drive / Backup Sync] Mirrored {db_path} to {backup_dir}")
             except Exception as e:
-                print(f"Error appending to rPPG_results_database.csv: {e}")
+                print(f"Error appending to {db_path}: {e}")
 
     def save_model(self, index):
         if not os.path.exists(self.model_dir):

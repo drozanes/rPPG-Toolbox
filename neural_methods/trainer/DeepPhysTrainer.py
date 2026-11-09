@@ -290,10 +290,11 @@ class DeepPhysTrainer(BaseTrainer):
             self.save_test_outputs(predictions, labels, self.config)
 
         # Auto-append test results to rPPG_results_database.csv if present
-        if metrics and os.path.exists("rPPG_results_database.csv"):
+        db_path = "csvs/rPPG_results_database.csv" if os.path.exists("csvs/rPPG_results_database.csv") else "rPPG_results_database.csv"
+        if metrics and os.path.exists(db_path):
             try:
                 import csv
-                with open("rPPG_results_database.csv", "a", newline="") as f:
+                with open(db_path, "a", newline="") as f:
                     writer = csv.writer(f)
                     writer.writerow([
                         self.config.TEST.DATA.DATASET,
@@ -309,14 +310,14 @@ class DeepPhysTrainer(BaseTrainer):
                         "Yes",
                         f"Online training with Early Stopping (best epoch {self.best_epoch}, val loss {self.min_valid_loss:.4f})."
                     ])
-                print("Appended DeepPhys benchmark results to rPPG_results_database.csv!")
+                print(f"Appended DeepPhys benchmark results to {db_path}!")
                 backup_dir = getattr(self.config.MODEL, 'BACKUP_DIR', '') or (
                     '/content/drive/MyDrive/rPPG_Checkpoints' if os.path.exists('/content/drive/MyDrive') else ''
                 )
                 if backup_dir and os.path.exists(backup_dir):
                     import shutil
-                    shutil.copy2("rPPG_results_database.csv", os.path.join(backup_dir, "rPPG_results_database.csv"))
-                    print(f"--> [Google Drive / Backup Sync] Mirrored rPPG_results_database.csv to {backup_dir}")
+                    shutil.copy2(db_path, os.path.join(backup_dir, "rPPG_results_database.csv"))
+                    print(f"--> [Google Drive / Backup Sync] Mirrored {db_path} to {backup_dir}")
             except Exception as e:
                 print(f"Note: Could not auto-append to database CSV: {e}")
 

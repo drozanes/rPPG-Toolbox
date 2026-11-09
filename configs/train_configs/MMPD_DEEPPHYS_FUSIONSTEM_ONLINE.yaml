@@ -3,9 +3,9 @@ TOOLBOX_MODE: "train_and_test"
 TRAIN:
   BATCH_SIZE: 4
   EPOCHS: 30
-  PATIENCE: 6
+  PATIENCE: 8
   LR: 1e-4
-  MODEL_FILE_NAME: MMPD_DeepPhys_FusionStem_Online
+  MODEL_FILE_NAME: MMPD_DeepPhys_FusionStem_MediaPipe_Online
   PLOT_LOSSES_AND_LR: True
   DATA:
     INFO:
@@ -35,11 +35,11 @@ TRAIN:
       CHUNK_LENGTH: 180
       CROP_FACE:
         DO_CROP_FACE: True
-        BACKEND: 'HC'
+        BACKEND: 'MP'
         USE_LARGE_FACE_BOX: True
         LARGE_BOX_COEF: 1.5
         DETECTION:
-          DO_DYNAMIC_DETECTION: False
+          DO_DYNAMIC_DETECTION: True
           DYNAMIC_DETECTION_FREQUENCY: 30
           USE_MEDIAN_FACE_BOX: False
       RESIZE:
@@ -74,11 +74,11 @@ VALID:
       CHUNK_LENGTH: 180
       CROP_FACE:
         DO_CROP_FACE: True
-        BACKEND: 'HC'
+        BACKEND: 'MP'
         USE_LARGE_FACE_BOX: True
         LARGE_BOX_COEF: 1.5
         DETECTION:
-          DO_DYNAMIC_DETECTION: False
+          DO_DYNAMIC_DETECTION: True
           DYNAMIC_DETECTION_FREQUENCY: 30
           USE_MEDIAN_FACE_BOX: False
       RESIZE:
@@ -114,11 +114,11 @@ TEST:
       CHUNK_LENGTH: 180
       CROP_FACE:
         DO_CROP_FACE: True
-        BACKEND: 'HC'
+        BACKEND: 'MP'
         USE_LARGE_FACE_BOX: True
         LARGE_BOX_COEF: 1.5
         DETECTION:
-          DO_DYNAMIC_DETECTION: False
+          DO_DYNAMIC_DETECTION: True
           DYNAMIC_DETECTION_FREQUENCY: 30
           USE_MEDIAN_FACE_BOX: False
       RESIZE:

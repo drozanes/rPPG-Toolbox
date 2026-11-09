@@ -137,6 +137,10 @@ class FusionStem(nn.Module):
             # [N, C, D, H, W] -> permute to [N, D, C, H, W]
             x = x.permute(0, 2, 1, 3, 4)
 
+        if x.shape[2] == 6:
+            # Two-stream input [diff (0:3), raw (3:6)]: extract raw RGB for multi-shift temporal diffs
+            x = x[:, :, 3:, :, :]
+
         N, D, C, H, W = x.shape
 
         # Construct 5 consecutive temporal shifts with edge reflection/clamping:

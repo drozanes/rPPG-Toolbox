@@ -40,3 +40,22 @@ pdf_preview/
 .venv_kaggle/
 kaggle_name_that_llm/
 *.parquet
+
+# ML Models, Checkpoints and Datasets
+*.pth
+*.pt
+*.pickle
+*.pkl
+*.npz
+*.tar.gz
+*.zip
+*.parquet
+
+# Secrets & Keys
+*.keys.json
+*oauth*.json
+
+# Virtual Environments & Caches
+.venv/
+.venv*/
+~$*.docx

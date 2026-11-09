@@ -63,3 +63,23 @@ MMPD,Weakly-Supervised,ContrastPhys (MediaPipe Dynamic Tracking Val Ep 16),7.295
 MMPD,Weakly-Supervised,ContrastPhys (MediaPipe Test Split / Best Val Ep 16),19.347,29.332,24.150,0.350,-5.385,0.0,4.1,Yes,"MediaPipe BlazeFace dynamic tracking model evaluated on official unseen test split (Subj 30-33, 80 videos). Selected by best Validation MAE (Epoch 16). Cuts test error significantly vs late-epoch drift."
 MMPD,Unsupervised,ContrastPhys (MediaPipe Test Split / Min IPR Ep 3),21.456,24.902,27.258,0.083,-7.770,0.0,4.1,Yes,"MediaPipe BlazeFace dynamic tracking model evaluated on official unseen test split (Subj 30-33, 80 videos). Selected purely label-free via minimum IPR (Epoch 3). Achieves lowest test RMSE (24.90 BPM)."
 MMPD,Supervised,DeepPhys (FusionStem + MediaPipe),19.539,29.910,20.271,-0.051,-4.421,0.0,Fast,Yes,"DeepPhys with Multi-Temporal FusionStem and MediaPipe dynamic tracking (best epoch 13, val loss 0.9522). Cuts MAE from 27.93 to 19.54 BPM and boosts SNR by +3.13 dB."
+MMPD,Supervised,PhysFormer (FusionStem + MediaPipe),6.158,12.546,6.903,0.613,-4.058,14.0,Moderate,Yes,"ViT with Multi-Temporal FusionStem and MediaPipe BlazeFace dynamic tracking (24 epochs on Colab). SOTA on MMPD: cuts MAE to 6.16 BPM and doubles Pearson to 0.613."
+PURE,Supervised,PhysFormer,30.725,44.178,63.179,-0.507,-1.794,0.0,Moderate,Yes,"Spatiotemporal Vision Transformer (12 layers, 160 frames, theta=0.7)."
+PURE,Supervised,SpikingPhysFormer,0.311,0.748,0.622,0.999,0.761,0.0,4.5,Yes,Neural Networks 2025 SNN architecture on 160-frame clips.
+PURE,Weakly-Supervised,ContrastPhys+,4.138,13.706,8.563,0.741,1.923,0.0,3.1,Yes,"Contrast-Phys+ TPAMI 2024 setup: 2x2 ST-rPPG pooling, active PSD [40, 250], pairwise MSE loss."
+UBFC-rPPG,Supervised,SpikingPhysFormer,7.666,15.681,7.551,0.753,-4.963,0.0,4.5,Yes,Neural Networks 2025 SNN architecture on 160-frame clips.
+UBFC-rPPG,Supervised,PhysFormer,57.031,61.387,54.045,0.024,-9.877,0.0,Moderate,Yes,"Spatiotemporal Vision Transformer (12 layers, 160 frames, theta=0.7)."
+UBFC-rPPG,Supervised,PhysFormer,4.688,7.614,4.618,0.850,-4.955,0.0,Moderate,Yes,"Spatiotemporal Vision Transformer (12 layers, 160 frames, theta=0.7)."
+PURE,Supervised,PhysFormer,9.412,19.111,20.086,0.514,-3.898,0.0,Moderate,Yes,"Spatiotemporal Vision Transformer (12 layers, 160 frames, theta=0.7)."
+MMPD,Supervised,PhysFormer,14.886,21.836,18.261,0.132,-5.151,0.0,Moderate,Yes,"Spatiotemporal Vision Transformer (12 layers, 160 frames, theta=0.7)."
+MMPD,Supervised,PhysFormer,27.746,38.718,30.989,0.185,-7.595,0.0,Moderate,Yes,"Spatiotemporal Vision Transformer (12 layers, 160 frames, theta=0.7)."
+UBFC-rPPG,Weakly-Supervised,ContrastPhys+,2.734,3.769,2.507,0.942,0.473,0.0,3.1,Yes,"Contrast-Phys+ TPAMI 2024 setup: 2x2 ST-rPPG pooling, active PSD [40, 250], pairwise MSE loss."
+UBFC-rPPG,Weakly-Supervised,ContrastPhys+,73.682,74.995,69.048,0.309,-7.339,0.0,3.1,Yes,"Contrast-Phys+ TPAMI 2024 setup: 2x2 ST-rPPG pooling, active PSD [40, 250], pairwise MSE loss."
+PURE,Weakly-Supervised,ContrastPhys+,75.806,89.255,131.716,0.123,-7.481,0.0,3.1,Yes,"Contrast-Phys+ TPAMI 2024 setup: 2x2 ST-rPPG pooling, active PSD [40, 250], pairwise MSE loss."
+MMPD,Weakly-Supervised,ContrastPhys+,14.282,20.187,15.617,0.109,-5.159,0.0,3.1,Yes,"Contrast-Phys+ TPAMI 2024 setup: 2x2 ST-rPPG pooling, active PSD [40, 250], pairwise MSE loss."
+MMPD,Weakly-Supervised,ContrastPhys+,36.068,39.189,44.541,-0.139,-9.870,0.0,3.1,Yes,"Contrast-Phys+ TPAMI 2024 setup: 2x2 ST-rPPG pooling, active PSD [40, 250], pairwise MSE loss."
+UBFC-rPPG,Supervised,SpikingPhysFormer (FusionStem),54.883,56.982,50.372,-0.033,-12.289,0.0,4.5,Yes,SNN architecture with Multi-Temporal FusionStem.
+PURE,Supervised,SpikingPhysFormer (FusionStem),15.894,19.816,24.723,0.172,-5.739,0.0,4.5,Yes,SNN architecture with Multi-Temporal FusionStem.
+MMPD,Supervised,SpikingPhysFormer,21.346,28.141,23.621,0.051,-7.186,0.0,4.5,Yes,Neural Networks 2025 SNN architecture on 160-frame clips.
+MMPD,Supervised,SpikingPhysFormer,26.158,33.130,28.007,-0.033,-7.918,0.0,4.5,Yes,Neural Networks 2025 SNN architecture on 160-frame clips.
+MMPD,Supervised,SpikingPhysFormer (FusionStem + MediaPipe),15.106,23.739,15.637,0.096,-4.441,13.2,4.4,Yes,"SNN architecture with Multi-Temporal FusionStem and MediaPipe BlazeFace online tracking (24 epochs on Colab, SNN time-steps T_s=4). Cuts baseline error from 22.52 to 15.11 BPM on official unseen test split (Subj 30-33)."

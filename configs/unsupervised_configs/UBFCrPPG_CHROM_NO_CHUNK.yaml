@@ -8,7 +8,7 @@ UNSUPERVISED:
     DATASET: UBFC-rPPG
     DO_PREPROCESS: True # MUST BE TRUE FOR FIRST RUN
     DATA_FORMAT: NDHWC
-    DATA_PATH: "/Users/drozanes/Downloads/UBFC-rPPG_Raw/DATASET_2"
+    DATA_PATH: "./UBFC-rPPG_Raw/DATASET_2"
     CACHED_PATH: "PreprocessedData"
     EXP_DATA_NAME: ""
     BEGIN: 0.0

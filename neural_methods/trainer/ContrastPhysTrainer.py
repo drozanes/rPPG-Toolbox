@@ -232,13 +232,22 @@ class ContrastPhysTrainer(BaseTrainer):
         predictions = dict()
         labels = dict()
 
+        def load_checkpoint(path):
+            # Normalize state dict keys across DataParallel ('module.') and PyTorch version differences ('end.1.' -> 'conv_end.')
+            state_dict = torch.load(path, map_location=self.device)
+            clean_state_dict = {}
+            for k, v in state_dict.items():
+                k_clean = k.replace('module.', '').replace('end.1.', 'conv_end.')
+                clean_state_dict[k_clean] = v
+            self.model.load_state_dict(clean_state_dict)
+
         if self.config.TOOLBOX_MODE == "only_test":
-            self.model.load_state_dict(torch.load(self.config.INFERENCE.MODEL_PATH, map_location=self.device))
+            load_checkpoint(self.config.INFERENCE.MODEL_PATH)
         else:
             epoch_to_load = self.max_epoch_num - 1 if self.config.TEST.USE_LAST_EPOCH else self.best_epoch
             model_path = os.path.join(self.model_dir, self.model_file_name + '_Epoch' + str(epoch_to_load) + '.pth')
             print(f"Loading checkpoint for testing from: {model_path}")
-            self.model.load_state_dict(torch.load(model_path, map_location=self.device))
+            load_checkpoint(model_path)
 
         self.model.eval()
         with torch.no_grad():
@@ -268,11 +277,12 @@ class ContrastPhysTrainer(BaseTrainer):
             pass
 
         # Auto-append test results to rPPG_results_database.csv if present
-        if metrics and os.path.exists("rPPG_results_database.csv"):
+        db_path = "csvs/rPPG_results_database.csv" if os.path.exists("csvs/rPPG_results_database.csv") else "rPPG_results_database.csv"
+        if metrics and os.path.exists(db_path):
             try:
                 import csv
                 model_name = "ContrastPhys+ (FusionStem)" if (hasattr(self.config.MODEL, "CONTRAST_PHYS") and getattr(self.config.MODEL.CONTRAST_PHYS, "USE_FUSION_STEM", False)) else "ContrastPhys+"
-                with open("rPPG_results_database.csv", "a", newline="") as f:
+                with open(db_path, "a", newline="") as f:
                     writer = csv.writer(f)
                     writer.writerow([
                         self.config.TEST.DATA.DATASET,
@@ -288,9 +298,9 @@ class ContrastPhysTrainer(BaseTrainer):
                         "Yes",
                         "Contrast-Phys+ TPAMI 2024 setup: 2x2 ST-rPPG pooling, active PSD [40, 250], pairwise MSE loss."
                     ])
-                print(f"Appended {model_name} benchmark results to rPPG_results_database.csv!")
+                print(f"Appended {model_name} benchmark results to {db_path}!")
             except Exception as e:
-                print(f"Error appending to rPPG_results_database.csv: {e}")
+                print(f"Error appending to {db_path}: {e}")
 
     def save_model(self, index):
         if not os.path.exists(self.model_dir):

@@ -116,10 +116,17 @@ class DeepPhys(nn.Module):
     def forward(self, inputs, params=None):
 
         if self.use_fusion_stem:
+            # Multi-temporal FusionStem replaces standard single-frame difference stem
             if inputs.ndim == 5:
                 N, D, C, H, W = inputs.shape
-                diff_input = self.fusion_stem(inputs) # [N*D, 32, H, W]
-                raw_input = inputs.contiguous().view(N * D, C, H, W) # [N*D, 3, H, W]
+                if C == 6:
+                    # Input contains [diff (0:3), raw (3:6)]; feed raw RGB to FusionStem for dynamic temporal diffs
+                    raw_rgb = inputs[:, :, 3:, :, :]
+                    diff_input = self.fusion_stem(raw_rgb) # [N*D, 32, H, W]
+                    raw_input = raw_rgb.contiguous().view(N * D, 3, H, W) # [N*D, 3, H, W]
+                else:
+                    diff_input = self.fusion_stem(inputs) # [N*D, 32, H, W]
+                    raw_input = inputs.contiguous().view(N * D, C, H, W)
             elif inputs.ndim == 4 and inputs.shape[1] == 6:
                 diff_input = self.fusion_stem(inputs) # [B, 32, H, W]
                 raw_input = inputs[:, 3:, :, :]       # [B, 3, H, W]

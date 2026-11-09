@@ -1,0 +1,418 @@
+Model,Dataset,Protocol,Reported_In,Year,MAE_bpm,RMSE_bpm,Pearson_r,SNR_dB,SD_bpm,MAPE_pct,Notes
+POS,UBFC-rPPG,Cross-Dataset (Toolbox),RhythmMamba (AAAI),2025,4.08,7.72,0.92,-2.39,,3.93,Toolbox benchmark baseline
+POS,UBFC-rPPG,Cross-Dataset (Toolbox),RhythmFormer (CVPR),2024,4.08,7.72,0.92,-2.39,,3.93,Toolbox benchmark baseline
+POS,UBFC-rPPG,Unsupervised Benchmark,rPPG-Toolbox (NeurIPS),2023,4.0,7.72,0.92,-2.39,,3.86,Official rPPG-Toolbox NeurIPS benchmark
+POS,UBFC-rPPG,Intra-Dataset,Contrast-Phys+ (TPAMI),2024,4.05,8.75,0.78,,,,Skin segmented benchmark
+POS,UBFC-rPPG,Intra-Dataset,rPPG-MAE (TMM),2023,4.05,8.75,0.78,,,,Reported baseline
+POS,UBFC-rPPG,Cross-Dataset (PURE -> UBFC),rPPG-MAE (TMM),2023,3.52,8.38,,,,,Zero-shot unsupervised transfer
+POS,UBFC-rPPG,Intra-Dataset,Hyperbolic GNN (EAAI),2023,6.89,9.95,0.62,,10.06,12.73,Face tracking + POS
+POS,UBFC-rPPG,Intra-Dataset,Meta-rPPG (NeurIPS),2020,4.12,10.5,,,10.4,,Standard POS baseline
+POS,UBFC-rPPG,Intra-Dataset,PRNet (BSPC),2021,4.12,10.5,,,10.4,,Reported baseline
+POS,UBFC-rPPG,Intra-Dataset,X-iPPGNet (CBM),2023,4.12,10.5,,,10.4,,Reported baseline
+POS,UBFC-rPPG,Intra-Dataset,Jaiswal & Meenpal (CBM),2022,4.12,10.5,,,10.4,,Reported baseline
+POS,UBFC-rPPG,Intra-Dataset,Robust rPPG (DSP),2020,2.436,6.608,0.936,,,,cPR fine baseline comparison
+POS,UBFC-rPPG,Multi-Source Domain Gen (MSDG),Advancing Generalizable (TIP),2024,7.35,8.04,0.49,,,,Target test on UBFC
+POS,UBFC-rPPG,Intra-Dataset (Corrected Pipeline),Local Benchmark (rPPG-Toolbox),2026,1.549,3.996,0.975,0.995,,1.571,Strict HSV skin-mask + 60s full-video FFT (NDHWC Raw)
+POS,UBFC-rPPG,Intra-Dataset (NDCHW Buggy Config),Local Benchmark (rPPG-Toolbox),2026,21.686,26.901,0.087,-12.19,,21.877,Buggy NDCHW dimension transpose error
+POS,PURE,Cross-Dataset (Toolbox),RhythmMamba (AAAI),2025,3.67,11.82,0.88,6.87,,7.25,Toolbox benchmark baseline
+POS,PURE,Cross-Dataset (Toolbox),RhythmFormer (CVPR),2024,3.67,11.82,0.88,6.87,,7.25,Toolbox benchmark baseline
+POS,PURE,Unsupervised Benchmark,rPPG-Toolbox (NeurIPS),2023,3.67,11.82,0.88,6.87,,7.25,Official rPPG-Toolbox NeurIPS benchmark
+POS,PURE,Intra-Dataset (AAM Tracking),Gudi et al. (ICCVW),2019,0.3,,,,0.51,,"Active Appearance Model (AAM) ROI + POS: steady 0.16, talk 0.77, trans 0.12-0.18, rot 0.29-0.32"
+POS,PURE,Cross-Dataset (VIPL -> PURE),Hyperbolic GNN (EAAI),2023,10.96,13.43,0.63,,11.21,16.11,Cross-dataset setting
+POS,PURE,Multi-Source Domain Gen (MSDG),Advancing Generalizable (TIP),2024,9.82,13.44,0.34,,,,Target test on PURE
+POS,PURE,Single-Source Domain Gen (SSDG),Advancing Generalizable (TIP),2024,9.82,13.44,0.34,,,,Trained on UBFC tested on PURE
+POS,PURE,Intra-Dataset (10s window),PRNet (BSPC),2021,3.693,4.264,0.9069,,3.473,4.61,10s sliding window on PURE
+POS,PURE,Intra-Dataset (Corrected Pipeline),Local Benchmark (rPPG-Toolbox),2026,3.423,10.25,0.906,-1.223,,6.534,HSV skin-mask on 6s chunks
+POS,VIPL-HR,Intra-Dataset (5-Fold CV),PhysFormer (CVPR),2022,11.5,17.2,0.3,,15.3,,5-fold subject-exclusive CV
+POS,VIPL-HR,Intra-Dataset (5-Fold CV),PhysFormer++ (TPAMI),2023,11.5,17.2,0.3,,15.3,,5-fold subject-exclusive CV
+POS,VIPL-HR,Intra-Dataset,PhySU-Net,2024,11.5,17.2,0.3,,15.3,,Reported baseline
+POS,VIPL-HR,Intra-Dataset,NAS-HR (VR),2021,11.5,17.2,0.3,,15.3,18.5,ME 7.87 bpm
+POS,VIPL-HR,Intra-Dataset,Hyperbolic GNN (EAAI),2023,11.5,17.2,0.3,,15.3,18.5,Reported baseline
+POS,VIPL-HR,Intra-Dataset,Jaiswal & Meenpal (CBM),2022,11.5,17.2,0.3,,15.3,,Reported baseline
+POS,VIPL-HR,Intra-Dataset,rPPG-MAE (TMM),2023,11.5,17.2,0.3,,,,Reported baseline
+POS,VIPL-HR,Multi-Source Domain Gen (MSDG),Advancing Generalizable (TIP),2024,14.59,21.26,0.19,,,,Target test on VIPL-HR
+POS,MMPD,Cross-Dataset Benchmark,RhythmMamba (AAAI),2025,12.36,17.71,0.18,-11.53,,14.43,rPPG-Toolbox protocol on mobile dataset
+POS,MMPD,Cross-Dataset Benchmark,RhythmFormer (CVPR),2024,12.34,17.7,0.17,-11.53,,14.43,rPPG-Toolbox protocol on mobile dataset
+POS,MMPD,Unsupervised Benchmark,rPPG-Toolbox (NeurIPS),2023,12.36,17.71,0.18,-11.53,,14.43,Official MMPD mobile benchmark
+POS,COHFACE,Intra-Dataset,Hyperbolic GNN (EAAI),2023,11.65,15.14,0.35,,10.06,15.61,Compression + chiaroscuro lighting
+POS,MAHNOB-HCI,Intra-Dataset,Gudi et al. (ICCVW),2019,12.8,,,,11.89,,High H.264 compression noise degrades spatial averaging
+POS,MMSE-HR,Intra-Dataset,Jaiswal & Meenpal (CBM),2022,5.77,,0.82,,,,"Emotion elicitation, facial expressions"
+POS,OBF,Intra-Dataset (10-Fold CV),PhysFormer (CVPR),2022,,1.906,0.991,,1.899,,"High-quality 60fps video, 10-fold CV"
+POS,OBF,Intra-Dataset (10-Fold CV),PhysFormer++ (TPAMI),2023,,1.906,0.991,,1.899,,10-fold CV
+POS,OBF,Intra-Dataset,Contrast-Phys+ (TPAMI),2024,,1.906,0.991,,,,Reported baseline
+POS,OBF,Intra-Dataset,PhySU-Net,2024,,1.906,0.991,,1.899,,Reported baseline
+POS,UBFC-Phys,Unsupervised Benchmark,rPPG-Toolbox (NeurIPS),2023,4.51,8.16,0.77,-1.28,,6.12,Official toolbox benchmark across rest/speech/arithmetic
+POS,BUAA-MIHR,Multi-Source Domain Gen (MSDG),Advancing Generalizable (TIP),2024,5.04,7.12,0.63,,,,Domain generalization benchmark
+POS,V4V,Multi-Source Domain Gen (MSDG),Advancing Generalizable (TIP),2024,17.65,23.22,0.04,,,,Challenging in-the-wild video protocol
+POS,VicarPPG,Intra-Dataset,Gudi et al. (ICCVW),2019,2.64,,,,6.32,,"At rest 0.7 bpm, workout 4.57 bpm"
+POS,Multi-Challenge Gym/Tone,Multi-Environment Lab Benchmark,Wang et al. (IEEE TBME),2016,,,,5.16,,,"Average SNR across Fitzpatrick tones I-V, rotation, talking, biking, stepping (-3.58 to 10.51 dB)"
+POS,Field-Clinic (India/Sierra Leone),Clinical Diversity Benchmark,Dasari & Nowara (npj Digital Med),2021,,,,,14.14,,Mean error 9.59 bpm vs FDA Masimo pulse oximeter
+CHROM,UBFC-rPPG,Cross-Dataset (Toolbox),RhythmMamba (AAAI),2025,4.06,8.83,0.89,-2.96,,3.84,Toolbox benchmark baseline
+CHROM,UBFC-rPPG,Cross-Dataset (Toolbox),RhythmFormer (CVPR),2024,4.06,8.83,0.89,-2.96,,3.84,Toolbox benchmark baseline
+CHROM,UBFC-rPPG,Unsupervised Benchmark,rPPG-Toolbox (NeurIPS),2023,3.98,8.83,0.89,-2.96,,3.78,Official rPPG-Toolbox NeurIPS benchmark
+CHROM,UBFC-rPPG,Intra-Dataset,Contrast-Phys+ (TPAMI),2024,2.37,4.91,0.89,,,,Skin segmented benchmark
+CHROM,UBFC-rPPG,Intra-Dataset,rPPG-MAE (TMM),2023,2.37,4.91,0.89,,,,Reported baseline
+CHROM,UBFC-rPPG,Cross-Dataset (PURE -> UBFC),rPPG-MAE (TMM),2023,3.1,6.84,,,,,Zero-shot unsupervised transfer
+CHROM,UBFC-rPPG,Within-Database,DiffPhys (Bioengineering),2024,3.19,9.98,0.9,4.92,,3.17,Within-database evaluation
+CHROM,UBFC-rPPG,Cross-Dataset (PURE -> UBFC),DiffPhys (Bioengineering),2024,3.19,9.98,0.9,4.92,,3.17,Cross-database evaluation
+CHROM,UBFC-rPPG,Intra-Dataset,Hyperbolic GNN (EAAI),2023,6.25,8.98,0.62,,10.05,13.48,Face tracking + CHROM
+CHROM,UBFC-rPPG,Intra-Dataset,Meta-rPPG (NeurIPS),2020,10.6,20.3,,,19.1,,Reported baseline
+CHROM,UBFC-rPPG,Intra-Dataset,X-iPPGNet (CBM),2023,10.6,20.3,,,19.1,,Reported baseline
+CHROM,UBFC-rPPG,Intra-Dataset,Jaiswal & Meenpal (CBM),2022,10.6,20.3,,,19.1,,Reported baseline
+CHROM,UBFC-rPPG,Intra-Dataset,Robust rPPG (DSP),2020,3.435,4.614,0.968,,,,Baseline report
+CHROM,UBFC-rPPG,Multi-Source Domain Gen (MSDG),Advancing Generalizable (TIP),2024,7.23,8.92,0.51,,,,Target test on UBFC
+CHROM,UBFC-rPPG,Intra-Dataset (Corrected Pipeline),Local Benchmark (rPPG-Toolbox),2026,1.569,3.401,0.982,-0.098,,1.609,Strict HSV skin-mask + 60s full-video FFT (NDHWC Raw)
+CHROM,UBFC-rPPG,Intra-Dataset (Toolbox Baseline),Local Benchmark (rPPG-Toolbox),2026,3.306,7.283,0.916,-1.548,,3.187,Default rPPG-Toolbox implementation
+CHROM,UBFC-rPPG,Intra-Dataset (NDCHW Buggy Config),Local Benchmark (rPPG-Toolbox),2026,22.936,28.261,0.042,-12.852,,22.514,Buggy NDCHW dimension transpose error
+CHROM,PURE,Cross-Dataset (Toolbox),RhythmMamba (AAAI),2025,5.77,14.93,0.81,4.58,,11.52,Toolbox benchmark baseline
+CHROM,PURE,Cross-Dataset (Toolbox),RhythmFormer (CVPR),2024,5.77,14.93,0.81,4.58,,11.52,Toolbox benchmark baseline
+CHROM,PURE,Unsupervised Benchmark,rPPG-Toolbox (NeurIPS),2023,5.77,14.93,0.81,4.58,,11.52,Official rPPG-Toolbox NeurIPS benchmark
+CHROM,PURE,Intra-Dataset,Contrast-Phys+ (TPAMI),2024,2.07,9.92,0.99,,,,Reported baseline
+CHROM,PURE,Intra-Dataset,rPPG-MAE (TMM),2023,2.07,9.92,0.99,,,,Reported baseline
+CHROM,PURE,Within-Database,DiffPhys (Bioengineering),2024,4.85,16.27,0.72,5.35,,5.18,Within-database evaluation
+CHROM,PURE,Cross-Dataset (UBFC -> PURE),DiffPhys (Bioengineering),2024,4.85,16.27,0.72,5.35,,5.18,Cross-database evaluation
+CHROM,PURE,Intra-Dataset,Gudi et al. (ICCVW),2019,2.07,,,,,,Reported baseline
+CHROM,PURE,Intra-Dataset,NAS-HR (VR),2021,2.07,2.5,0.99,,,,Reported baseline
+CHROM,PURE,Cross-Dataset (VIPL -> PURE),Hyperbolic GNN (EAAI),2023,11.17,15.98,0.52,,14.81,18.4,Cross-dataset setting
+CHROM,PURE,Multi-Source Domain Gen (MSDG),Advancing Generalizable (TIP),2024,9.79,12.76,0.37,,,,Target test on PURE
+CHROM,PURE,Single-Source Domain Gen (SSDG),Advancing Generalizable (TIP),2024,9.79,12.76,0.37,,,,Trained on UBFC tested on PURE
+CHROM,PURE,Intra-Dataset (10s window),PRNet (BSPC),2021,2.541,3.04,0.9267,,2.85,3.18,10s sliding window
+CHROM,PURE,Intra-Dataset (Corrected Pipeline),Local Benchmark (rPPG-Toolbox),2026,5.64,15.522,0.789,-1.674,,10.844,HSV skin-mask on 6s chunks
+CHROM,PURE,Intra-Dataset (Toolbox Baseline),Local Benchmark (rPPG-Toolbox),2026,7.238,16.864,0.751,-2.312,,13.863,Default rPPG-Toolbox baseline without skin mask
+CHROM,VIPL-HR,Intra-Dataset (5-Fold CV),PhysFormer (CVPR),2022,11.4,16.9,0.28,,15.1,,5-fold subject-exclusive CV
+CHROM,VIPL-HR,Intra-Dataset (5-Fold CV),PhysFormer++ (TPAMI),2023,11.4,16.9,0.28,,15.1,,5-fold subject-exclusive CV
+CHROM,VIPL-HR,Intra-Dataset,PhySU-Net,2024,11.4,16.9,0.28,,15.1,,Reported baseline
+CHROM,VIPL-HR,Intra-Dataset,NAS-HR (VR),2021,11.4,16.9,0.28,,15.1,17.8,ME 7.63 bpm
+CHROM,VIPL-HR,Intra-Dataset,Hyperbolic GNN (EAAI),2023,11.07,17.99,0.27,,17.74,17.8,Reported baseline
+CHROM,VIPL-HR,Intra-Dataset,Jaiswal & Meenpal (CBM),2022,11.4,16.9,0.28,,15.1,,Reported baseline
+CHROM,VIPL-HR,Intra-Dataset,TransPPG,2022,11.4,16.9,0.28,,15.1,,Reported baseline
+CHROM,VIPL-HR,Intra-Dataset,rPPG-MAE (TMM),2023,11.4,16.9,0.28,,,,Reported baseline
+CHROM,VIPL-HR,Multi-Source Domain Gen (MSDG),Advancing Generalizable (TIP),2024,11.44,16.97,0.28,,,,Target test on VIPL-HR
+CHROM,MMPD,Cross-Dataset Benchmark,RhythmMamba (AAAI),2025,13.66,18.76,0.08,-11.74,,16.0,Toolbox protocol on mobile video
+CHROM,MMPD,Cross-Dataset Benchmark,RhythmFormer (CVPR),2024,13.63,18.75,0.08,-11.74,,15.96,Toolbox protocol on mobile video
+CHROM,MMPD,Unsupervised Benchmark,rPPG-Toolbox (NeurIPS),2023,13.66,18.76,0.08,-11.74,,15.99,Official MMPD mobile benchmark
+CHROM,COHFACE,Intra-Dataset,Hyperbolic GNN (EAAI),2023,11.22,15.83,0.31,,11.67,17.78,Chiaroscuro lighting + compression
+CHROM,COHFACE,Intra-Dataset,Deep Pulse-Signal Mag,2024,7.8,12.45,0.26,,,,Intra-dataset test
+CHROM,MAHNOB-HCI,Intra-Dataset,PhysFormer (CVPR),2022,13.49,22.36,0.21,,,,Highly compressed H.264
+CHROM,MAHNOB-HCI,Intra-Dataset,PhysFormer++ (TPAMI),2023,13.49,22.36,0.21,,,,Highly compressed H.264
+CHROM,MAHNOB-HCI,Intra-Dataset,Meta-rPPG (NeurIPS),2020,13.49,22.36,0.21,,,,Reported baseline
+CHROM,MAHNOB-HCI,Intra-Dataset,Gudi et al. (ICCVW),2019,13.49,,,,,,Reported baseline
+CHROM,MAHNOB-HCI,Intra-Dataset,Jaiswal & Meenpal (CBM),2022,13.49,22.36,0.21,,,,Reported baseline
+CHROM,MAHNOB-HCI,Intra-Dataset,X-iPPGNet (CBM),2023,13.49,22.36,0.21,,,,Reported baseline
+CHROM,MAHNOB-HCI,Cross-Dataset,Deep Pulse-Signal Mag,2024,13.49,22.36,0.2,,,,Cross-dataset setting
+CHROM,MAHNOB-HCI,Intra-Dataset,TransPPG,2022,,22.36,0.21,,13.67,,Reported baseline
+CHROM,MAHNOB-HCI,Transfer Learning,DeepPhys (ECCV),2018,5.09,,,-9.12,,,Baseline report in ECCV 2018
+CHROM,MMSE-HR,Cross-Dataset (UBFC -> MMSE-HR),Contrast-Phys+ (TPAMI),2024,,13.97,0.55,,,,Cross-dataset testing
+CHROM,MMSE-HR,Intra-Dataset,Contrast-Phys+ (TPAMI),2024,,13.97,0.55,,,,Intra-dataset reference
+CHROM,MMSE-HR,Cross-Dataset (VIPL -> MMSE-HR),PhysFormer (CVPR),2022,,13.97,0.55,,14.08,,Cross-dataset evaluation
+CHROM,MMSE-HR,Cross-Dataset,PhysFormer++ (TPAMI),2023,,13.97,0.55,,14.08,,Cross-dataset evaluation
+CHROM,MMSE-HR,Intra-Dataset,Jaiswal & Meenpal (CBM),2022,12.2,13.97,0.55,,14.08,,Intra-dataset test
+CHROM,MMSE-HR,Intra-Dataset,X-iPPGNet (CBM),2023,,13.97,0.55,,14.08,,Intra-dataset test
+CHROM,OBF,Intra-Dataset (10-Fold CV),PhysFormer (CVPR),2022,,2.733,0.98,,2.73,,10-fold CV on high-fps uncompressed video
+CHROM,OBF,Intra-Dataset (10-Fold CV),PhysFormer++ (TPAMI),2023,,2.733,0.98,,2.73,,10-fold CV
+CHROM,OBF,Intra-Dataset,Contrast-Phys+ (TPAMI),2024,,2.733,0.98,,,,Reported baseline
+CHROM,OBF,Intra-Dataset,PhySU-Net,2024,,2.733,0.98,,2.73,,Reported baseline
+CHROM,OBF,Intra-Dataset,RhythmNet (ICCV),2019,,2.733,0.98,,2.73,,Reported baseline
+CHROM,UBFC-Phys,Unsupervised Benchmark,rPPG-Toolbox (NeurIPS),2023,4.49,7.56,0.8,-1.92,,6.0,Official toolbox benchmark across rest/speech/arithmetic
+CHROM,BUAA-MIHR,Multi-Source Domain Gen (MSDG),Advancing Generalizable (TIP),2024,6.09,8.29,0.51,,,,Domain generalization benchmark
+CHROM,V4V,Multi-Source Domain Gen (MSDG),Advancing Generalizable (TIP),2024,14.92,19.22,0.08,,,,Challenging in-the-wild protocol
+CHROM,RGB Video II,Transfer Learning,DeepPhys (ECCV),2018,0.3,,,-2.3,,,Controlled video benchmark
+CHROM,117 Static Subjects Lab,Controlled Optical Study,de Haan & Jeanne (IEEE TBME),2013,,0.4,1.0,3.86,0.8,,"RMSE 0.4-1.1 bpm, SD 0.8-2.6 bpm; 98% within 3 bpm during gym bike exercise"
+CHROM,Field-Clinic (India/Sierra Leone),Clinical Diversity Benchmark,Dasari & Nowara (npj Digital Med),2021,,,,,14.15,,Mean error -6.40 bpm vs FDA Masimo pulse oximeter
+ICA,UBFC-rPPG,Cross-Dataset (Toolbox),RhythmMamba (AAAI),2025,16.0,25.65,0.44,-9.91,,15.35,Toolbox benchmark baseline
+ICA,UBFC-rPPG,Cross-Dataset (Toolbox),RhythmFormer (CVPR),2024,16.0,25.65,0.44,-9.91,,15.35,Toolbox benchmark baseline
+ICA,UBFC-rPPG,Unsupervised Benchmark,rPPG-Toolbox (NeurIPS),2023,14.7,25.65,0.44,-9.91,,14.34,Official rPPG-Toolbox NeurIPS benchmark
+ICA,UBFC-rPPG,Intra-Dataset,Contrast-Phys+ (TPAMI),2024,5.17,11.76,0.65,,,,Skin segmented benchmark
+ICA,UBFC-rPPG,Intra-Dataset,rPPG-MAE (TMM),2023,5.17,11.76,0.65,,,,Reported baseline
+ICA,UBFC-rPPG,Cross-Dataset (PURE -> UBFC),rPPG-MAE (TMM),2023,4.39,11.6,,,,,Zero-shot unsupervised transfer
+ICA,UBFC-rPPG,Intra-Dataset,Hyperbolic GNN (EAAI),2023,8.59,14.02,0.71,,15.74,23.34,Face tracking + ICA
+ICA,UBFC-rPPG,Intra-Dataset,Meta-rPPG (NeurIPS),2020,8.43,18.8,,,18.6,,Reported baseline
+ICA,UBFC-rPPG,Intra-Dataset,X-iPPGNet (CBM),2023,8.43,18.8,,,18.6,,Reported baseline
+ICA,UBFC-rPPG,Intra-Dataset,Jaiswal & Meenpal (CBM),2022,8.43,18.8,,,18.6,,Reported baseline
+ICA,UBFC-rPPG,Intra-Dataset,Robust rPPG (DSP),2020,3.507,8.635,0.908,,,,Reported baseline
+ICA,UBFC-rPPG,Intra-Dataset (Corrected Pipeline),Local Benchmark (rPPG-Toolbox),2026,16.187,28.02,0.449,-4.788,,15.348,JADE ICA with Welch spectral peak selection on full video (NDHWC Raw)
+ICA,UBFC-rPPG,Intra-Dataset (Toolbox Paper Baseline),Local Benchmark (rPPG-Toolbox),2026,14.7,,0.44,-9.91,,,Reported in rPPG-Toolbox paper
+ICA,UBFC-rPPG,Intra-Dataset (NDCHW Buggy Config),Local Benchmark (rPPG-Toolbox),2026,33.058,38.954,0.032,-13.694,,31.579,Buggy NDCHW dimension transpose error
+ICA,PURE,Cross-Dataset (Toolbox),RhythmMamba (AAAI),2025,4.77,16.07,0.72,5.24,,4.47,Toolbox benchmark baseline
+ICA,PURE,Cross-Dataset (Toolbox),RhythmFormer (CVPR),2024,4.77,16.07,0.72,5.24,,4.47,Toolbox benchmark baseline
+ICA,PURE,Unsupervised Benchmark,rPPG-Toolbox (NeurIPS),2023,4.77,16.07,0.72,5.24,,4.47,Official rPPG-Toolbox NeurIPS benchmark
+ICA,PURE,Cross-Dataset (VIPL -> PURE),Hyperbolic GNN (EAAI),2023,16.18,20.98,0.41,,19.43,25.61,Cross-dataset setting
+ICA,PURE,Intra-Dataset (Corrected Pipeline),Local Benchmark (rPPG-Toolbox),2026,6.662,17.375,0.669,-2.762,,8.236,Classical ICA on 6s chunks with Welch spectral peak selection
+ICA,VIPL-HR,Intra-Dataset,Hyperbolic GNN (EAAI),2023,10.47,15.26,0.6,,16.11,,Challenging lighting/motion
+ICA,MMPD,Cross-Dataset Benchmark,RhythmMamba (AAAI),2025,18.6,24.3,0.01,-13.84,,20.88,Mobile video benchmark
+ICA,MMPD,Cross-Dataset Benchmark,RhythmFormer (CVPR),2024,18.57,24.28,0.0,-13.84,,20.85,Mobile video benchmark
+ICA,MMPD,Unsupervised Benchmark,rPPG-Toolbox (NeurIPS),2023,18.6,24.3,0.01,-13.84,,20.88,Official MMPD mobile benchmark
+ICA,COHFACE,Intra-Dataset,Hyperbolic GNN (EAAI),2023,7.77,11.27,0.64,,12.12,23.34,Intra-dataset test
+ICA,MAHNOB-HCI,Intra-Dataset,PhysFormer (CVPR),2022,,13.6,0.36,,13.5,,Poh et al. 2011 baseline
+ICA,MAHNOB-HCI,Intra-Dataset,PhysFormer++ (TPAMI),2023,,13.6,0.36,,13.5,,Poh et al. 2011 baseline
+ICA,MAHNOB-HCI,Intra-Dataset,Meta-rPPG (NeurIPS),2020,,13.6,0.36,,13.5,,Poh et al. 2011 baseline
+ICA,MAHNOB-HCI,Intra-Dataset,X-iPPGNet (CBM),2023,,13.6,0.36,,13.5,,Poh et al. 2011 baseline
+ICA,MAHNOB-HCI,Intra-Dataset,Jaiswal & Meenpal (CBM),2022,13.2,13.6,0.36,,13.5,,"Poh 2011 (Poh 2010: MAE 25.0, RMSE 25.9, r 0.08)"
+ICA,MAHNOB-HCI,Cross-Dataset,Deep Pulse-Signal Mag,2024,,13.6,0.36,,,,Cross-dataset test
+ICA,MAHNOB-HCI,Intra-Dataset,TransPPG,2022,,13.6,0.08,,24.3,,Reported baseline
+ICA,MAHNOB-HCI,Transfer Learning,DeepPhys (ECCV),2018,10.5,,,-10.4,,,5-band ICA baseline in ECCV 2018
+ICA,UBFC-Phys,Unsupervised Benchmark,rPPG-Toolbox (NeurIPS),2023,10.04,15.73,0.36,-5.28,,11.85,Official toolbox benchmark across rest/speech/arithmetic
+ICA,VicarPPG,Intra-Dataset,Gudi et al. (ICCVW),2019,24.1,,,,30.9,,Motion artifacts cause complete component swap
+ICA,Multi-Challenge Gym/Tone,Multi-Environment Lab Benchmark,Wang et al. (IEEE TBME),2016,,,,1.92,,,"Average SNR: stationary 11.61 dB, talking 3.11 dB, biking -5.40 dB, stepping -12.51 dB"
+PBV,UBFC-rPPG,Cross-Dataset (Toolbox),RhythmMamba (AAAI),2025,15.9,26.4,0.48,-9.16,,15.17,Toolbox benchmark baseline
+PBV,UBFC-rPPG,Cross-Dataset (Toolbox),RhythmFormer (CVPR),2024,15.9,26.4,0.48,-9.16,,15.17,Toolbox benchmark baseline
+PBV,UBFC-rPPG,Unsupervised Benchmark,rPPG-Toolbox (NeurIPS),2023,15.9,26.4,0.48,-9.16,,15.17,Official rPPG-Toolbox NeurIPS benchmark
+PBV,UBFC-rPPG,Intra-Dataset (Corrected Pipeline),Local Benchmark (rPPG-Toolbox),2026,7.67,18.592,0.721,-2.459,,7.821,Requires exact BVP signature vector; evaluated on full video (NDHWC Raw)
+PBV,UBFC-rPPG,Intra-Dataset (NDCHW Buggy Config),Local Benchmark (rPPG-Toolbox),2026,31.328,36.945,0.003,-12.598,,31.051,Buggy NDCHW dimension transpose error
+PBV,PURE,Cross-Dataset (Toolbox),RhythmMamba (AAAI),2025,3.92,12.99,0.84,2.3,,4.84,Toolbox benchmark baseline
+PBV,PURE,Cross-Dataset (Toolbox),RhythmFormer (CVPR),2024,3.92,12.99,0.84,2.3,,4.84,Toolbox benchmark baseline
+PBV,PURE,Unsupervised Benchmark,rPPG-Toolbox (NeurIPS),2023,3.91,12.99,0.84,2.3,,4.82,Official rPPG-Toolbox NeurIPS benchmark
+PBV,PURE,Intra-Dataset (Corrected Pipeline),Local Benchmark (rPPG-Toolbox),2026,5.369,15.455,0.765,-2.114,,8.281,Classical PBV with HSV skin-mask on 6s chunks
+PBV,MMPD,Cross-Dataset Benchmark,RhythmMamba (AAAI),2025,17.95,23.58,0.09,-13.88,,20.18,Mobile video benchmark
+PBV,MMPD,Cross-Dataset Benchmark,RhythmFormer (CVPR),2024,17.88,23.53,0.09,-13.88,,20.11,Mobile video benchmark
+PBV,MMPD,Unsupervised Benchmark,rPPG-Toolbox (NeurIPS),2023,17.95,23.58,0.09,-13.88,,20.18,Official MMPD mobile benchmark
+PBV,UBFC-Phys,Unsupervised Benchmark,rPPG-Toolbox (NeurIPS),2023,12.34,17.43,0.33,-9.33,,14.63,Official toolbox benchmark across rest/speech/arithmetic
+PBV,GRGB Motion Dataset,Motion Robustness Benchmark,GRGB (2023),2023,16.23,,,,,,"Resting 2.95, gym 22.73, talk 13.08, rotation 26.16 bpm"
+PBV,Gym Exercising Subjects,Motion Robustness Study,de Haan & van Leest (Physiol. Meas.),2014,,,,7.6,,,SNR 7.6 dB (512 window) / 5.6 dB (64 window); 68% pulse detection rate vs CHROM 60% and ICA <40%
+PBV,Multi-Challenge Gym/Tone,Multi-Environment Lab Benchmark,Wang et al. (IEEE TBME),2016,,,,3.56,,,"Average SNR: stationary 6.57 dB, rotation 6.36 dB, talking 4.01 dB, stepping -2.85 dB"
+DeepPhys,UBFC-rPPG,Intra-Dataset,RhythmMamba (AAAI),2025,6.27,10.82,0.65,,,,Standard intra-dataset split
+DeepPhys,UBFC-rPPG,Intra-Dataset,RhythmFormer (CVPR),2024,6.27,10.82,0.65,,,,Standard intra-dataset split
+DeepPhys,UBFC-rPPG,Intra-Dataset,PhysMamba,2024,6.27,10.82,0.65,,,,Standard intra-dataset split
+DeepPhys,UBFC-rPPG,Within-Database,DiffPhys (Bioengineering),2024,2.64,4.26,0.99,6.31,,3.28,Within-database evaluation
+DeepPhys,UBFC-rPPG,Intra-Dataset,Hyperbolic GNN (EAAI),2023,5.75,9.62,0.65,,8.42,7.94,Intra-dataset test
+DeepPhys,UBFC-rPPG,Cross-Dataset (PURE -> UBFC),RhythmMamba (AAAI),2025,1.21,2.9,0.99,1.74,,1.42,Cross-dataset testing
+DeepPhys,UBFC-rPPG,Cross-Dataset (PURE -> UBFC),RhythmFormer (CVPR),2024,1.21,2.9,0.99,1.74,,1.42,Cross-dataset testing
+DeepPhys,UBFC-rPPG,Cross-Dataset (PURE -> UBFC),Spiking-PhysFormer (Neural Netw),2025,1.21,,0.99,,,1.42,Cross-dataset testing
+DeepPhys,UBFC-rPPG,Cross-Dataset (PURE -> UBFC),PhysMamba,2024,1.21,2.9,0.99,,,,Cross-dataset testing
+DeepPhys,UBFC-rPPG,Cross-Dataset (PURE -> UBFC),PhysDiff,2025,1.21,2.9,0.99,,,,Cross-dataset testing
+DeepPhys,UBFC-rPPG,Cross-Dataset (PURE -> UBFC),DiffPhys (Bioengineering),2024,1.21,2.9,0.98,5.73,,1.42,Cross-database evaluation
+DeepPhys,UBFC-rPPG,Cross-Dataset (PURE -> UBFC),rPPG-Toolbox (NeurIPS),2023,1.21,2.9,0.99,1.74,,1.42,Official toolbox cross-dataset evaluation
+DeepPhys,UBFC-rPPG,Cross-Dataset (SCAMPS -> UBFC),rPPG-Toolbox (NeurIPS),2023,3.1,9.81,0.87,-0.79,,3.08,Trained on synthetic avatar dataset
+DeepPhys,UBFC-rPPG,Multi-Source Domain Gen (MSDG),Advancing Generalizable (TIP),2024,7.82,8.42,0.54,,,,Target test on UBFC
+DeepPhys,UBFC-rPPG,Intra-Dataset (Local Benchmark),Local Benchmark (rPPG-Toolbox),2026,1.946,4.861,0.962,0.494,,2.07,Evaluated on 6s chunks
+DeepPhys,PURE,Intra-Dataset,RhythmMamba (AAAI),2025,0.83,1.54,0.99,,,,Standard intra-dataset split
+DeepPhys,PURE,Intra-Dataset,RhythmFormer (CVPR),2024,0.83,1.54,0.99,,,,Standard intra-dataset split
+DeepPhys,PURE,Intra-Dataset,PhysMamba,2024,0.83,1.54,0.99,,,,Standard intra-dataset split
+DeepPhys,PURE,Within-Database,DiffPhys (Bioengineering),2024,3.96,12.95,0.76,6.32,,4.38,Within-database evaluation
+DeepPhys,PURE,Cross-Dataset (UBFC -> PURE),RhythmMamba (AAAI),2025,5.54,18.51,0.66,4.4,,5.32,Cross-dataset testing
+DeepPhys,PURE,Cross-Dataset (UBFC -> PURE),RhythmFormer (CVPR),2024,5.54,18.51,0.66,4.4,,5.32,Cross-dataset testing
+DeepPhys,PURE,Cross-Dataset (UBFC -> PURE),Spiking-PhysFormer (Neural Netw),2025,5.54,,0.66,,,5.32,Cross-dataset testing
+DeepPhys,PURE,Cross-Dataset (UBFC -> PURE),PhysMamba,2024,5.54,18.51,0.66,,,,Cross-dataset testing
+DeepPhys,PURE,Cross-Dataset (UBFC -> PURE),PhysDiff,2025,5.54,18.51,0.66,,,,Cross-dataset testing
+DeepPhys,PURE,Cross-Dataset (UBFC -> PURE),DiffPhys (Bioengineering),2024,5.5,18.51,0.66,4.35,,5.25,Cross-database evaluation
+DeepPhys,PURE,Cross-Dataset (UBFC -> PURE),rPPG-Toolbox (NeurIPS),2023,5.54,18.51,0.66,4.4,,5.32,Official toolbox cross-dataset evaluation
+DeepPhys,PURE,Cross-Dataset (SCAMPS -> PURE),rPPG-Toolbox (NeurIPS),2023,3.95,,,,,4.25,Trained on synthetic avatar dataset
+DeepPhys,PURE,Cross-Dataset (VIPL -> PURE),Hyperbolic GNN (EAAI),2023,7.76,10.92,,,10.84,13.83,Cross-dataset setting
+DeepPhys,PURE,Multi-Source Domain Gen (MSDG),Advancing Generalizable (TIP),2024,9.34,12.56,0.55,,,,Target test on PURE
+DeepPhys,PURE,Intra-Dataset (Local Benchmark),Local Benchmark (rPPG-Toolbox),2026,1.728,9.481,0.917,4.975,,1.756,Standard 2D-CNN evaluated on 6s chunks
+DeepPhys,VIPL-HR,Intra-Dataset (5-Fold CV),PhysFormer (CVPR),2022,11.0,13.8,0.11,,13.6,,5-fold subject-exclusive CV
+DeepPhys,VIPL-HR,Intra-Dataset (5-Fold CV),PhysFormer++ (TPAMI),2023,11.0,13.8,0.11,,13.6,,5-fold subject-exclusive CV
+DeepPhys,VIPL-HR,Intra-Dataset,RhythmMamba (AAAI),2025,11.0,13.8,0.11,,,,Reported baseline
+DeepPhys,VIPL-HR,Intra-Dataset,RhythmFormer (CVPR),2024,11.0,13.8,0.11,,,,Reported baseline
+DeepPhys,VIPL-HR,Intra-Dataset,PhySU-Net,2024,11.0,13.8,0.11,,13.6,,Reported baseline
+DeepPhys,VIPL-HR,Intra-Dataset,NAS-HR (VR),2021,11.0,13.8,0.11,,13.6,13.6,ME -2.60 bpm
+DeepPhys,VIPL-HR,Intra-Dataset,Hyperbolic GNN (EAAI),2023,11.0,13.8,0.11,,13.6,13.6,Reported baseline
+DeepPhys,VIPL-HR,Intra-Dataset,Jaiswal & Meenpal (CBM),2022,11.0,13.8,0.11,,13.6,,Reported baseline
+DeepPhys,VIPL-HR,Intra-Dataset,TransPPG,2022,11.0,13.8,0.11,,13.6,,Reported baseline
+DeepPhys,VIPL-HR,Multi-Source Domain Gen (MSDG),Advancing Generalizable (TIP),2024,12.56,19.13,0.14,,,,Target test on VIPL-HR
+DeepPhys,MMPD,Intra-Dataset,RhythmMamba (AAAI),2025,22.27,28.92,-0.03,,,,Sequential split 7:1:2
+DeepPhys,MMPD,Intra-Dataset,RhythmFormer (CVPR),2024,22.27,28.92,-0.03,,,,Sequential split 7:1:2
+DeepPhys,MMPD,Cross-Dataset (UBFC -> MMPD),RhythmMamba (AAAI),2025,17.5,25.0,0.06,-11.72,,19.27,Cross-dataset setting
+DeepPhys,MMPD,Cross-Dataset (PURE -> MMPD),RhythmMamba (AAAI),2025,16.92,24.61,0.05,-11.53,,18.54,Cross-dataset setting
+DeepPhys,MMPD,Cross-Dataset (UBFC -> MMPD),RhythmFormer (CVPR),2024,17.5,25.0,0.05,-11.72,,19.27,Cross-dataset setting
+DeepPhys,MMPD,Cross-Dataset (PURE -> MMPD),RhythmFormer (CVPR),2024,16.92,24.61,0.05,-11.53,,18.54,Cross-dataset setting
+DeepPhys,MMPD,Cross-Dataset (UBFC -> MMPD),Spiking-PhysFormer (Neural Netw),2025,17.5,,0.06,,,19.27,Cross-dataset setting
+DeepPhys,MMPD,Cross-Dataset (PURE -> MMPD),Spiking-PhysFormer (Neural Netw),2025,16.92,,0.05,,,18.54,Cross-dataset setting
+DeepPhys,MMPD,Cross-Dataset (UBFC -> MMPD),PhysMamba,2024,17.5,25.0,0.05,,,,Cross-dataset setting
+DeepPhys,MMPD,Cross-Dataset (PURE -> MMPD),PhysMamba,2024,16.92,24.61,0.05,,,,Cross-dataset setting
+DeepPhys,MMPD,Cross-Dataset (UBFC -> MMPD),rPPG-Toolbox (NeurIPS),2023,17.49,25.0,0.06,-11.72,,19.26,Official toolbox benchmark
+DeepPhys,MMPD,Cross-Dataset (PURE -> MMPD),rPPG-Toolbox (NeurIPS),2023,16.92,24.61,0.05,-11.53,,18.54,Official toolbox benchmark
+DeepPhys,MMPD,Cross-Dataset (SCAMPS -> MMPD),rPPG-Toolbox (NeurIPS),2023,15.22,23.17,0.09,-10.23,,16.56,Trained on synthetic avatar dataset
+DeepPhys,COHFACE,Intra-Dataset,RhythmFormer (CVPR),2024,6.89,13.89,0.34,,,,Intra-dataset test
+DeepPhys,COHFACE,Intra-Dataset,Hyperbolic GNN (EAAI),2023,6.79,12.34,0.31,,8.56,7.94,Threshold skin mask culls dim regions
+DeepPhys,MAHNOB-HCI,Transfer Learning,DeepPhys (ECCV),2018,4.57,,,-8.98,,,"Trained on Task 2 RGB Video I, tested zero-shot on MAHNOB-HCI"
+DeepPhys,MAHNOB-HCI,Transfer Learning,PhysFormer (CVPR),2022,4.57,,,,,,Reported baseline
+DeepPhys,MAHNOB-HCI,Transfer Learning,PhysFormer++ (TPAMI),2023,4.57,,,,,,Reported baseline
+DeepPhys,MAHNOB-HCI,Transfer Learning,Meta-rPPG (NeurIPS),2020,4.57,,,,,,Reported baseline
+DeepPhys,MAHNOB-HCI,Transfer Learning,PRNet (BSPC),2021,4.57,,,,,,Reported baseline
+DeepPhys,MAHNOB-HCI,Transfer Learning,X-iPPGNet (CBM),2023,4.57,,,,,,Reported baseline
+DeepPhys,MAHNOB-HCI,Transfer Learning,Gudi et al. (ICCVW),2019,4.57,,,,,,Reported baseline
+DeepPhys,MAHNOB-HCI,Cross-Dataset,Deep Pulse-Signal Mag,2024,4.57,6.44,0.84,,,,Reported cross-dataset baseline
+DeepPhys,MMSE-HR,Intra-Dataset,Jaiswal & Meenpal (CBM),2022,4.72,8.68,0.82,,,,Reported baseline
+DeepPhys,UBFC-Phys,Cross-Dataset (UBFC -> UBFC-Phys),Spiking-PhysFormer (Neural Netw),2025,6.62,,0.66,,,8.21,Cross-dataset setting
+DeepPhys,UBFC-Phys,Cross-Dataset (PURE -> UBFC-Phys),Spiking-PhysFormer (Neural Netw),2025,8.42,,0.44,,,10.18,Cross-dataset setting
+DeepPhys,UBFC-Phys,Cross-Dataset (UBFC -> UBFC-Phys),rPPG-Toolbox (NeurIPS),2023,6.62,10.69,0.66,-2.98,,8.21,Official toolbox benchmark
+DeepPhys,UBFC-Phys,Cross-Dataset (PURE -> UBFC-Phys),rPPG-Toolbox (NeurIPS),2023,8.42,13.8,0.44,-4.41,,10.18,Official toolbox benchmark
+DeepPhys,UBFC-Phys,Cross-Dataset (SCAMPS -> UBFC-Phys),rPPG-Toolbox (NeurIPS),2023,4.75,7.5,0.82,-2.04,,5.89,Trained on synthetic avatar dataset
+DeepPhys,BUAA-MIHR,Multi-Source Domain Gen (MSDG),Advancing Generalizable (TIP),2024,4.78,6.74,0.69,,,,Domain generalization benchmark
+DeepPhys,V4V,Multi-Source Domain Gen (MSDG),Advancing Generalizable (TIP),2024,14.52,19.11,0.14,,,,In-the-wild video protocol
+DeepPhys,RGB Video I,Participant-Independent,Chen & McDuff (ECCV),2018,2.45,,,4.65,,,"CAN model trained on all tasks; Task 6 model achieved MAE 2.15, SNR 5.41 dB"
+DeepPhys,RGB Video II,Transfer Learning,Chen & McDuff (ECCV),2018,0.14,,,0.03,,,Zero-shot transfer from RGB Video I
+DeepPhys,Field-Clinic (India/Sierra Leone),Clinical Diversity Benchmark,Dasari & Nowara (npj Digital Med),2021,,,,,12.24,,Mean error -14.11 bpm vs FDA Masimo pulse oximeter
+PhysFormer,UBFC-rPPG,Intra-Dataset,RhythmMamba (AAAI),2025,0.5,0.71,0.99,,,,Sequential split 30:12
+PhysFormer,UBFC-rPPG,Intra-Dataset,RhythmFormer (CVPR),2024,0.5,0.71,0.99,,,,Sequential split 30:12
+PhysFormer,UBFC-rPPG,Intra-Dataset,PhysMamba,2024,0.5,0.71,0.99,,,,Sequential split 30:12
+PhysFormer,UBFC-rPPG,Within-Database,DiffPhys (Bioengineering),2024,2.83,6.43,0.96,6.01,,3.32,Within-database evaluation
+PhysFormer,UBFC-rPPG,Within-Dataset (0.0-0.7 / 0.7-1.0),FactorizePhys (NeurIPS),2024,1.76,3.36,0.96,6.1,0.79,1.6,Subject-wise split
+PhysFormer,UBFC-rPPG,Cross-Dataset (PURE -> UBFC),RhythmMamba (AAAI),2025,1.44,3.77,0.98,0.18,,1.66,Cross-dataset testing
+PhysFormer,UBFC-rPPG,Cross-Dataset (PURE -> UBFC),RhythmFormer (CVPR),2024,1.44,3.77,0.98,0.18,,1.66,Cross-dataset testing
+PhysFormer,UBFC-rPPG,Cross-Dataset (PURE -> UBFC),Spiking-PhysFormer (Neural Netw),2025,1.44,,0.98,,,1.66,Cross-dataset testing
+PhysFormer,UBFC-rPPG,Cross-Dataset (PURE -> UBFC),PhysMamba,2024,1.44,3.77,0.98,,,,Cross-dataset testing
+PhysFormer,UBFC-rPPG,Cross-Dataset (PURE -> UBFC),DiffPhys (Bioengineering),2024,1.69,6.64,0.93,3.44,,1.7,Cross-database evaluation
+PhysFormer,UBFC-rPPG,Cross-Dataset (PURE -> UBFC),FactorizePhys (NeurIPS),2024,1.01,2.4,0.99,8.42,0.38,1.21,Cross-dataset evaluation
+PhysFormer,UBFC-rPPG,Cross-Dataset (iBVP -> UBFC),FactorizePhys (NeurIPS),2024,9.88,19.59,0.44,2.8,2.95,8.72,Trained on iBVP dataset
+PhysFormer,UBFC-rPPG,Cross-Dataset (SCAMPS -> UBFC),FactorizePhys (NeurIPS),2024,8.42,17.73,0.49,2.29,2.72,11.27,Trained on SCAMPS dataset
+PhysFormer,UBFC-rPPG,Cross-Dataset (PURE -> UBFC),rPPG-Toolbox (NeurIPS),2023,1.44,3.77,0.98,0.18,,1.66,Official toolbox benchmark
+PhysFormer,UBFC-rPPG,Cross-Dataset (SCAMPS -> UBFC),rPPG-Toolbox (NeurIPS),2023,4.56,10.48,0.81,-6.34,,5.18,Trained on synthetic avatar dataset
+PhysFormer,UBFC-rPPG,Intra-Dataset (Paper Aligned),Local Benchmark (rPPG-Toolbox),2026,1.639,4.464,0.966,-2.176,,1.684,Restored official F.cross_entropy + sum-reduction kl_loss on F.log_softmax(ca)
+PhysFormer,UBFC-rPPG,Intra-Dataset (Baseline),Local Benchmark (rPPG-Toolbox),2026,1.946,4.906,0.961,1.454,,1.985,Standard Transformer evaluated on 6s chunks
+PhysFormer,UBFC-rPPG,Intra-Dataset (Post-Fix Degradation),Local Benchmark (rPPG-Toolbox),2026,29.001,35.171,-0.093,-9.687,,29.808,Filtered get_hr + fixed loss schedule corruption
+PhysFormer,PURE,Intra-Dataset,RhythmMamba (AAAI),2025,1.1,1.75,0.99,,,,Sequential split 6:4
+PhysFormer,PURE,Intra-Dataset,RhythmFormer (CVPR),2024,1.1,1.75,0.99,,,,Sequential split 6:4
+PhysFormer,PURE,Intra-Dataset,PhysMamba,2024,1.1,1.75,0.99,,,,Sequential split 6:4
+PhysFormer,PURE,Within-Database,DiffPhys (Bioengineering),2024,4.36,13.0,0.76,6.31,,5.6,Within-database evaluation
+PhysFormer,PURE,Within-Dataset (0.0-0.7 / 0.7-1.0),FactorizePhys (NeurIPS),2024,0.68,1.31,1.0,19.05,0.26,1.08,Subject-wise split
+PhysFormer,PURE,Cross-Dataset (UBFC -> PURE),RhythmMamba (AAAI),2025,12.92,24.36,0.47,2.16,,23.92,Cross-dataset testing
+PhysFormer,PURE,Cross-Dataset (UBFC -> PURE),RhythmFormer (CVPR),2024,12.92,24.36,0.47,2.16,,23.92,Cross-dataset testing
+PhysFormer,PURE,Cross-Dataset (UBFC -> PURE),Spiking-PhysFormer (Neural Netw),2025,12.92,,0.47,,,23.92,12 transformer blocks baseline
+PhysFormer,PURE,"Cross-Dataset (UBFC -> PURE, 6 blocks)",Spiking-PhysFormer (Neural Netw),2025,9.12,,0.6,,,15.61,Optimal 6 blocks reduces OoD overfitting
+PhysFormer,PURE,"Cross-Dataset (UBFC -> PURE, parallel)",Spiking-PhysFormer (Neural Netw),2025,9.9,,0.68,,,17.66,Parallel sub-blocks ablation
+PhysFormer,PURE,Cross-Dataset (UBFC -> PURE),PhysMamba,2024,12.92,24.36,0.47,,,,Cross-dataset testing
+PhysFormer,PURE,Cross-Dataset (UBFC -> PURE),DiffPhys (Bioengineering),2024,13.19,24.57,0.47,2.16,,24.41,Cross-database evaluation
+PhysFormer,PURE,Cross-Dataset (UBFC -> PURE),FactorizePhys (NeurIPS),2024,8.9,18.77,0.71,8.73,2.15,17.68,Cross-dataset evaluation
+PhysFormer,PURE,Cross-Dataset (iBVP -> PURE),FactorizePhys (NeurIPS),2024,6.58,16.55,0.76,9.75,1.98,6.93,Trained on iBVP dataset
+PhysFormer,PURE,Cross-Dataset (SCAMPS -> PURE),FactorizePhys (NeurIPS),2024,16.64,28.13,0.51,0.84,2.95,30.58,Trained on SCAMPS dataset
+PhysFormer,PURE,Cross-Dataset (UBFC -> PURE),rPPG-MAE (TMM),2023,23.63,30.7,,,,,Reported cross-dataset baseline
+PhysFormer,PURE,Cross-Dataset (UBFC -> PURE),rPPG-Toolbox (NeurIPS),2023,12.92,24.36,0.47,2.16,,23.92,Official toolbox benchmark
+PhysFormer,PURE,Cross-Dataset (SCAMPS -> PURE),rPPG-Toolbox (NeurIPS),2023,26.58,,,,,42.79,Trained on synthetic avatar dataset
+PhysFormer,PURE,"Intra-Dataset (Paper Aligned, 10s)",Local Benchmark (rPPG-Toolbox),2026,6.795,18.418,0.701,2.543,,7.626,Restored official F.cross_entropy + sum kl_loss; evaluated on 10s windows
+PhysFormer,PURE,Intra-Dataset (Epoch 3 pre-corrupt),Local Benchmark (rPPG-Toolbox),2026,6.827,18.488,0.679,,,8.74,Standard Transformer on 10s windows before harmonic loss bug
+PhysFormer,PURE,Intra-Dataset (Corrupted Baseline Ep 26),Local Benchmark (rPPG-Toolbox),2026,23.142,38.711,0.276,0.421,,29.387,Degraded by 2nd harmonic frequency loss corruption
+PhysFormer,VIPL-HR,Intra-Dataset (5-Fold CV),PhysFormer (CVPR),2022,4.97,7.79,0.78,,7.74,,Official CVPR 2022 proposal (TDC + TD-MHSA)
+PhysFormer,VIPL-HR,Intra-Dataset (5-Fold CV),PhysFormer++ (TPAMI),2023,4.97,7.79,0.78,,7.74,,Single-pathway baseline
+PhysFormer++,VIPL-HR,Intra-Dataset (5-Fold CV),PhysFormer++ (TPAMI),2023,4.88,7.62,0.8,,7.65,,Official TPAMI 2023 SlowFast two-pathway architecture
+PhysFormer,VIPL-HR,Intra-Dataset,RhythmMamba (AAAI),2025,4.97,7.79,0.78,,,,Reported baseline
+PhysFormer++,VIPL-HR,Intra-Dataset,RhythmMamba (AAAI),2025,4.88,7.62,0.8,,,,Reported baseline
+PhysFormer,VIPL-HR,Intra-Dataset,RhythmFormer (CVPR),2024,4.97,7.79,0.78,,,,Reported baseline
+PhysFormer++,VIPL-HR,Intra-Dataset,RhythmFormer (CVPR),2024,4.88,7.62,0.8,,,,Reported baseline
+PhysFormer,VIPL-HR,Intra-Dataset,PhySU-Net,2024,4.97,7.79,0.78,,7.74,,Reported baseline
+PhysFormer,VIPL-HR,Intra-Dataset,Hyperbolic GNN (EAAI),2023,4.97,7.79,0.78,,7.74,,Reported baseline
+PhysFormer,VIPL-HR,Intra-Dataset,Review2023 (MTA),2024,4.97,7.79,0.78,,7.74,,Survey report
+PhysFormer++,VIPL-HR,Intra-Dataset,Review2023 (MTA),2024,4.88,7.62,0.8,,7.65,,Survey report
+PhysFormer,MMPD,Intra-Dataset,RhythmMamba (AAAI),2025,11.99,18.41,0.18,,,,Sequential split 7:1:2
+PhysFormer,MMPD,Intra-Dataset,RhythmFormer (CVPR),2024,11.99,18.41,0.18,,,,Sequential split 7:1:2
+PhysFormer,MMPD,Cross-Dataset (UBFC -> MMPD),RhythmMamba (AAAI),2025,12.1,17.79,0.17,-10.53,,15.41,Cross-dataset testing
+PhysFormer,MMPD,Cross-Dataset (PURE -> MMPD),RhythmMamba (AAAI),2025,14.57,20.71,0.15,-12.15,,16.73,Cross-dataset testing
+PhysFormer,MMPD,Cross-Dataset (UBFC -> MMPD),RhythmFormer (CVPR),2024,12.1,17.79,0.17,-10.53,,15.41,Cross-dataset testing
+PhysFormer,MMPD,Cross-Dataset (PURE -> MMPD),RhythmFormer (CVPR),2024,14.57,20.71,0.15,-12.15,,16.73,Cross-dataset testing
+PhysFormer,MMPD,Cross-Dataset (UBFC -> MMPD),Spiking-PhysFormer (Neural Netw),2025,12.1,,0.17,,,15.41,Cross-dataset testing
+PhysFormer,MMPD,Cross-Dataset (PURE -> MMPD),Spiking-PhysFormer (Neural Netw),2025,14.57,,0.15,,,16.73,Cross-dataset testing
+PhysFormer,MMPD,Cross-Dataset (UBFC -> MMPD),PhysMamba,2024,12.1,17.79,0.17,,,,Cross-dataset testing
+PhysFormer,MMPD,Cross-Dataset (PURE -> MMPD),PhysMamba,2024,14.57,20.71,0.15,,,,Cross-dataset testing
+PhysFormer,MMPD,Cross-Dataset (UBFC -> MMPD),rPPG-Toolbox (NeurIPS),2023,12.1,17.79,0.17,-10.53,,15.41,Official toolbox benchmark
+PhysFormer,MMPD,Cross-Dataset (PURE -> MMPD),rPPG-Toolbox (NeurIPS),2023,14.57,20.71,0.15,-12.15,,16.73,Official toolbox benchmark
+PhysFormer,MMPD,Cross-Dataset (SCAMPS -> MMPD),rPPG-Toolbox (NeurIPS),2023,22.69,26.94,0.15,-18.83,,27.06,Trained on synthetic avatar dataset
+PhysFormer,COHFACE,Intra-Dataset (Vanilla w/o Fusion Stem),RhythmFormer (CVPR),2024,30.11,34.05,-0.01,-19.09,,26.09,Complete attention collapse on compressed chiaroscuro video
+PhysFormer,COHFACE,Intra-Dataset (with Fusion Stem),RhythmFormer (CVPR),2024,0.84,2.81,0.99,8.86,,0.67,Fusion stem restores fine pulse information
+PhysFormer,MAHNOB-HCI,Intra-Dataset (9-Fold CV),PhysFormer (CVPR),2022,3.25,3.97,0.87,,3.87,,9-fold CV fine-tuned from VIPL-HR
+PhysFormer,MAHNOB-HCI,Intra-Dataset (9-Fold CV),PhysFormer++ (TPAMI),2023,3.25,3.97,0.87,,3.87,,Single pathway
+PhysFormer++,MAHNOB-HCI,Intra-Dataset (9-Fold CV),PhysFormer++ (TPAMI),2023,3.23,3.88,0.87,,3.9,,SlowFast two-pathway
+PhysFormer++,MAHNOB-HCI,Intra-Dataset,Deep Pulse-Signal Mag,2024,3.23,3.88,0.87,,,,Reported baseline
+PhysFormer,MAHNOB-HCI,Intra-Dataset,Review2023 (MTA),2024,3.25,3.97,0.87,,3.87,,Survey report
+PhysFormer++,MAHNOB-HCI,Intra-Dataset,Review2023 (MTA),2024,3.23,3.88,0.87,,3.9,,Survey report
+PhysFormer,MMSE-HR,Cross-Dataset (UBFC -> MMSE-HR),Contrast-Phys+ (TPAMI),2024,2.68,7.01,0.86,1.2,,,Cross-dataset generalization
+PhysFormer,MMSE-HR,Intra-Dataset (5-Fold CV),Contrast-Phys+ (TPAMI),2024,1.48,4.22,0.95,2.55,,,Subject-independent 5-fold CV
+PhysFormer,MMSE-HR,Cross-Dataset (UBFC -> MMSE-HR),PhysDiff,2025,2.68,7.01,0.86,,,,Cross-dataset report
+PhysFormer,MMSE-HR,Cross-Dataset (VIPL -> MMSE-HR),PhysFormer (CVPR),2022,2.84,5.36,0.92,,5.22,,Zero-shot cross-dataset evaluation
+PhysFormer,MMSE-HR,Cross-Dataset (VIPL -> MMSE-HR),PhysFormer++ (TPAMI),2023,2.84,5.36,0.92,,5.22,,Single pathway
+PhysFormer++,MMSE-HR,Cross-Dataset (VIPL -> MMSE-HR),PhysFormer++ (TPAMI),2023,2.71,5.15,0.93,,5.09,,"SlowFast two-pathway (FLOPs 49.85G, Params 9.79M)"
+PhysFormer,MMSE-HR,Cross-Dataset,Review2023 (MTA),2024,2.84,5.36,0.92,,5.22,,Survey report
+PhysFormer++,MMSE-HR,Cross-Dataset,Review2023 (MTA),2024,2.71,5.15,0.93,,5.09,,Survey report
+PhysFormer,OBF,Intra-Dataset (10-Fold CV),PhysFormer (CVPR),2022,,0.804,0.998,,0.804,,10-fold subject-exclusive protocol
+PhysFormer,OBF,Intra-Dataset (10-Fold CV),PhysFormer++ (TPAMI),2023,,0.804,0.998,,0.804,,Single pathway
+PhysFormer++,OBF,Intra-Dataset (10-Fold CV),PhysFormer++ (TPAMI),2023,,0.765,0.998,,0.765,,SlowFast two-pathway
+PhysFormer,OBF,Intra-Dataset,PhySU-Net,2024,,0.804,0.998,,0.804,,Reported baseline
+PhysFormer,OBF,Intra-Dataset,Review2023 (MTA),2024,,0.804,0.998,,,,Survey report
+PhysFormer++,OBF,Intra-Dataset,Review2023 (MTA),2024,,0.765,0.998,,,,Survey report
+PhysFormer,UBFC-Phys,Cross-Dataset (UBFC -> UBFC-Phys),Spiking-PhysFormer (Neural Netw),2025,6.63,,0.69,,,8.91,Cross-dataset setting
+PhysFormer,UBFC-Phys,Cross-Dataset (PURE -> UBFC-Phys),Spiking-PhysFormer (Neural Netw),2025,6.04,,0.65,,,7.67,Cross-dataset setting
+PhysFormer,UBFC-Phys,Cross-Dataset (UBFC -> UBFC-Phys),rPPG-Toolbox (NeurIPS),2023,6.63,10.22,0.69,-3.58,,8.91,Official toolbox benchmark
+PhysFormer,UBFC-Phys,Cross-Dataset (PURE -> UBFC-Phys),rPPG-Toolbox (NeurIPS),2023,6.04,9.77,0.65,-2.16,,7.67,Official toolbox benchmark
+PhysFormer,UBFC-Phys,Cross-Dataset (SCAMPS -> UBFC-Phys),rPPG-Toolbox (NeurIPS),2023,11.91,16.42,0.27,-10.38,,15.57,Trained on synthetic avatar dataset
+PhysFormer,iBVP,Within-Dataset (0.0-0.7 / 0.7-1.0),FactorizePhys (NeurIPS),2024,1.96,4.22,0.91,10.72,0.63,2.49,Subject-wise split
+SpikingPhysFormer,UBFC-rPPG,Cross-Dataset (PURE -> UBFC),Spiking-PhysFormer (Neural Netw),2025,2.8,,0.95,,1.69,2.81,"Official HNN model: MAE 2.80 +/- 1.69, MAPE 2.81 +/- 1.46%, r 0.95 +/- 0.06"
+SpikingPhysFormer,UBFC-rPPG,Cross-Dataset (PURE -> UBFC),RhythmMamba (AAAI),2025,2.8,,0.95,,,2.81,Reported cross-dataset benchmark
+SpikingPhysFormer,UBFC-rPPG,Cross-Dataset (PURE -> UBFC),RhythmFormer (CVPR),2024,2.8,,0.95,,,2.81,Reported cross-dataset benchmark
+SpikingPhysFormer,UBFC-rPPG,Cross-Dataset (PURE -> UBFC),PhysMamba,2024,5.25,,0.83,,,,Reported cross-dataset benchmark
+SpikingPhysFormer,UBFC-rPPG,Intra-Dataset (Pretrained PE Transfer),Local Benchmark (rPPG-Toolbox),2026,1.967,4.419,0.968,0.893,,2.086,SNN+Transformer evaluated on 6s chunks; highly robust against outliers
+SpikingPhysFormer,UBFC-rPPG,Intra-Dataset (Paper 2025 Vanilla),Local Benchmark (rPPG-Toolbox),2026,25.153,29.773,-0.034,-8.729,,24.198,"Neural Networks 2025 setup (128x128, 160 frames, 96 dim, LR 3e-3, 10 ep)"
+SpikingPhysFormer,UBFC-rPPG,Intra-Dataset (PE Transfer Ep 29),Local Benchmark (rPPG-Toolbox),2026,20.759,26.535,-0.032,-8.691,,22.1,Fine-tuned with pretrained PhysFormer stem Epoch 29
+SpikingPhysFormer,UBFC-rPPG,Intra-Dataset (PE Transfer Ep 10),Local Benchmark (rPPG-Toolbox),2026,34.487,41.207,-0.171,-9.751,,32.472,Fine-tuned with pretrained PhysFormer stem Epoch 10
+SpikingPhysFormer,PURE,"Cross-Dataset (UBFC -> PURE, Default)",Spiking-PhysFormer (Neural Netw),2025,3.83,,0.83,,0.74,5.7,"Official HNN model: MAE 3.83 +/- 0.74, MAPE 5.70 +/- 0.74%, r 0.83 +/- 0.06"
+SpikingPhysFormer,PURE,"Cross-Dataset (UBFC -> PURE, Optimal 10-bl)",Spiking-PhysFormer (Neural Netw),2025,2.9,,0.91,,,5.47,Ablation study: 10 transformer blocks
+SpikingPhysFormer,PURE,"Cross-Dataset (UBFC -> PURE, Timestep=1)",Spiking-PhysFormer (Neural Netw),2025,2.56,,0.92,,,4.13,"Ablation study: SNN timestep=1, Power 1.334 mJ"
+SpikingPhysFormer,PURE,"Cross-Dataset (UBFC -> PURE, Parallel S3A)",Spiking-PhysFormer (Neural Netw),2025,2.49,,0.92,,,4.83,"Ablation study: S3A attention with TDC Q, Conv3D K/V, Power 1.52 uJ/block"
+SpikingPhysFormer,PURE,Cross-Dataset (UBFC -> PURE),RhythmMamba (AAAI),2025,3.83,,0.83,,,5.7,Reported cross-dataset benchmark
+SpikingPhysFormer,PURE,Cross-Dataset (UBFC -> PURE),RhythmFormer (CVPR),2024,3.83,,0.83,,,5.7,Reported cross-dataset benchmark
+SpikingPhysFormer,PURE,Cross-Dataset (UBFC -> PURE),PhysMamba,2024,2.7,,0.91,,,,Reported cross-dataset benchmark
+SpikingPhysFormer,PURE,Intra-Dataset (Pretrained PE Transfer),Local Benchmark (rPPG-Toolbox),2026,2.1,10.119,0.917,3.674,,2.865,SNN+Transformer evaluated on 6s chunks; highly robust against outliers
+SpikingPhysFormer,PURE,Intra-Dataset (Paper 2025 Vanilla),Local Benchmark (rPPG-Toolbox),2026,24.639,31.47,0.092,-7.87,,28.483,"Neural Networks 2025 setup (128x128, 160 frames, 96 dim, LR 3e-3, 10 ep)"
+SpikingPhysFormer,PURE,Intra-Dataset (PE Transfer Ep 29),Local Benchmark (rPPG-Toolbox),2026,23.76,28.028,0.085,-7.433,,34.253,Fine-tuned with pretrained PhysFormer stem Epoch 29
+SpikingPhysFormer,PURE,Intra-Dataset (PE Transfer Ep 10),Local Benchmark (rPPG-Toolbox),2026,23.537,27.855,0.037,-7.505,,33.35,Fine-tuned with pretrained PhysFormer stem Epoch 10
+SpikingPhysFormer,MMPD,Cross-Dataset (UBFC -> MMPD),Spiking-PhysFormer (Neural Netw),2025,14.15,,0.15,,0.87,16.22,"MAE 14.15 +/- 0.87, MAPE 16.22 +/- 0.96%, r 0.15 +/- 0.06"
+SpikingPhysFormer,MMPD,Cross-Dataset (PURE -> MMPD),Spiking-PhysFormer (Neural Netw),2025,14.57,,0.14,,1.52,16.55,"MAE 14.57 +/- 1.52, MAPE 16.55 +/- 1.34%, r 0.14 +/- 0.06"
+SpikingPhysFormer,MMPD,Cross-Dataset (UBFC -> MMPD),RhythmMamba (AAAI),2025,14.15,,0.15,,,16.22,Reported cross-dataset benchmark
+SpikingPhysFormer,MMPD,Cross-Dataset (PURE -> MMPD),RhythmMamba (AAAI),2025,14.57,,0.14,,,16.55,Reported cross-dataset benchmark
+SpikingPhysFormer,MMPD,Cross-Dataset (UBFC -> MMPD),RhythmFormer (CVPR),2024,14.15,,0.15,,,16.22,Reported cross-dataset benchmark
+SpikingPhysFormer,MMPD,Cross-Dataset (PURE -> MMPD),RhythmFormer (CVPR),2024,14.57,,0.14,,,16.55,Reported cross-dataset benchmark
+SpikingPhysFormer,MMPD,Cross-Dataset (UBFC -> MMPD),PhysMamba,2024,13.36,,0.2,,,,Reported cross-dataset benchmark
+SpikingPhysFormer,MMPD,Cross-Dataset (PURE -> MMPD),PhysMamba,2024,12.76,,0.23,,,,Reported cross-dataset benchmark
+SpikingPhysFormer,UBFC-Phys,Cross-Dataset (UBFC -> UBFC-Phys),Spiking-PhysFormer (Neural Netw),2025,6.68,,0.6,,0.82,8.33,"MAE 6.68 +/- 0.82, MAPE 8.33 +/- 0.85%, r 0.60 +/- 0.08"
+SpikingPhysFormer,UBFC-Phys,Cross-Dataset (PURE -> UBFC-Phys),Spiking-PhysFormer (Neural Netw),2025,5.72,,0.68,,0.75,7.17,"MAE 5.72 +/- 0.75, MAPE 7.17 +/- 0.79%, r 0.68 +/- 0.07"
+ContrastPhys+,UBFC-rPPG,Intra-Dataset (100% Labels),Contrast-Phys+ (TPAMI),2024,0.21,0.8,0.99,,,,Supervised with GT signals + spatio-temporal contrast
+ContrastPhys+,UBFC-rPPG,Intra-Dataset (60% Labels),Contrast-Phys+ (TPAMI),2024,0.22,0.81,0.99,,,,Semi-supervised setting (60% GT)
+ContrastPhys+,UBFC-rPPG,Intra-Dataset (20% Labels),Contrast-Phys+ (TPAMI),2024,0.24,0.87,0.99,,,,Semi-supervised setting (20% GT)
+ContrastPhys+,UBFC-rPPG,"Intra-Dataset (0% Labels, Unsupervised)",Contrast-Phys+ (TPAMI),2024,0.64,1.0,0.99,,,,Pure self-supervised spatio-temporal contrast
+ContrastPhys+,UBFC-rPPG,Synthetic Train (SCAMPS -> UBFC),Contrast-Phys+ (TPAMI),2024,0.89,3.25,0.98,,,,Trained only on labeled synthetic avatars
+ContrastPhys+,UBFC-rPPG,Semi-Supervised (SCAMPS + unlab MMSE),Contrast-Phys+ (TPAMI),2024,0.51,2.16,0.99,,,,Labeled synthetic + unlabeled real video
+ContrastPhys+,UBFC-rPPG,Unsupervised (unlabeled MMSE -> UBFC),Contrast-Phys+ (TPAMI),2024,1.03,2.7,0.99,,,,Zero-shot unsupervised real video transfer
+ContrastPhys+,UBFC-rPPG,Synthetic Train (UCLA-Synth -> UBFC),Contrast-Phys+ (TPAMI),2024,0.74,2.29,0.99,,,,Trained only on labeled UCLA-Synth avatars
+ContrastPhys+,UBFC-rPPG,Semi-Supervised (UCLA + unlab MMSE),Contrast-Phys+ (TPAMI),2024,0.6,2.07,0.99,,,,Labeled synthetic + unlabeled real video
+ContrastPhys+,UBFC-rPPG,Intra-Dataset,RhythmMamba (AAAI),2025,0.21,0.8,0.99,,,,Reported benchmark
+ContrastPhys+,UBFC-rPPG,Intra-Dataset,RhythmFormer (CVPR),2024,0.21,0.8,0.99,,,,Reported benchmark
+ContrastPhys+,UBFC-rPPG,Intra-Dataset,PhysDiff,2025,0.21,0.8,0.99,,,,Reported benchmark
+ContrastPhys,UBFC-rPPG,Cross-Dataset (PURE -> UBFC),PhysDiff,2025,10.22,,0.45,,,,Contrast-Phys (ECCV 2022) baseline
+ContrastPhys,UBFC-rPPG,Intra-Dataset (Self-Supervised),rPPG-MAE (TMM),2023,0.64,1.0,0.99,,,,Contrast-Phys (ECCV 2022) self-supervised report
+ContrastPhys+,UBFC-rPPG,Intra-Dataset (Corrected Pipeline),Local Benchmark (rPPG-Toolbox),2026,1.422,3.226,0.984,2.222,,1.513,3D-CNN; math corrected to match 2024 paper perfectly
+ContrastPhys+,UBFC-rPPG,Intra-Dataset (TPAMI 2024 2x2 ST-rPPG),Local Benchmark (rPPG-Toolbox),2026,15.632,29.614,0.289,-1.88,,17.983,"DiffNormalized RGB, 2x2 ST-rPPG pooling, active PSD [40, 250], pairwise MSE"
+ContrastPhys+,UBFC-rPPG,"Intra-Dataset (Paper Aligned, pad=3)",Local Benchmark (rPPG-Toolbox),2026,15.13,29.53,0.304,-1.286,,17.483,"Official setup with zero_pad=3 (512-pt FFT, 3.5 BPM resolution) and delta_t<=T chunk sampling"
+ContrastPhys+,PURE,Intra-Dataset (100% Labels),Contrast-Phys+ (TPAMI),2024,0.48,0.98,0.99,,,,Supervised setting
+ContrastPhys+,PURE,Intra-Dataset (60% Labels),Contrast-Phys+ (TPAMI),2024,0.52,1.02,0.99,,,,Semi-supervised setting
+ContrastPhys+,PURE,Intra-Dataset (20% Labels),Contrast-Phys+ (TPAMI),2024,0.61,1.18,0.99,,,,Semi-supervised setting
+ContrastPhys+,PURE,"Intra-Dataset (0% Labels, Unsupervised)",Contrast-Phys+ (TPAMI),2024,1.0,1.4,0.99,,,,Pure self-supervised setting
+ContrastPhys+,PURE,Intra-Dataset,RhythmMamba (AAAI),2025,0.48,0.98,0.99,,,,Reported benchmark
+ContrastPhys+,PURE,Intra-Dataset,RhythmFormer (CVPR),2024,0.48,0.98,0.99,,,,Reported benchmark
+ContrastPhys+,PURE,Intra-Dataset,PhysDiff,2025,0.48,0.98,0.99,,,,Reported benchmark
+ContrastPhys,PURE,Cross-Dataset (UBFC -> PURE),PhysDiff,2025,19.61,,0.33,,,,Contrast-Phys (ECCV 2022) baseline
+ContrastPhys,PURE,Intra-Dataset (Self-Supervised),rPPG-MAE (TMM),2023,1.0,1.4,0.99,,,,Contrast-Phys (ECCV 2022) report
+ContrastPhys,PURE,Intra-Dataset (Epoch 4 best val loss),Local Benchmark (rPPG-Toolbox),2026,15.813,25.695,0.137,-6.839,,18.59,3D-CNN evaluated on 6s chunks
+ContrastPhys+,PURE,Intra-Dataset (TPAMI 2024 2x2 ST-rPPG),Local Benchmark (rPPG-Toolbox),2026,34.717,45.642,0.092,-4.229,,52.951,"TPAMI 2024 setup: DiffNormalized RGB, 2x2 ST-rPPG pooling"
+ContrastPhys,VIPL-HR,Intra-Dataset (Self-Supervised),rPPG-MAE (TMM),2023,7.49,14.4,0.49,,,,Contrast-Phys (ECCV 2022) self-supervised benchmark
+ContrastPhys+,MMSE-HR,"Cross-Dataset (UBFC -> MMSE-HR, 100%)",Contrast-Phys+ (TPAMI),2024,1.76,5.34,0.92,1.37,,,Supervised cross-dataset transfer
+ContrastPhys+,MMSE-HR,"Cross-Dataset (UBFC -> MMSE-HR, 60%)",Contrast-Phys+ (TPAMI),2024,2.3,6.32,0.89,1.25,,,Semi-supervised cross-dataset transfer
+ContrastPhys+,MMSE-HR,"Cross-Dataset (UBFC -> MMSE-HR, 20%)",Contrast-Phys+ (TPAMI),2024,2.28,6.51,0.88,1.15,,,Semi-supervised cross-dataset transfer
+ContrastPhys+,MMSE-HR,"Cross-Dataset (UBFC -> MMSE-HR, 0%)",Contrast-Phys+ (TPAMI),2024,2.43,7.34,0.86,1.09,,,Unsupervised cross-dataset transfer
+ContrastPhys+,MMSE-HR,Multi-Source Unlabeled (UBFC + unlab PURE),Contrast-Phys+ (TPAMI),2024,1.13,3.71,0.96,2.37,,,Labeled UBFC + unlabeled PURE videos
+ContrastPhys+,MMSE-HR,Multi-Source Unlabeled (UBFC + unlab OBF),Contrast-Phys+ (TPAMI),2024,1.47,4.55,0.94,3.17,,,Labeled UBFC + unlabeled OBF videos
+ContrastPhys+,MMSE-HR,Intra-Dataset (100% Labels),Contrast-Phys+ (TPAMI),2024,1.11,3.83,0.96,3.72,,,Subject-independent 5-fold CV
+ContrastPhys+,MMSE-HR,Intra-Dataset (60% Labels),Contrast-Phys+ (TPAMI),2024,1.2,3.89,0.96,3.51,,,Semi-supervised 5-fold CV
+ContrastPhys+,MMSE-HR,Intra-Dataset (20% Labels),Contrast-Phys+ (TPAMI),2024,1.51,4.15,0.95,2.93,,,Semi-supervised 5-fold CV
+ContrastPhys+,MMSE-HR,"Intra-Dataset (0% Labels, Unsup)",Contrast-Phys+ (TPAMI),2024,1.82,6.69,0.87,2.64,,,Unsupervised 5-fold CV
+ContrastPhys,MMSE-HR,Cross-Dataset (UBFC -> MMSE-HR),PhysDiff,2025,2.43,7.34,0.86,,,,Contrast-Phys (ECCV 2022) baseline
+ContrastPhys+,MMSE-HR,Cross-Dataset (UBFC -> MMSE-HR),PhysDiff,2025,1.76,5.34,0.92,,,,Contrast-Phys+ report
+ContrastPhys+,OBF,Intra-Dataset (100% Labels),Contrast-Phys+ (TPAMI),2024,0.34,0.75,0.998,,,,Subject-independent 10-fold CV
+ContrastPhys+,OBF,Intra-Dataset (60% Labels),Contrast-Phys+ (TPAMI),2024,0.35,0.79,0.997,,,,Semi-supervised 10-fold CV
+ContrastPhys+,OBF,Intra-Dataset (20% Labels),Contrast-Phys+ (TPAMI),2024,0.37,0.84,0.997,,,,Semi-supervised 10-fold CV
+ContrastPhys+,OBF,"Intra-Dataset (0% Labels, Unsup)",Contrast-Phys+ (TPAMI),2024,0.51,1.39,0.994,,,,Unsupervised 10-fold CV
+ContrastPhys+,MR-NIRP (NIR),Intra-Dataset (100% Labels),Contrast-Phys+ (TPAMI),2024,1.96,3.02,0.93,,,,Leave-one-subject-out CV on Near-Infrared videos
+ContrastPhys+,MR-NIRP (NIR),Intra-Dataset (60% Labels),Contrast-Phys+ (TPAMI),2024,2.58,3.65,0.89,,,,Semi-supervised LOSO CV
+ContrastPhys+,MR-NIRP (NIR),Intra-Dataset (20% Labels),Contrast-Phys+ (TPAMI),2024,2.57,4.02,0.88,,,,Semi-supervised LOSO CV
+ContrastPhys+,MR-NIRP (NIR),"Intra-Dataset (0% Labels, Unsup)",Contrast-Phys+ (TPAMI),2024,2.68,4.77,0.85,,,,Unsupervised LOSO CV
+ContrastPhys+,EquiPleth,Skin Tone Fairness (100% Labels),Contrast-Phys+ (TPAMI),2024,,4.4,,,,,Fairness (RMSE gap dark vs light skin) = 1.96 bpm
+ContrastPhys+,EquiPleth,Skin Tone Fairness (50% Labels),Contrast-Phys+ (TPAMI),2024,,4.97,,,,,Fairness = 3.05 bpm
+ContrastPhys+,EquiPleth,"Skin Tone Fairness (0% Labels, Unsup)",Contrast-Phys+ (TPAMI),2024,,5.16,,,,,"Fairness = 3.39 bpm (vs PhysNet RMSE 5.26, Fairness 4.05)"
