@@ -1,0 +1,19 @@
+Train_Dataset,Test_Dataset,Evaluation_Type,Model_Name,Architecture,Weights_File,MAE_BPM,RMSE_BPM,MAPE_Percent,Pearson_r,SNR_dB,Status,Timestamp
+UBFC-rPPG,UBFC-rPPG,Intra-Dataset,DeepPhys (Official Pretrained),2D-CNN (Appearance + Motion),final_model_release/UBFC-rPPG_DeepPhys.pth,0.146,0.254,0.142,1.0,0.206,Success,2026-11-09 15:41:52
+UBFC-rPPG,UBFC-rPPG,Intra-Dataset,PhysNet (Official Pretrained),3D-CNN Spatio-Temporal,final_model_release/UBFC-rPPG_PhysNet_DiffNormalized.pth,0.83,1.571,0.79,0.992,0.122,Success,2026-11-09 15:42:24
+UBFC-rPPG,UBFC-rPPG,Intra-Dataset,PhysFormer (Official Pretrained),Spatio-Temporal ViT (12-layer),final_model_release/UBFC-rPPG_PhysFormer_DiffNormalized.pth,33.008,36.923,30.316,0.135,-8.613,Success,2026-11-09 15:43:00
+UBFC-rPPG,PURE,Cross-Dataset,DeepPhys (Official Pretrained),2D-CNN (Appearance + Motion),final_model_release/UBFC-rPPG_DeepPhys.pth,1.318,3.155,2.715,0.987,2.747,Success,2026-11-11 08:53:24
+UBFC-rPPG,MMPD,Cross-Dataset,DeepPhys (Official Pretrained),2D-CNN (Appearance + Motion),final_model_release/UBFC-rPPG_DeepPhys.pth,20.616,29.772,21.57,0.033,-6.003,Success,2026-11-11 08:55:11
+PURE,PURE,Intra-Dataset,DeepPhys (Official Pretrained),2D-CNN (Appearance + Motion),final_model_release/PURE_DeepPhys.pth,0.256,0.712,0.516,0.999,4.05,Success,2026-11-11 08:55:23
+PURE,UBFC-rPPG,Cross-Dataset,DeepPhys (Official Pretrained),2D-CNN (Appearance + Motion),final_model_release/PURE_DeepPhys.pth,1.66,3.642,1.798,0.975,-1.753,Success,2026-11-11 08:55:31
+PURE,MMPD,Cross-Dataset,DeepPhys (Official Pretrained),2D-CNN (Appearance + Motion),final_model_release/PURE_DeepPhys.pth,23.593,31.941,24.973,-0.008,-6.755,Success,2026-11-11 08:57:04
+UBFC-rPPG,PURE,Cross-Dataset,PhysFormer (Official Pretrained),Spatio-Temporal ViT (12-layer),final_model_release/UBFC-rPPG_PhysFormer_DiffNormalized.pth,55.573,61.469,99.547,-0.177,-8.168,Success,2026-11-11 08:57:34
+UBFC-rPPG,MMPD,Cross-Dataset,PhysFormer (Official Pretrained),Spatio-Temporal ViT (12-layer),final_model_release/UBFC-rPPG_PhysFormer_DiffNormalized.pth,33.772,39.593,40.955,0.057,-7.671,Success,2026-11-11 09:00:21
+PURE,PURE,Intra-Dataset,PhysFormer (Official Pretrained),Spatio-Temporal ViT (12-layer),final_model_release/PURE_PhysFormer_DiffNormalized.pth,15.179,17.853,28.587,0.758,-6.856,Success,2026-11-11 09:00:52
+PURE,UBFC-rPPG,Cross-Dataset,PhysFormer (Official Pretrained),Spatio-Temporal ViT (12-layer),final_model_release/PURE_PhysFormer_DiffNormalized.pth,16.504,22.83,15.663,0.601,-8.317,Success,2026-11-11 09:01:12
+PURE,MMPD,Cross-Dataset,PhysFormer (Official Pretrained),Spatio-Temporal ViT (12-layer),final_model_release/PURE_PhysFormer_DiffNormalized.pth,19.308,23.936,20.312,0.084,-8.101,Success,2026-11-11 09:03:58
+UBFC-rPPG,PURE,Cross-Dataset,PhysNet (Official Pretrained),3D-CNN Spatio-Temporal,final_model_release/UBFC-rPPG_PhysNet_DiffNormalized.pth,4.065,13.702,8.46,0.74,2.707,Success,2026-11-11 09:04:20
+UBFC-rPPG,MMPD,Cross-Dataset,PhysNet (Official Pretrained),3D-CNN Spatio-Temporal,final_model_release/UBFC-rPPG_PhysNet_DiffNormalized.pth,16.562,23.331,19.191,0.208,-6.161,Success,2026-11-11 09:07:00
+PURE,PURE,Intra-Dataset,PhysNet (Official Pretrained),3D-CNN Spatio-Temporal,final_model_release/PURE_PhysNet_DiffNormalized.pth,0.165,0.246,0.28,1.0,4.075,Success,2026-11-11 09:07:22
+PURE,UBFC-rPPG,Cross-Dataset,PhysNet (Official Pretrained),3D-CNN Spatio-Temporal,final_model_release/PURE_PhysNet_DiffNormalized.pth,5.225,11.157,5.22,0.853,-4.822,Success,2026-11-11 09:07:37
+PURE,MMPD,Cross-Dataset,PhysNet (Official Pretrained),3D-CNN Spatio-Temporal,final_model_release/PURE_PhysNet_DiffNormalized.pth,23.066,29.79,24.451,0.069,-7.522,Success,2026-11-11 09:10:17
