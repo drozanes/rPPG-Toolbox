@@ -6,7 +6,7 @@ UBFC-rPPG,PURE,PhysFormer,Supervised (Transformer),30.725,44.178,63.179,-0.507,-
 PURE,UBFC-rPPG,DeepPhys (FusionStem),Supervised (2D-CNN),0.488,0.854,0.463,0.997,-1.001,Success
 PURE,UBFC-rPPG,ContrastPhys+,Weakly-Supervised,2.734,3.769,2.507,0.942,0.473,Success
 PURE,UBFC-rPPG,Spiking-PhysFormer,Supervised (SNN),7.666,15.681,7.551,0.753,-4.963,Success
-PURE,UBFC-rPPG,PhysFormer,Supervised (Transformer),57.031,61.387,54.045,0.024,-9.877,Success
+PURE,UBFC-rPPG,PhysFormer,Supervised (Transformer),10.596,13.267,9.426,0.423,-6.100,Success
 MMPD,UBFC-rPPG,PhysFormer (FusionStem + MediaPipe),Supervised (Transformer),4.688,7.614,4.618,0.850,-4.955,Success
 MMPD,UBFC-rPPG,DeepPhys (FusionStem + MediaPipe),Supervised (2D-CNN),30.225,41.330,27.438,0.017,-5.849,Success
 MMPD,UBFC-rPPG,ContrastPhys+ (MediaPipe Ep 16),Weakly-Supervised,73.682,74.995,69.048,0.309,-7.339,Success
@@ -14,7 +14,7 @@ MMPD,PURE,DeepPhys (FusionStem + MediaPipe),Supervised (2D-CNN),6.390,12.021,11.
 MMPD,PURE,PhysFormer (FusionStem + MediaPipe),Supervised (Transformer),9.412,19.111,20.086,0.514,-3.898,Success
 MMPD,PURE,ContrastPhys+ (MediaPipe Ep 16),Weakly-Supervised,75.806,89.255,131.716,0.123,-7.481,Success
 UBFC-rPPG,MMPD,ContrastPhys+,Weakly-Supervised,14.282,20.187,15.617,0.109,-5.159,Success
-UBFC-rPPG,MMPD,PhysFormer,Supervised (Transformer),14.886,21.836,18.261,0.132,-5.151,Success
+UBFC-rPPG,MMPD,PhysFormer,Supervised (Transformer),13.244,20.642,15.680,0.174,-4.544,Success
 PURE,MMPD,DeepPhys (FusionStem),Supervised (2D-CNN),26.241,33.267,27.618,-0.222,-7.758,Success
 PURE,MMPD,PhysFormer,Supervised (Transformer),27.746,38.718,30.989,0.185,-7.595,Success
 UBFC-rPPG,MMPD,DeepPhys (FusionStem),Supervised (2D-CNN),28.021,34.327,30.080,-0.053,-7.955,Success

@@ -43,6 +43,7 @@ from dataset import data_loader
 import evaluation.metrics
 
 CSV_PATH = os.path.join(REPO_ROOT, "csvs", "official_pretrained_models_benchmark.csv")
+CSV_PATH_6S = os.path.join(REPO_ROOT, "csvs", "official_pretrained_models_benchmark_6s.csv")
 CSV_HEADERS = [
     "Train_Dataset", "Test_Dataset", "Evaluation_Type", "Model_Name",
     "Architecture", "Weights_File", "MAE_BPM", "RMSE_BPM",
@@ -71,19 +72,23 @@ def isolate_database_csv():
                 os.rename(tmp, t)
 
 
-def init_csv():
-    os.makedirs(os.path.dirname(CSV_PATH), exist_ok=True)
-    if not os.path.exists(CSV_PATH):
-        with open(CSV_PATH, "w", newline="") as f:
+def init_csv(csv_path=None):
+    if csv_path is None:
+        csv_path = CSV_PATH
+    os.makedirs(os.path.dirname(csv_path), exist_ok=True)
+    if not os.path.exists(csv_path):
+        with open(csv_path, "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerow(CSV_HEADERS)
-        print(f"📄 Initialized new benchmark CSV at: {CSV_PATH}")
+        print(f"📄 Initialized new benchmark CSV at: {csv_path}")
 
 
-def is_already_completed(train_ds, test_ds, model_name):
-    if not os.path.exists(CSV_PATH):
+def is_already_completed(train_ds, test_ds, model_name, csv_path=None):
+    if csv_path is None:
+        csv_path = CSV_PATH
+    if not os.path.exists(csv_path):
         return False
-    with open(CSV_PATH, "r", newline="") as f:
+    with open(csv_path, "r", newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
             if (row.get("Train_Dataset") == train_ds and
@@ -94,11 +99,13 @@ def is_already_completed(train_ds, test_ds, model_name):
     return False
 
 
-def save_benchmark_result(train_ds, test_ds, model_name, architecture, weights_file, metrics, status="Success"):
-    init_csv()
+def save_benchmark_result(train_ds, test_ds, model_name, architecture, weights_file, metrics, status="Success", csv_path=None):
+    if csv_path is None:
+        csv_path = CSV_PATH
+    init_csv(csv_path)
     eval_type = "Intra-Dataset" if train_ds == test_ds else "Cross-Dataset"
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    with open(CSV_PATH, "a", newline="") as f:
+    with open(csv_path, "a", newline="") as f:
         writer = csv.writer(f)
         writer.writerow([
             train_ds,
@@ -115,16 +122,18 @@ def save_benchmark_result(train_ds, test_ds, model_name, architecture, weights_f
             status,
             now_str
         ])
-    print(f"\n💾 [Saved Result] [{train_ds} -> {test_ds} | {model_name}] MAE={metrics.get('MAE', 'N/A')}, Pearson={metrics.get('Pearson', 'N/A')}, SNR={metrics.get('SNR', 'N/A')} dB")
+    print(f"\n💾 [Saved Result -> {os.path.basename(csv_path)}] [{train_ds} -> {test_ds} | {model_name}] MAE={metrics.get('MAE', 'N/A')}, Pearson={metrics.get('Pearson', 'N/A')}, SNR={metrics.get('SNR', 'N/A')} dB")
 
 
-def get_base_config(device="mps"):
+def get_base_config(device="mps", window_size=6, use_smaller_window=True):
     config = _C.clone()
     config.TOOLBOX_MODE = "only_test"
     config.DEVICE = device
     config.INFERENCE.BATCH_SIZE = 4
     config.INFERENCE.EVALUATION_METHOD = "FFT"
-    config.TEST.METRICS = ['MAE', 'RMSE', 'MAPE', 'Pearson', 'SNR', 'BA']
+    config.INFERENCE.EVALUATION_WINDOW.USE_SMALLER_WINDOW = use_smaller_window
+    config.INFERENCE.EVALUATION_WINDOW.WINDOW_SIZE = window_size
+    config.TEST.METRICS = ['MAE', 'RMSE', 'MAPE', 'Pearson', 'SNR']
     config.TEST.USE_LAST_EPOCH = True
     config.TEST.OUTPUT_SAVE_DIR = ""  # Disable saving giant raw frame folders
     return config
@@ -447,7 +456,10 @@ def get_all_benchmark_specs():
     return specs
 
 
-def run_benchmark(spec, device="mps", force=False):
+def run_benchmark(spec, device="mps", force=False, window_size=6, use_smaller_window=True, csv_path=None):
+    if csv_path is None:
+        csv_path = CSV_PATH_6S if use_smaller_window else CSV_PATH
+
     train_ds = spec["train_dataset"]
     test_ds = spec["test_dataset"]
     model_type = spec["model_type"]
@@ -457,25 +469,26 @@ def run_benchmark(spec, device="mps", force=False):
     ckpt_path = os.path.join(REPO_ROOT, ckpt_rel)
     batch_size = spec.get("batch_size", 4)
     eval_type = "Intra-Dataset" if train_ds == test_ds else "Cross-Dataset"
+    win_str = f"{window_size}s Window" if use_smaller_window else "Full Video"
 
     print("\n" + "=" * 80)
-    print(f"🚀 [{spec['id'] + 1}/18] Benchmark: {eval_type} [{train_ds} -> {test_ds}]")
+    print(f"🚀 [{spec['id'] + 1}/18] Benchmark: {eval_type} [{train_ds} -> {test_ds}] ({win_str})")
     print(f"   Model: {model_name} ({arch})")
     print(f"   Checkpoint: {ckpt_rel}")
     print(f"   Device: {device} | Batch size: {batch_size}")
     print("=" * 80)
 
-    if not force and is_already_completed(train_ds, test_ds, model_name):
-        print(f"⏭️  Already completed successfully in {CSV_PATH}. Skipping (use --force to re-run).")
+    if not force and is_already_completed(train_ds, test_ds, model_name, csv_path=csv_path):
+        print(f"⏭️  Already completed successfully in {csv_path}. Skipping (use --force to re-run).")
         return
 
     if not os.path.exists(ckpt_path):
         err_msg = f"Checkpoint not found at: {ckpt_path}"
         print(f"❌ {err_msg}")
-        save_benchmark_result(train_ds, test_ds, model_name, arch, ckpt_rel, {}, status=f"Error: Checkpoint missing")
+        save_benchmark_result(train_ds, test_ds, model_name, arch, ckpt_rel, {}, status=f"Error: Checkpoint missing", csv_path=csv_path)
         return
 
-    config = get_base_config(device=device)
+    config = get_base_config(device=device, window_size=window_size, use_smaller_window=use_smaller_window)
     config.MODEL.NAME = model_type
     config.INFERENCE.MODEL_PATH = ckpt_path
     config.INFERENCE.BATCH_SIZE = batch_size
@@ -543,12 +556,12 @@ def run_benchmark(spec, device="mps", force=False):
 
         elapsed = time.time() - start_t
         print(f"⏱️ Evaluation completed in {elapsed:.1f}s")
-        save_benchmark_result(train_ds, test_ds, model_name, arch, ckpt_rel, captured_metrics, status="Success")
+        save_benchmark_result(train_ds, test_ds, model_name, arch, ckpt_rel, captured_metrics, status="Success", csv_path=csv_path)
 
     except Exception as e:
         print(f"❌ Error during evaluation: {e}")
         traceback.print_exc()
-        save_benchmark_result(train_ds, test_ds, model_name, arch, ckpt_rel, {}, status=f"Error: {e}")
+        save_benchmark_result(train_ds, test_ds, model_name, arch, ckpt_rel, {}, status=f"Error: {e}", csv_path=csv_path)
 
 
 def main():
@@ -561,6 +574,12 @@ def main():
                         default=None, help="Filter by test dataset")
     parser.add_argument("--device", type=str, default="mps" if torch.backends.mps.is_available() else "cpu",
                         help="Device to run on (mps, cpu, cuda)")
+    parser.add_argument("--window_size", type=int, default=6,
+                        help="Evaluation window size in seconds (default: 6)")
+    parser.add_argument("--full_video", action="store_true",
+                        help="Use full video FFT instead of 6s window")
+    parser.add_argument("--csv_file", type=str, default=None,
+                        help="Custom output CSV path")
     parser.add_argument("--force", action="store_true", help="Re-run even if already completed in CSV")
     parser.add_argument("--dry_run", action="store_true", help="Inspect specs and files without executing")
     parser.add_argument("--list", action="store_true", help="List all 18 specs and exit")
@@ -568,7 +587,9 @@ def main():
 
     args = parser.parse_args()
 
-    init_csv()
+    use_smaller_window = not args.full_video
+    target_csv = args.csv_file if args.csv_file else (CSV_PATH if args.full_video else CSV_PATH_6S)
+    init_csv(target_csv)
     all_specs = get_all_benchmark_specs()
 
     if args.list:
@@ -592,7 +613,9 @@ def main():
             continue
         selected.append(s)
 
-    print(f"\n🎯 Selected {len(selected)} benchmark evaluations.")
+    win_desc = "Full-Video" if args.full_video else f"{args.window_size}s Window"
+    print(f"\n🎯 Selected {len(selected)} benchmark evaluations under {win_desc} protocol.")
+    print(f"   Destination CSV: {target_csv}")
 
     if args.dry_run:
         print("\n🔍 DRY RUN - Checking checkpoints:")
@@ -603,9 +626,10 @@ def main():
         return
 
     for s in selected:
-        run_benchmark(s, device=args.device, force=args.force)
+        run_benchmark(s, device=args.device, force=args.force, window_size=args.window_size,
+                      use_smaller_window=use_smaller_window, csv_path=target_csv)
 
-    print(f"\n🎉 All planned benchmarks finished! Results logged to:\n   {CSV_PATH}\n")
+    print(f"\n🎉 All planned benchmarks finished! Results logged to:\n   {target_csv}\n")
 
 
 if __name__ == "__main__":
