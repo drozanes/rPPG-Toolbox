@@ -45,9 +45,7 @@ def main():
     print("=" * 80, flush=True)
 
     ckpt_dir = os.environ.get("MMPD_CKPT_DIR") or (
-        "runs/exp/MMPD_cf0dc246c7/PreTrainedModels" if os.path.exists("runs/exp/MMPD_cf0dc246c7/PreTrainedModels") else (
-            "PreTrainedModels" if os.path.exists("PreTrainedModels") else "/Users/drozanes/Downloads/exp/MMPD_cf0dc246c7/PreTrainedModels"
-        )
+        "runs/exp/MMPD_cf0dc246c7/PreTrainedModels" if os.path.exists("runs/exp/MMPD_cf0dc246c7/PreTrainedModels") else "PreTrainedModels"
     )
     ckpt_files = sorted(glob.glob(os.path.join(ckpt_dir, "MMPD_ContrastPhys_Online_Epoch*.pth")),
                         key=lambda x: int(re.search(r'Epoch(\d+)', x).group(1)))

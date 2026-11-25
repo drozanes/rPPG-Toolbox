@@ -10,15 +10,15 @@ To keep the workspace clean and easy to navigate, only the **3 Core Master Table
 
 | File | Description | Metrics / Content |
 | :--- | :--- | :--- |
-| **[`rPPG_results_database.csv`](file:///Users/drozanes/dev/rPPG-Toolbox/csvs/rPPG_results_database.csv)** | **Master Results Database**: Consolidated metrics across all **85 benchmark runs** conducted in this project. | `Method`, `Dataset`, `Paradigm`, `MAE`, `RMSE`, `MAPE`, `Pearson_r`, `SNR_dB`, `Hardware`, `FPS` |
-| **[`local_benchmarks_intra_dataset.csv`](file:///Users/drozanes/dev/rPPG-Toolbox/csvs/local_benchmarks_intra_dataset.csv)** | **Intra-Dataset Benchmarks**: Head-to-head comparison across UBFC-rPPG, PURE, and MMPD for classical, supervised, neuromorphic (SNN), and contrastive models. | Detailed intra-dataset evaluations with baseline vs. our improvements |
-| **[`cross_dataset_benchmarks.csv`](file:///Users/drozanes/dev/rPPG-Toolbox/csvs/cross_dataset_benchmarks.csv)** | **Cross-Dataset Generalization Matrix**: 24 zero-shot domain transfer evaluations (Lab $\leftrightarrow$ Dynamic Motion $\leftrightarrow$ Mobile Phone). | Evaluation of domain gap robustness (e.g. UBFC $\rightarrow$ PURE, PURE $\rightarrow$ UBFC) |
+| **[`rPPG_results_database.csv`](./rPPG_results_database.csv)** | **Master Results Database**: Consolidated metrics across all **85 benchmark runs** conducted in this project. | `Method`, `Dataset`, `Paradigm`, `MAE`, `RMSE`, `MAPE`, `Pearson_r`, `SNR_dB`, `Hardware`, `FPS` |
+| **[`local_benchmarks_intra_dataset.csv`](./local_benchmarks_intra_dataset.csv)** | **Intra-Dataset Benchmarks**: Head-to-head comparison across UBFC-rPPG, PURE, and MMPD for classical, supervised, neuromorphic (SNN), and contrastive models. | Detailed intra-dataset evaluations with baseline vs. our improvements |
+| **[`cross_dataset_benchmarks.csv`](./cross_dataset_benchmarks.csv)** | **Cross-Dataset Generalization Matrix**: 24 zero-shot domain transfer evaluations (Lab $\leftrightarrow$ Dynamic Motion $\leftrightarrow$ Mobile Phone). | Evaluation of domain gap robustness (e.g. UBFC $\rightarrow$ PURE, PURE $\rightarrow$ UBFC) |
 
 ---
 
 ## 📁 Subdirectories
 
-### 1. [`detailed_scans/`](file:///Users/drozanes/dev/rPPG-Toolbox/csvs/detailed_scans/)
+### 1. [`detailed_scans/`](./detailed_scans/)
 Per-epoch training logs, model-selection validation scans, and ablation studies:
 - `ubfc-rppg_unsupervised_scan_all_epochs.csv`: 30-epoch progression of ContrastPhys+ on UBFC-rPPG.
 - `pure_unsupervised_scan_all_epochs.csv`: 30-epoch progression of ContrastPhys+ under head motion on PURE.
@@ -28,7 +28,7 @@ Per-epoch training logs, model-selection validation scans, and ablation studies:
 - `unsupervised_model_selection_comparison.csv`: Validation of 100% label-free IPR selection vs. ground-truth MAE.
 - `contrastphys_experiments_comparison.csv`: Contrastive loss formulations and spatial grid ablations.
 
-### 2. [`literature_benchmarks/`](file:///Users/drozanes/dev/rPPG-Toolbox/csvs/literature_benchmarks/)
+### 2. [`literature_benchmarks/`](./literature_benchmarks/)
 External benchmark databases compiled from published papers:
 - `rppg_comprehensive_benchmark_database.csv`: 417 literature benchmark evaluations synthesized from 34 publications.
 - `published_intra_dataset_ranges.csv`: Reported literature metric ranges across 9 top peer-reviewed papers.

@@ -1,9 +1,23 @@
-<p align="center">
-:fire: Please remember to :star: this repo if you find it useful and cite our work if you end up using it in your work! :fire:
-</p>
-<p align="center">
-:fire: If you have any questions or concerns, please create an <a href="https://github.com/ubicomplab/rPPG-Toolbox/issues">issue</a> :memo:! :fire:
-</p>
+# Advanced Computer Science Project (Course 22997) — rPPG-Toolbox Extension
+
+> **Academic Project Fork**: Extended from [`ubicomplab/rPPG-Toolbox`](https://github.com/ubicomplab/rPPG-Toolbox) for the Open University of Israel (*22997 — Advanced Project in Computer Science*).
+
+### Key Project Contributions
+- **New Architectures & Modules**: Implemented **ContrastPhys / Contrast-Phys+** (`ContrastPhysNet.py`, `ContrastPhysLoss.py`, `ContrastPhysTrainer.py`), **Spiking-PhysFormer** (`SpikingPhysFormer.py`, `SpikingPhysFormerTrainer.py`), and modular **FusionStem** (`FusionStem.py`) integrated across DeepPhys, PhysFormer, Spiking-PhysFormer, and ContrastPhys.
+- **Pipeline & Signal Processing Fixes**: Resolved `NDHWC` vs. `NDCHW` channel slicing in unsupervised methods, added dual HSV skin-masking (`POS`, `CHROM`, `PBV`, `ICA`), fixed `PhysFormer` validation `std` normalization & loss/LR scheduling (`CosineAnnealingLR`), and added **MediaPipe BlazeFace** + EMA smooth face tracking for compressed mobile video (`MMPD`).
+- **Standardized Benchmarking**: Evaluated **85+ runs** across intra-dataset (`UBFC-rPPG`, `PURE`, `mini-MMPD`) and zero-shot cross-dataset generalization protocols.
+
+### Project Artifacts & Navigation
+- **Colab Notebooks**: [`notebooks/`](./notebooks/) ([`notebooks/README.md`](./notebooks/README.md))
+- **Benchmark Results (CSVs)**: [`csvs/`](./csvs/) ([`csvs/README.md`](./csvs/README.md))
+- **Evaluation Scripts**: [`scripts/`](./scripts/)
+- **Report Charts**: [`report_assets/`](./report_assets/)
+
+### Dataset Access
+- **UBFC-rPPG (Dataset 2)**: Openly accessible via [Google Drive](https://drive.google.com/drive/folders/1o0XU4gTIo46YfwaWjIgbtCncc-oF44Xk?usp=drive_link).
+- **PURE & mini-MMPD**: Hosted on [Hugging Face (`WeiQian98`)](https://huggingface.co/WeiQian98) — requires requesting dataset access permission from the repository owner.
+
+---
 
 
 ![rPPG-Toolbox Logo](./figures/toolbox_logo.png)
@@ -435,22 +449,25 @@ python evaluate_test_candidate_epochs.py
 
 # :floppy_disk: Pre-trained Checkpoints & Config File Mappings
 
-| Model Architecture | Target Dataset | Paradigm | Configuration File | Checkpoint Path | Verified MAE | Verified Pearson $r$ |
+> [!NOTE]
+> Model checkpoint files (`.pth`) are excluded from Git due to file size limits. They can be reproduced using the linked YAML configs or downloaded directly from the **[Google Drive Checkpoints Folder](https://drive.google.com/drive/folders/1kjQyR3K_idz0N2hEQRVSX7PlmAehTpqq?usp=sharing)** (includes a mapping table linking each `.pth` file to its model, dataset, and config).
+
+| Model Architecture | Target Dataset | Paradigm | Configuration File | Checkpoint Filename | Verified MAE | Verified Pearson $r$ |
 | :--- | :--- | :--- | :--- | :--- | :---: | :---: |
-| **DeepPhys (FusionStem)** | **PURE** | Supervised 2D-CNN | [`PURE_DEEPPHYS_FUSIONSTEM.yaml`](./configs/train_configs/PURE_DEEPPHYS_FUSIONSTEM.yaml) | [`PURE_DeepPhys_FusionStem_Epoch11.pth`](./runs/exp/PURE_af43ac9745/PreTrainedModels/PURE_DeepPhys_FusionStem_Epoch11.pth) | **0.128** | **1.000** |
-| **DeepPhys (FusionStem)** | **UBFC-rPPG** | Supervised 2D-CNN | [`UBFCrPPG_DEEPPHYS_FUSIONSTEM.yaml`](./configs/train_configs/UBFCrPPG_DEEPPHYS_FUSIONSTEM.yaml) | [`UBFC-rPPG_DeepPhys_FusionStem_Epoch5.pth`](./runs/exp/UBFC-rPPG_f9fd2719b6/PreTrainedModels/UBFC-rPPG_DeepPhys_FusionStem_Epoch5.pth) | **1.367** | **0.990** |
-| **DeepPhys (Baseline)** | **PURE** | Supervised 2D-CNN | [`PURE_PHYSFORMER.yaml`](./configs/train_configs/PURE_PHYSFORMER.yaml) | [`DeepPhys_Epoch29.pth`](./trained_models/PURE/best_checkpoints/DeepPhys_Epoch29.pth) | **1.728** | **0.917** |
-| **PhysFormer (FusionStem+MP)** | **MMPD** | Supervised Transformer | [`MMPD_PHYSFORMER_FUSIONSTEM_MEDIAPIPE_ONLINE.yaml`](./configs/train_configs/MMPD_PHYSFORMER_FUSIONSTEM_MEDIAPIPE_ONLINE.yaml) | [`MMPD_PhysFormer_FusionStem_MediaPipe_Online_Epoch16.pth`](./runs/exp/MMPD_1fa6608630/PreTrainedModels/MMPD_PhysFormer_FusionStem_MediaPipe_Online_Epoch16.pth) | **6.158** | **0.613** |
-| **PhysFormer (Paper Aligned)** | **UBFC-rPPG** | Supervised Transformer | [`UBFCrPPG_PHYSFORMER.yaml`](./configs/train_configs/UBFCrPPG_PHYSFORMER.yaml) | [`PostFix_UBFC-rPPG_PhysFormer_Epoch27.pth`](./trained_models/UBFC-rPPG/best_checkpoints/PostFix_UBFC-rPPG_PhysFormer_Epoch27.pth) | **1.639** | **0.966** |
-| **PhysFormer (Paper Aligned)** | **PURE** | Supervised Transformer | [`PURE_PHYSFORMER.yaml`](./configs/train_configs/PURE_PHYSFORMER.yaml) | [`PhysFormer_best_Epoch26.pth`](./trained_models/PURE/best_checkpoints/PhysFormer_best_Epoch26.pth) | **6.795** | **0.701** |
-| **SpikingPhysFormer (FusionStem+MP)** | **MMPD** | Supervised Neuromorphic (SNN) | [`MMPD_SPIKINGPHYSFORMER_FUSIONSTEM_MEDIAPIPE_ONLINE.yaml`](./configs/train_configs/MMPD_SPIKINGPHYSFORMER_FUSIONSTEM_MEDIAPIPE_ONLINE.yaml) | [`MMPD_SpikingPhysFormer_FusionStem_MediaPipe_Online_Epoch18.pth`](./runs/exp/MMPD_e894957ce5/PreTrainedModels/MMPD_SpikingPhysFormer_FusionStem_MediaPipe_Online_Epoch18.pth) | **15.106** | **0.096** |
-| **SpikingPhysFormer (Transfer)** | **UBFC $\rightarrow$ PURE** | Neuromorphic Zero-Shot | [`PURE_SPIKINGPHYSFORMER.yaml`](./configs/train_configs/PURE_SPIKINGPHYSFORMER.yaml) | [`UBFC-rPPG_trained_snn_part.pth`](./pretrained_models/SpikingPhysFormer_Paper/UBFC-rPPG_trained_snn_part.pth) | **0.311** | **0.999** |
-| **SpikingPhysFormer (PE Transfer)** | **UBFC-rPPG** | Supervised (SNN) | [`PURE_SPIKINGPHYSFORMER_PAPER.yaml`](./configs/train_configs/PURE_SPIKINGPHYSFORMER_PAPER.yaml) | [`Paper2025_UBFC_SpikingPhysFormer_Paper_Epoch9.pth`](./trained_models/UBFC-rPPG/best_checkpoints/Paper2025_UBFC_SpikingPhysFormer_Paper_Epoch9.pth) | **1.967** | **0.968** |
-| **ContrastPhys+ (TPAMI 2024)** | **UBFC-rPPG** | Weakly-Supervised 3D-CNN | [`UBFCrPPG_CONTRASTPHYS_CORRECTED.yaml`](./configs/train_configs/UBFCrPPG_CONTRASTPHYS_CORRECTED.yaml) | [`ContrastPhys_best_Epoch8.pth`](./trained_models/UBFC-rPPG/best_checkpoints/ContrastPhys_best_Epoch8.pth) | **1.025** | **0.972** |
-| **ContrastPhys (Min IPR Winner)** | **UBFC-rPPG** | 100% Label-Free Unsupervised | [`UBFCrPPG_CONTRASTPHYS_UNSUPERVISED.yaml`](./configs/train_configs/UBFCrPPG_CONTRASTPHYS_UNSUPERVISED.yaml) | [`Corrected2024_UBFC-rPPG_ContrastPhys_Epoch13.pth`](./trained_models/UBFC-rPPG/best_checkpoints/Corrected2024_UBFC-rPPG_ContrastPhys_Epoch13.pth) | **5.882** | **0.601** |
-| **ContrastPhys (Val MAE Winner)** | **UBFC-rPPG** | Unsupervised Calibrated | [`UBFCrPPG_CONTRASTPHYS_UNSUPERVISED.yaml`](./configs/train_configs/UBFCrPPG_CONTRASTPHYS_UNSUPERVISED.yaml) | [`ContrastPhys_best_Epoch8.pth`](./trained_models/UBFC-rPPG/best_checkpoints/ContrastPhys_best_Epoch8.pth) | **4.597** | **0.597** |
-| **ContrastPhys (Val MAE Winner)** | **PURE** | Unsupervised Calibrated | [`PURE_CONTRASTPHYS_UNSUPERVISED.yaml`](./configs/train_configs/PURE_CONTRASTPHYS_UNSUPERVISED.yaml) | [`Corrected2024_PURE_ContrastPhys_Epoch9.pth`](./trained_models/PURE/best_checkpoints/Corrected2024_PURE_ContrastPhys_Epoch9.pth) | **8.862** | **0.577** |
-| **ContrastPhys (MediaPipe Test)** | **MMPD** | Weakly-Supervised 3D-CNN | [`MMPD_CONTRASTPHYS_ONLINE.yaml`](./configs/train_configs/MMPD_CONTRASTPHYS_ONLINE.yaml) | [`MMPD_ContrastPhys_MediaPipe_Online_Epoch16.pth`](./MMPD_ContrastPhys_MediaPipe_Online_Epoch16.pth) | **19.347** | **0.350** |
+| **DeepPhys (FusionStem)** | **PURE** | Supervised 2D-CNN | [`PURE_DEEPPHYS_FUSIONSTEM.yaml`](./configs/train_configs/PURE_DEEPPHYS_FUSIONSTEM.yaml) | `PURE_DeepPhys_FusionStem_Epoch11.pth` | **0.128** | **1.000** |
+| **DeepPhys (FusionStem)** | **UBFC-rPPG** | Supervised 2D-CNN | [`UBFCrPPG_DEEPPHYS_FUSIONSTEM.yaml`](./configs/train_configs/UBFCrPPG_DEEPPHYS_FUSIONSTEM.yaml) | `UBFC-rPPG_DeepPhys_FusionStem_Epoch5.pth` | **1.367** | **0.990** |
+| **DeepPhys (Baseline)** | **PURE** | Supervised 2D-CNN | [`PURE_DEEPPHYS.yaml`](./configs/train_configs/PURE_DEEPPHYS.yaml) | `DeepPhys_Epoch29.pth` | **1.728** | **0.917** |
+| **PhysFormer (FusionStem+MP)** | **MMPD** | Supervised Transformer | [`MMPD_PHYSFORMER_FUSIONSTEM_MEDIAPIPE_ONLINE.yaml`](./configs/train_configs/MMPD_PHYSFORMER_FUSIONSTEM_MEDIAPIPE_ONLINE.yaml) | `MMPD_PhysFormer_FusionStem_MediaPipe_Online_Epoch16.pth` | **6.158** | **0.613** |
+| **PhysFormer (Paper Aligned)** | **UBFC-rPPG** | Supervised Transformer | [`UBFCrPPG_PHYSFORMER.yaml`](./configs/train_configs/UBFCrPPG_PHYSFORMER.yaml) | `PostFix_UBFC-rPPG_PhysFormer_Epoch27.pth` | **1.639** | **0.966** |
+| **PhysFormer (Paper Aligned)** | **PURE** | Supervised Transformer | [`PURE_PHYSFORMER.yaml`](./configs/train_configs/PURE_PHYSFORMER.yaml) | `PhysFormer_best_Epoch26.pth` | **6.795** | **0.701** |
+| **SpikingPhysFormer (FusionStem+MP)** | **MMPD** | Supervised Neuromorphic (SNN) | [`MMPD_SPIKINGPHYSFORMER_FUSIONSTEM_MEDIAPIPE_ONLINE.yaml`](./configs/train_configs/MMPD_SPIKINGPHYSFORMER_FUSIONSTEM_MEDIAPIPE_ONLINE.yaml) | `MMPD_SpikingPhysFormer_FusionStem_MediaPipe_Online_Epoch18.pth` | **15.106** | **0.096** |
+| **SpikingPhysFormer (Transfer)** | **UBFC $\rightarrow$ PURE** | Neuromorphic Zero-Shot | [`PURE_SPIKINGPHYSFORMER.yaml`](./configs/train_configs/PURE_SPIKINGPHYSFORMER.yaml) | `UBFC-rPPG_trained_snn_part.pth` | **0.311** | **0.999** |
+| **SpikingPhysFormer (PE Transfer)** | **UBFC-rPPG** | Supervised (SNN) | [`UBFC-rPPG_SpikingPhysFormer_PAPER.yaml`](./configs/train_configs/UBFC-rPPG_SpikingPhysFormer_PAPER.yaml) | `Paper2025_UBFC_SpikingPhysFormer_Paper_Epoch9.pth` | **1.967** | **0.968** |
+| **ContrastPhys+ (TPAMI 2024)** | **UBFC-rPPG** | Weakly-Supervised 3D-CNN | [`UBFCrPPG_CONTRASTPHYS_CORRECTED.yaml`](./configs/train_configs/UBFCrPPG_CONTRASTPHYS_CORRECTED.yaml) | `ContrastPhys_best_Epoch8.pth` | **1.025** | **0.972** |
+| **ContrastPhys (Min IPR Winner)** | **UBFC-rPPG** | 100% Label-Free Unsupervised | [`UBFCrPPG_CONTRASTPHYS_UNSUPERVISED.yaml`](./configs/train_configs/UBFCrPPG_CONTRASTPHYS_UNSUPERVISED.yaml) | `Corrected2024_UBFC-rPPG_ContrastPhys_Epoch13.pth` | **5.882** | **0.601** |
+| **ContrastPhys (Val MAE Winner)** | **UBFC-rPPG** | Unsupervised Calibrated | [`UBFCrPPG_CONTRASTPHYS_UNSUPERVISED.yaml`](./configs/train_configs/UBFCrPPG_CONTRASTPHYS_UNSUPERVISED.yaml) | `ContrastPhys_best_Epoch8.pth` | **4.597** | **0.597** |
+| **ContrastPhys (Val MAE Winner)** | **PURE** | Unsupervised Calibrated | [`PURE_CONTRASTPHYS_UNSUPERVISED.yaml`](./configs/train_configs/PURE_CONTRASTPHYS_UNSUPERVISED.yaml) | `Corrected2024_PURE_ContrastPhys_Epoch9.pth` | **8.862** | **0.577** |
+| **ContrastPhys (MediaPipe Test)** | **MMPD** | Weakly-Supervised 3D-CNN | [`MMPD_CONTRASTPHYS_ONLINE.yaml`](./configs/train_configs/MMPD_CONTRASTPHYS_ONLINE.yaml) | `MMPD_ContrastPhys_MediaPipe_Online_Epoch16.pth` | **19.347** | **0.350** |
 
 # :eyes: Visualization of Preprocessed Data
 A python notebook for visualizing preprocessed data can be found in `tools/preprocessing_viz` along with an associated README. The notebook, `viz_preprocessed_data.ipynb`, automatically detects the preprocessed data format and then plots input image examples and waveforms. 
