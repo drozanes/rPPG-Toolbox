@@ -3,8 +3,8 @@
 > **Academic Project Fork**: Extended from [`ubicomplab/rPPG-Toolbox`](https://github.com/ubicomplab/rPPG-Toolbox) for the Open University of Israel (*22997 — Advanced Project in Computer Science*).
 
 ### Key Project Contributions
-- **New Architectures & Modules**: Implemented **ContrastPhys / Contrast-Phys+** (`ContrastPhysNet.py`, `ContrastPhysLoss.py`, `ContrastPhysTrainer.py`), **Spiking-PhysFormer** (`SpikingPhysFormer.py`, `SpikingPhysFormerTrainer.py`), and modular **FusionStem** (`FusionStem.py`) integrated across DeepPhys, PhysFormer, Spiking-PhysFormer, and ContrastPhys.
-- **Pipeline & Signal Processing Fixes**: Resolved `NDHWC` vs. `NDCHW` channel slicing in unsupervised methods, added dual HSV skin-masking (`POS`, `CHROM`, `PBV`, `ICA`), fixed `PhysFormer` validation `std` normalization & loss/LR scheduling (`CosineAnnealingLR`), and added **MediaPipe BlazeFace** + EMA smooth face tracking for compressed mobile video (`MMPD`).
+- **New Architectures & Modules**: Implemented **Contrast-Phys+** (`ContrastPhysNet.py`, `ContrastPhysLoss.py`, `ContrastPhysTrainer.py`), **Spiking-PhysFormer** (`SpikingPhysFormer.py`, `SpikingPhysFormerTrainer.py`), and modular **FusionStem** (`FusionStem.py`) integrated across DeepPhys, PhysFormer, Spiking-PhysFormer, and ContrastPhys.
+- **Pipeline & Signal Processing Fixes**: Resolved `NDHWC` vs. `NDCHW` channel slicing in unsupervised methods, added dual HSV skin-masking (`POS`, `CHROM`, `PBV`, `ICA`), fixed `PhysFormer` validation `std` normalization & loss/LR scheduling (`CosineAnnealingLR`), and added **MediaPipe BlazeFace** + EMA smooth face tracking.
 - **Standardized Benchmarking**: Evaluated **85+ runs** across intra-dataset (`UBFC-rPPG`, `PURE`, `mini-MMPD`) and zero-shot cross-dataset generalization protocols.
 
 ### Project Artifacts & Navigation
