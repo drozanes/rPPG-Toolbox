@@ -1,3 +1,5 @@
+"""Evaluate ContrastPhys+ checkpoints on the MMPD validation set using MAE and IPR."""
+
 import os
 import sys
 

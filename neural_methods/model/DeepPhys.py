@@ -59,28 +59,21 @@ class DeepPhys(nn.Module):
                 downsample_stride=2,
                 output_format="deepphys"
             )
-            # Motion branch takes 32 feature channels from FusionStem upsampling
-            self.motion_conv1 = nn.Conv2d(32, self.nb_filters1, kernel_size=self.kernel_size, padding=(1, 1),
-                                          bias=True)
-            self.motion_conv2 = nn.Conv2d(self.nb_filters1, self.nb_filters1, kernel_size=self.kernel_size, bias=True)
-            # Appearance branch takes 3 raw RGB channels to generate skin attention mask
-            self.apperance_conv1 = nn.Conv2d(self.in_channels, self.nb_filters1, kernel_size=self.kernel_size,
-                                             padding=(1, 1), bias=True)
-            self.apperance_conv2 = nn.Conv2d(self.nb_filters1, self.nb_filters1, kernel_size=self.kernel_size, bias=True)
-            self.apperance_att_conv1 = nn.Conv2d(self.nb_filters1, 1, kernel_size=1, padding=(0, 0), bias=True)
-            self.attn_mask_1 = Attention_mask()
+            motion_in_channels = 32
         else:
-            # Motion branch convs
-            self.motion_conv1 = nn.Conv2d(self.in_channels, self.nb_filters1, kernel_size=self.kernel_size, padding=(1, 1),
-                                          bias=True)
-            self.motion_conv2 = nn.Conv2d(self.nb_filters1, self.nb_filters1, kernel_size=self.kernel_size, bias=True)
-            # Appearance branch convs
-            self.apperance_conv1 = nn.Conv2d(self.in_channels, self.nb_filters1, kernel_size=self.kernel_size,
-                                             padding=(1, 1), bias=True)
-            self.apperance_conv2 = nn.Conv2d(self.nb_filters1, self.nb_filters1, kernel_size=self.kernel_size, bias=True)
-            # Attention layers
-            self.apperance_att_conv1 = nn.Conv2d(self.nb_filters1, 1, kernel_size=1, padding=(0, 0), bias=True)
-            self.attn_mask_1 = Attention_mask()
+            motion_in_channels = self.in_channels
+
+        # Motion branch convs
+        self.motion_conv1 = nn.Conv2d(motion_in_channels, self.nb_filters1, kernel_size=self.kernel_size, padding=(1, 1),
+                                      bias=True)
+        self.motion_conv2 = nn.Conv2d(self.nb_filters1, self.nb_filters1, kernel_size=self.kernel_size, bias=True)
+        # Appearance branch convs
+        self.apperance_conv1 = nn.Conv2d(self.in_channels, self.nb_filters1, kernel_size=self.kernel_size,
+                                         padding=(1, 1), bias=True)
+        self.apperance_conv2 = nn.Conv2d(self.nb_filters1, self.nb_filters1, kernel_size=self.kernel_size, bias=True)
+        # Attention layers
+        self.apperance_att_conv1 = nn.Conv2d(self.nb_filters1, 1, kernel_size=1, padding=(0, 0), bias=True)
+        self.attn_mask_1 = Attention_mask()
 
         self.motion_conv3 = nn.Conv2d(self.nb_filters1, self.nb_filters2, kernel_size=self.kernel_size, padding=(1, 1),
                                       bias=True)

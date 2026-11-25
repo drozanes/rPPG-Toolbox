@@ -1,3 +1,5 @@
+"""Run cross-dataset evaluation of trained PhysFormer checkpoints across UBFC-rPPG, PURE, and MMPD."""
+
 import os
 import sys
 

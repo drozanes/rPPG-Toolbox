@@ -302,6 +302,7 @@ if __name__ == "__main__":
                 device=config.DEVICE)
             if getattr(config.TRAIN.DATA, 'ONLINE', False):
                 from torch.utils.data import Sampler
+                # Shuffle video order, then chunks within each video to preserve video cache locality in online mode
                 class OnlineVideoSampler(Sampler):
                     def __init__(self, dataset, chunk_len=10):
                         self.num_samples = len(dataset)
