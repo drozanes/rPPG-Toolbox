@@ -285,8 +285,6 @@ if __name__ == "__main__":
             train_loader = data_loader.LADHLoader.LADHLoader
         elif config.TRAIN.DATA.DATASET == "SUMS":
             train_loader = data_loader.SUMSLoader.SUMSLoader
-        elif config.TRAIN.DATA.DATASET == "MCD-rPPG":
-            train_loader = data_loader.MCDrPPGLoader.MCDrPPGLoader
         elif config.TOOLBOX_MODE == "only_preprocess" and not config.TRAIN.DATA.DATASET:
             pass
         else:
@@ -366,8 +364,6 @@ if __name__ == "__main__":
             valid_loader = data_loader.LADHLoader.LADHLoader
         elif config.VALID.DATA.DATASET == "SUMS":
             valid_loader = data_loader.SUMSLoader.SUMSLoader
-        elif config.VALID.DATA.DATASET == "MCD-rPPG":
-            valid_loader = data_loader.MCDrPPGLoader.MCDrPPGLoader
         elif config.VALID.DATA.DATASET is None and not config.TEST.USE_LAST_EPOCH:
             raise ValueError("Validation dataset not specified despite USE_LAST_EPOCH set to False!")
         elif config.TOOLBOX_MODE == "only_preprocess" and not config.VALID.DATA.DATASET:
@@ -419,8 +415,6 @@ if __name__ == "__main__":
             test_loader = data_loader.LADHLoader.LADHLoader
         elif config.TEST.DATA.DATASET == "SUMS":
             test_loader = data_loader.SUMSLoader.SUMSLoader
-        elif config.TEST.DATA.DATASET == "MCD-rPPG":
-            test_loader = data_loader.MCDrPPGLoader.MCDrPPGLoader
         elif config.TOOLBOX_MODE == "only_preprocess" and not config.TEST.DATA.DATASET:
             pass
         else:
@@ -465,8 +459,6 @@ if __name__ == "__main__":
             unsupervised_loader = data_loader.UBFCPHYSLoader.UBFCPHYSLoader
         elif config.UNSUPERVISED.DATA.DATASET == "iBVP":
             unsupervised_loader = data_loader.iBVPLoader.iBVPLoader
-        elif config.UNSUPERVISED.DATA.DATASET == "MCD-rPPG":
-            unsupervised_loader = data_loader.MCDrPPGLoader.MCDrPPGLoader
         else:
             raise ValueError("Unsupported dataset! Currently supporting UBFC-rPPG, PURE, MMPD, \
                              SCAMPS, BP4D+, UBFC-PHYS and iBVP.")

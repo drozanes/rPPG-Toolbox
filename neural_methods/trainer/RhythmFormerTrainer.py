@@ -1,8 +1,3 @@
-try:
-    import wandb
-except ImportError:
-    pass
-import sys
 """Trainer for RhythmFormer."""
 import os
 import numpy as np
@@ -32,19 +27,8 @@ class RhythmFormerTrainer(BaseTrainer):
         self.diff_flag = 0
         if config.TRAIN.DATA.PREPROCESS.LABEL_TYPE == "DiffNormalized":
             self.diff_flag = 1
-
-        use_fusion_stem = getattr(config.MODEL, "USE_FUSION_STEM", True)
-        if hasattr(config.MODEL, "RHYTHMFORMER") and hasattr(config.MODEL.RHYTHMFORMER, "USE_FUSION_STEM"):
-            use_fusion_stem = config.MODEL.RHYTHMFORMER.USE_FUSION_STEM
-        alpha = getattr(getattr(config.MODEL, "FUSION_STEM", None), "ALPHA", 0.5)
-        beta = getattr(getattr(config.MODEL, "FUSION_STEM", None), "BETA", 0.5)
-
         if config.TOOLBOX_MODE == "train_and_test":
-            self.model = RhythmFormer(
-                use_fusion_stem=use_fusion_stem,
-                fusion_stem_alpha=alpha,
-                fusion_stem_beta=beta
-            ).to(self.device)
+            self.model = RhythmFormer().to(self.device)
             self.model = torch.nn.DataParallel(self.model, device_ids=list(range(config.NUM_OF_GPU_TRAIN)))
             self.num_train_batches = len(data_loader["train"])
             self.criterion = RhythmFormer_Loss()
@@ -54,11 +38,7 @@ class RhythmFormerTrainer(BaseTrainer):
             self.scheduler = torch.optim.lr_scheduler.OneCycleLR(
                 self.optimizer, max_lr=config.TRAIN.LR, epochs=config.TRAIN.EPOCHS, steps_per_epoch=self.num_train_batches)
         elif config.TOOLBOX_MODE == "only_test":
-            self.model = RhythmFormer(
-                use_fusion_stem=use_fusion_stem,
-                fusion_stem_alpha=alpha,
-                fusion_stem_beta=beta
-            ).to(self.device)
+            self.model = RhythmFormer().to(self.device)
             self.model = torch.nn.DataParallel(self.model, device_ids=list(range(config.NUM_OF_GPU_TRAIN)))
         else:
             raise ValueError("EfficientPhys trainer initialized in incorrect toolbox mode!")
@@ -112,21 +92,11 @@ class RhythmFormerTrainer(BaseTrainer):
 
             # Append the mean training loss for the epoch
             mean_training_losses.append(np.mean(train_loss))
-            try:
-                if 'wandb' in sys.modules:
-                    wandb.log({'Train Loss': mean_training_losses[-1], 'Epoch': epoch})
-            except Exception:
-                pass
 
             self.save_model(epoch)
             if not self.config.TEST.USE_LAST_EPOCH: 
                 valid_loss = self.valid(data_loader)
                 mean_valid_losses.append(valid_loss)
-                try:
-                    if 'wandb' in sys.modules:
-                        wandb.log({'Validation Loss': mean_valid_losses[-1], 'Epoch': epoch})
-                except Exception:
-                    pass
                 print('validation loss: ', valid_loss)
                 if self.min_valid_loss is None:
                     self.min_valid_loss = valid_loss

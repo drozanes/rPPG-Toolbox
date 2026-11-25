@@ -40,7 +40,3 @@ try:
     import dataset.data_loader.SUMSLoader
 except ImportError:
     pass
-try:
-    import dataset.data_loader.MCDrPPGLoader
-except ImportError:
-    pass

@@ -1,8 +1,3 @@
-try:
-    import wandb
-except ImportError:
-    pass
-import sys
 """Trainer for BigSmall Multitask Models"""
 
 # Training / Eval Imports 
@@ -273,11 +268,6 @@ class BigSmallTrainer(BaseTrainer):
 
             # Append the mean training loss for the epoch
             mean_training_losses.append(np.mean(train_loss))
-            try:
-                if 'wandb' in sys.modules:
-                    wandb.log({'Train Loss': mean_training_losses[-1], 'Epoch': epoch})
-            except Exception:
-                pass
 
             # SAVE MODEL FOR THIS EPOCH
             self.save_model(epoch)
@@ -288,11 +278,6 @@ class BigSmallTrainer(BaseTrainer):
                 # Get validation losses
                 valid_loss, valid_au_loss, valid_bvp_loss, valid_resp_loss = self.valid(data_loader)
                 mean_valid_losses.append(valid_loss)
-                try:
-                    if 'wandb' in sys.modules:
-                        wandb.log({'Validation Loss': mean_valid_losses[-1], 'Epoch': epoch})
-                except Exception:
-                    pass
                 val_loss_dict[epoch] = valid_loss
                 val_au_loss_dict[epoch] = valid_au_loss
                 val_bvp_loss_dict[epoch] = valid_bvp_loss

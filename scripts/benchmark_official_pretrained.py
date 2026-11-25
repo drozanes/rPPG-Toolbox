@@ -33,8 +33,8 @@ from torch.utils.data import DataLoader
 # Enable MPS fallback for operators not natively implemented on Apple Silicon MPS
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
-# Add current dir to python path
-REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
+# Add repo root to python path
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if REPO_ROOT not in sys.path:
     sys.path.insert(0, REPO_ROOT)
 

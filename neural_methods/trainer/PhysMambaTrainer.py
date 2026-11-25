@@ -1,8 +1,3 @@
-try:
-    import wandb
-except ImportError:
-    pass
-import sys
 """PhysMamba Trainer."""
 import os
 from collections import OrderedDict
