@@ -2,7 +2,6 @@
 """
 Official Pretrained Models Benchmark Runner (Intra & Cross Dataset)
 Repository: drozanes/rPPG-Toolbox
-Related GitHub Issue: drozanes/inbox#15
 
 Benchmarks the official pretrained weights in final_model_release/
 matching the architectures evaluated in the thesis:
