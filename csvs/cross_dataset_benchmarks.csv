@@ -9,17 +9,17 @@ PURE,UBFC-rPPG,Spiking-PhysFormer,Supervised (SNN),7.666,15.681,7.551,0.753,-4.9
 PURE,UBFC-rPPG,PhysFormer,Supervised (Transformer),10.596,13.267,9.426,0.423,-6.100,Success
 MMPD,UBFC-rPPG,PhysFormer (FusionStem + MediaPipe),Supervised (Transformer),4.688,7.614,4.618,0.850,-4.955,Success
 MMPD,UBFC-rPPG,DeepPhys (FusionStem + MediaPipe),Supervised (2D-CNN),30.225,41.330,27.438,0.017,-5.849,Success
-MMPD,UBFC-rPPG,ContrastPhys+ (MediaPipe Ep 16),Weakly-Supervised,73.682,74.995,69.048,0.309,-7.339,Success
+MMPD,UBFC-rPPG,ContrastPhys+ (MediaPipe Ep 16),Weakly-Supervised,56.055,64.398,54.132,-0.612,-5.899,Success
 MMPD,PURE,DeepPhys (FusionStem + MediaPipe),Supervised (2D-CNN),6.390,12.021,11.200,0.785,-2.799,Success
 MMPD,PURE,PhysFormer (FusionStem + MediaPipe),Supervised (Transformer),9.412,19.111,20.086,0.514,-3.898,Success
-MMPD,PURE,ContrastPhys+ (MediaPipe Ep 16),Weakly-Supervised,75.806,89.255,131.716,0.123,-7.481,Success
+MMPD,PURE,ContrastPhys+ (MediaPipe Ep 16),Weakly-Supervised,7.892,18.900,15.383,0.590,1.391,Success
 UBFC-rPPG,MMPD,ContrastPhys+,Weakly-Supervised,14.282,20.187,15.617,0.109,-5.159,Success
 UBFC-rPPG,MMPD,PhysFormer,Supervised (Transformer),13.244,20.642,15.680,0.174,-4.544,Success
 PURE,MMPD,DeepPhys (FusionStem),Supervised (2D-CNN),26.241,33.267,27.618,-0.222,-7.758,Success
 PURE,MMPD,PhysFormer,Supervised (Transformer),27.746,38.718,30.989,0.185,-7.595,Success
 UBFC-rPPG,MMPD,DeepPhys (FusionStem),Supervised (2D-CNN),28.021,34.327,30.080,-0.053,-7.955,Success
 PURE,MMPD,ContrastPhys+,Weakly-Supervised,36.068,39.189,44.541,-0.139,-9.870,Success
-MMPD,UBFC-rPPG,Spiking-PhysFormer (FusionStem + MediaPipe),Supervised (SNN),54.883,56.982,50.372,-0.033,-12.289,Success
-MMPD,PURE,Spiking-PhysFormer (FusionStem + MediaPipe),Supervised (SNN),15.894,19.816,24.723,0.172,-5.739,Success
+MMPD,UBFC-rPPG,Spiking-PhysFormer (FusionStem + MediaPipe),Supervised (SNN),9.180,15.572,8.433,0.470,-4.202,Success
+MMPD,PURE,Spiking-PhysFormer (FusionStem + MediaPipe),Supervised (SNN),0.183,0.269,0.272,1.000,4.482,Success
 UBFC-rPPG,MMPD,Spiking-PhysFormer,Supervised (SNN),21.346,28.141,23.621,0.051,-7.186,Success
 PURE,MMPD,Spiking-PhysFormer,Supervised (SNN),26.158,33.130,28.007,-0.033,-7.918,Success
