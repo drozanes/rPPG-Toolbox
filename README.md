@@ -8,9 +8,10 @@
 - **Standardized Benchmarking**: Evaluated **85+ runs** across intra-dataset (`UBFC-rPPG`, `PURE`, `mini-MMPD`) and zero-shot cross-dataset generalization protocols.
 
 ### Project Artifacts & Navigation
-- **Colab Notebooks**: [`notebooks/`](./notebooks/) ([`notebooks/README.md`](./notebooks/README.md))
-- **Benchmark Results (CSVs)**: [`csvs/`](./csvs/) ([`csvs/README.md`](./csvs/README.md))
+- **Colab Notebooks**: [`notebooks/`](./notebooks/)
+- **Benchmark Results (CSVs)**: [`csvs/`](./csvs/)
 - **Evaluation Scripts**: [`scripts/`](./scripts/)
+- **Pre-trained Checkpoints**: [Google Drive Checkpoints Folder](https://drive.google.com/drive/folders/1kjQyR3K_idz0N2hEQRVSX7PlmAehTpqq?usp=sharing)
 - **Report Charts**: [`report_assets/`](./report_assets/)
 
 ### Dataset Access
