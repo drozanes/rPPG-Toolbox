@@ -32,13 +32,13 @@ class TSM(nn.Module):
     def forward(self, x):
         nt, c, h, w = x.size()
         n_batch = nt // self.n_segment
-        x = x.view(n_batch, self.n_segment, c, h, w)
+        x = x.reshape(n_batch, self.n_segment, c, h, w)
         fold = c // self.fold_div
         out = torch.zeros_like(x)
         out[:, :-1, :fold] = x[:, 1:, :fold]  # shift left
         out[:, 1:, fold: 2 * fold] = x[:, :-1, fold: 2 * fold]  # shift right
         out[:, :, 2 * fold:] = x[:, :, 2 * fold:]  # not shift
-        return out.view(nt, c, h, w)
+        return out.reshape(nt, c, h, w)
 
 
 class EfficientPhys(nn.Module):
@@ -120,7 +120,7 @@ class EfficientPhys(nn.Module):
 
         d7 = self.avg_pooling_3(gated2)
         d8 = self.dropout_3(d7)
-        d9 = d8.view(d8.size(0), -1)
+        d9 = d8.reshape(d8.size(0), -1)
         d10 = torch.tanh(self.final_dense_1(d9))
         d11 = self.dropout_4(d10)
         out = self.final_dense_2(d11)

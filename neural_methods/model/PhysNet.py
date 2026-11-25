@@ -134,10 +134,18 @@ class PhysNet_padding_Encoder_Decoder_MAX(nn.Module):
         x = self.upsample(x)  # x [64, T/2, 8, 8]
         x = self.upsample2(x)  # x [64, T, 8, 8]
 
-        # x [64, T, 1,1]    -->  groundtruth left and right - 7
-        x = self.poolspa(x)
+        # x [64, T, 1,1]    -->  spatial global pooling to 1x1
+        if x.size(2) == length:
+            x = x.mean(dim=(-2, -1), keepdim=True)
+        else:
+            try:
+                x = self.poolspa(x)
+            except (NotImplementedError, RuntimeError):
+                # Fallback to CPU for MPS devices lacking aten::_adaptive_avg_pool3d
+                x = self.poolspa(x.cpu()).to(x.device)
+
         x = self.ConvBlock10(x)  # x [1, T, 1,1]
 
-        rPPG = x.view(-1, length)
+        rPPG = x.reshape(-1, length)
 
         return rPPG, x_visual, x_visual3232, x_visual1616
