@@ -2,7 +2,7 @@
 
 This directory houses the structured CSV evaluation data for the rPPG research project.
 
-To keep the workspace clean and easy to navigate, only the **3 Core Master Tables** reside in the root of this directory, while detailed training progression scans, literature comparisons, and raw sensor comparisons are organized into subdirectories.
+To keep the workspace clean and easy to navigate, only the **3 Core Master Tables** reside in the root of this directory, while detailed training progression scans and literature comparisons are organized into subdirectories.
 
 ---
 
@@ -33,9 +33,3 @@ External benchmark databases compiled from published papers:
 - `rppg_comprehensive_benchmark_database.csv`: 417 literature benchmark evaluations synthesized from 34 publications.
 - `published_intra_dataset_ranges.csv`: Reported literature metric ranges across 9 top peer-reviewed papers.
 - `rppg_summary_ranges.csv`: Upper/lower performance bounds across 85 distinct published setups.
-
-### 3. [`raw_sensor_comparisons/`](file:///Users/drozanes/dev/rPPG-Toolbox/csvs/raw_sensor_comparisons/)
-Per-recording pulse rate measurements comparing contact pulse oximeter sensors to rPPG algorithms:
-- `PURE_Comparison.csv`: Sequence-by-sequence pulse measurements across 60 PURE recordings.
-- `UBFC_Comparison.csv`: Reference ground-truth audit across UBFC-rPPG recordings.
-- `COHFACE_Comparison.csv`: Audit across 160 COHFACE recordings (noting the initial 30-frame hardware sensor corruption).
